@@ -4,12 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon/icon.jpeg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <title>Ditherix</title>
 </head>
 <body>
-    <h1>Bienvenidos a Ditherix</h1>
-    <p>Este es un simple ejemplo de una aplicación Flask.</p>
+    <main>
+        <button id="botonCargar" type="button" aria-controls="imageInput">
+            Elegir imagen
+        </button>
+        <input
+            class="oculto"
+            type="file"
+            id="imageInput"
+            accept="image/jpeg,image/png,image/webp"
+        >
+        <p id="mensaje" class="oculto" role="alert" aria-live="assertive"></p>
+        <p id="cargando" class="oculto" role="status" aria-live="polite">
+            Procesando imagen…
+        </p>
+        <img
+            id="preview"
+            class="preview oculto"
+            alt="Vista previa de la imagen procesada"
+        >
+    </main>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
