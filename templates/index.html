@@ -6,6 +6,7 @@
 
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon/icon.jpeg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/assets/liquid-glass.css') }}">
     <title>Ditherix</title>
 </head>
 <body>
@@ -116,10 +117,13 @@
             </div>
         </div>
     </main>
+    <div id="liquid-glass-root"></div>
+    <div id="liquid-cursor-root"></div>
     <script>
         document.body.append(document.getElementById("menuImagen"));
     </script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='visor.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='dist/assets/liquid-glass.js') }}"></script>
 </body>
 </html>
