@@ -6,30 +6,120 @@
 
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon/icon.jpeg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
     <title>Ditherix</title>
 </head>
 <body>
-    <main>
-        <button id="botonCargar" type="button" aria-controls="imageInput">
-            Elegir imagen
-        </button>
-        <input
-            class="oculto"
-            type="file"
-            id="imageInput"
-            accept="image/jpeg,image/png,image/webp"
-        >
+    <main class="visor" id="visor">
+        <div class="menu-flotante" id="menuImagen">
+            <nav class="glass-bar top-bar" aria-label="Menú principal">
+                <span class="brand">Ditherix</span>
+                <span class="bar-spacer"></span>
+
+                <div class="bar-items">
+
+                    <button class="glass-control" id="botonExportar" type="button" disabled>
+                        Exportar
+                    </button>
+                    <button class="glass-control" id="botonCargar" type="button" aria-controls="imageInput">
+                        Subir imagen
+                    </button>
+                </div>
+                <input
+                    class="oculto"
+                    type="file"
+                    id="imageInput"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+            </nav>
+
+            <nav class="glass-bar bottom-bar" aria-label="Herramientas de imagen">
+                <div class="bar-items">
+                    <button
+                        class="glass-control"
+                        id="btn-toggle-edit"
+                        type="button"
+                        aria-controls="edit-menu"
+                        aria-expanded="false"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z"/></svg>
+                    </button>
+                    <button id="btn-iniciar-recorte" class="glass-control" type="button" disabled>Recortar</button>
+                    <button id="btn-confirmar-recorte" class="glass-control oculto" type="button" disabled>Aplicar recorte</button>
+                    <button id="btn-cancelar-recorte" class="glass-control oculto" type="button" disabled>Cancelar</button>
+                </div>
+            </nav>
+
+            <section id="edit-menu" class="edit-panel hidden" aria-label="Ajustes de edición" aria-hidden="true">
+                <div class="edit-header">
+                    <h2>Edición</h2>
+                    <button class="close-btn" id="btn-close-edit" type="button" aria-label="Cerrar ajustes">
+                        &times;
+                    </button>
+                </div>
+
+                <div class="slider-group">
+                    <label for="brilloInput">Brillo <output id="brilloValor" for="brilloInput">0%</output></label>
+                    <input
+                        id="brilloInput"
+                        type="range"
+                        min="-100"
+                        max="100"
+                        step="1"
+                        value="0"
+                        aria-label="Nivel de brillo"
+                        disabled
+                    >
+                    <button class="glass-control" id="botonBrillo" type="button" disabled>Aplicar brillo</button>
+                </div>
+
+                <div class="slider-group">
+                    <label for="contrasteInput">Contraste <output id="contrasteValor" for="contrasteInput">0%</output></label>
+                    <input
+                        id="contrasteInput"
+                        type="range"
+                        min="-100"
+                        max="100"
+                        step="1"
+                        value="0"
+                        aria-label="Nivel de contraste"
+                        disabled
+                    >
+                    <button class="glass-control" id="botonContraste" type="button" disabled>Aplicar contraste</button>
+                </div>
+
+                <div class="slider-group">
+                    <label for="saturacionInput">Saturación <output id="saturacionValor" for="saturacionInput">0%</output></label>
+                    <input
+                        id="saturacionInput"
+                        type="range"
+                        min="-100"
+                        max="100"
+                        step="1"
+                        value="0"
+                        aria-label="Nivel de saturación"
+                        disabled
+                    >
+                    <button class="glass-control" id="botonSaturacion" type="button" disabled>Aplicar saturación</button>
+                </div>
+            </section>
+
+        </div>
+
         <p id="mensaje" class="oculto" role="alert" aria-live="assertive"></p>
         <p id="cargando" class="oculto" role="status" aria-live="polite">
             Procesando imagen…
         </p>
-        <img
-            id="preview"
-            class="preview oculto"
-            alt="Vista previa de la imagen procesada"
-        >
+        <div class="escenario" id="escenario">
+            <img id="preview" class="preview oculto" alt="Vista previa de la imagen procesada" draggable="false">
+            <div id="cropOverlay" class="crop-overlay oculto" aria-label="Área de selección del recorte">
+                <div id="cropSelection" class="crop-selection oculto"></div>
+            </div>
+        </div>
     </main>
+    <script>
+        document.body.append(document.getElementById("menuImagen"));
+    </script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='visor.js') }}"></script>
 </body>
 </html>

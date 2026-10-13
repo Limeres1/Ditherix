@@ -1,6 +1,6 @@
 import io
 
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import Image, ImageEnhance, ImageOps, UnidentifiedImageError
 
 # Este límite protege Pillow de imágenes comprimidas que explotan al decodificarse.
 MAX_LADO_PX = 6000
@@ -12,8 +12,6 @@ Image.MAX_IMAGE_PIXELS = MAX_LADO_PX * MAX_LADO_PX
 
 
 class ErrorImagen(Exception):
-    """Error de imagen con código y estado HTTP aptos para mostrar al usuario."""
-
     def __init__(self, codigo: str, mensaje: str, status: int):
         super().__init__(mensaje)
         self.codigo = codigo
@@ -30,7 +28,6 @@ def _error_corrupta() -> ErrorImagen:
 
 
 def _a_rgb(imagen: Image.Image) -> Image.Image:
-    """Aplana transparencias sobre blanco y entrega un RGB compatible con JPEG."""
     tiene_transparencia = "A" in imagen.getbands() or "transparency" in imagen.info
     if not tiene_transparencia:
         return imagen.convert("RGB")
@@ -41,7 +38,6 @@ def _a_rgb(imagen: Image.Image) -> Image.Image:
 
 
 def abrir_imagen(datos: bytes) -> Image.Image:
-    """Valida, decodifica, orienta y convierte una imagen sin usar el disco."""
     try:
         encabezado = Image.open(io.BytesIO(datos))
     except UnidentifiedImageError as error:
@@ -76,7 +72,6 @@ def abrir_imagen(datos: bytes) -> Image.Image:
                 413,
             )
 
-        # verify comprueba la estructura; luego se vuelve a abrir para decodificarla.
         encabezado.verify()
     except ErrorImagen:
         raise
@@ -107,8 +102,14 @@ def abrir_imagen(datos: bytes) -> Image.Image:
 
 
 def generar_vista(imagen: Image.Image) -> tuple[bytes, int, int]:
-    """Codifica una copia a JPEG conservando sus dimensiones originales."""
     ancho_vista, alto_vista = imagen.size
     salida = io.BytesIO()
     imagen.save(salida, format="JPEG", quality=90)
     return salida.getvalue(), ancho_vista, alto_vista
+
+
+def guardar_procesada_sin_perdida(imagen: Image.Image) -> bytes:
+    salida = io.BytesIO()
+    imagen.save(salida, format="PNG")
+    return salida.getvalue()
+
