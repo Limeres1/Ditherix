@@ -19,8 +19,9 @@ function reiniciarVista() {
     escala = 1;
     x = 0;
     y = 0;
-    aplicar()
+    aplicar();
 }
+window.reiniciarVista = reiniciarVista;
 
 ["pointerdown", "wheel", "dblclick"].forEach((evento) => {
     menuImagen.addEventListener(evento, (e) => e.stopPropagation());

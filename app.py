@@ -38,12 +38,15 @@ class ImagenGuardada:
 imagenes_guardadas: OrderedDict[str, ImagenGuardada] = OrderedDict()
 imagenes_lock = Lock()
 
+
 def respuesta_error(codigo: str, mensaje: str, status: int):
     return jsonify(ok=False, error=codigo, mensaje=mensaje), status
+
 
 @app.get("/")
 def index():
     return render_template("index.html")
+
 
 @app.post("/upload")
 def subir_imagen():

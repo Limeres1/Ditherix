@@ -1,5 +1,6 @@
 "use strict";
 
+const botonExportar = document.getElementById("botonExportar");
 const botonCargar = document.getElementById("botonCargar");
 const imageInput = document.getElementById("imageInput");
 const preview = document.getElementById("preview");
@@ -14,6 +15,7 @@ const botonContraste = document.getElementById("botonContraste");
 const saturacionInput = document.getElementById("saturacionInput");
 const saturacionValor = document.getElementById("saturacionValor");
 const botonSaturacion = document.getElementById("botonSaturacion");
+const btnRestablecer = document.getElementById("btn-restablecer");
 const btnIniciarRecorte = document.getElementById("btn-iniciar-recorte");
 const btnConfirmarRecorte = document.getElementById("btn-confirmar-recorte");
 const btnCancelarRecorte = document.getElementById("btn-cancelar-recorte");
@@ -52,6 +54,12 @@ function actualizarControlesEdicion() {
     saturacionInput.disabled = deshabilitados;
     botonSaturacion.disabled = deshabilitados;
     btnIniciarRecorte.disabled = deshabilitados;
+    if (btnRestablecer) {
+        btnRestablecer.disabled = deshabilitados;
+    }
+    if (botonExportar) {
+        botonExportar.disabled = !imagenActual || Boolean(controladorCarga) || procesandoAccion;
+    }
     btnConfirmarRecorte.disabled = !modoRecorte || !obtenerCoordenadasRecorte() || procesandoAccion;
     btnCancelarRecorte.disabled = !modoRecorte || procesandoAccion;
 }
@@ -113,14 +121,24 @@ function obtenerCoordenadasRecorte() {
 
     const anchoVista = escenarioImagen.clientWidth;
     const altoVista = escenarioImagen.clientHeight;
-    const escalaImagen = Math.max(
-        anchoVista / preview.naturalWidth,
-        altoVista / preview.naturalHeight,
-    );
+
+    const estilo = getComputedStyle(preview);
+    const padLeft = parseFloat(estilo.paddingLeft) || 0;
+    const padRight = parseFloat(estilo.paddingRight) || 0;
+    const padTop = parseFloat(estilo.paddingTop) || 0;
+    const padBottom = parseFloat(estilo.paddingBottom) || 0;
+
+    const anchoContenido = Math.max(1, anchoVista - padLeft - padRight);
+    const altoContenido = Math.max(1, altoVista - padTop - padBottom);
+
+    const esCover = estilo.objectFit === "cover";
+    const escalaImagen = esCover
+        ? Math.max(anchoContenido / preview.naturalWidth, altoContenido / preview.naturalHeight)
+        : Math.min(anchoContenido / preview.naturalWidth, altoContenido / preview.naturalHeight);
     const anchoRenderizado = preview.naturalWidth * escalaImagen;
     const altoRenderizado = preview.naturalHeight * escalaImagen;
-    const desplazamientoX = (anchoVista - anchoRenderizado) / 2;
-    const desplazamientoY = (altoVista - altoRenderizado) / 2;
+    const desplazamientoX = padLeft + (anchoContenido - anchoRenderizado) / 2;
+    const desplazamientoY = padTop + (altoContenido - altoRenderizado) / 2;
 
     const aPixelX = (x) => Math.max(
         0,
@@ -239,6 +257,9 @@ imageInput.addEventListener("change", async () => {
         }
 
         preview.classList.remove("oculto");
+        if (typeof reiniciarVista === "function") {
+            reiniciarVista();
+        }
     } catch (error) {
         if (numeroSolicitud !== solicitudActual || error.name === "AbortError") {
             return;
@@ -444,6 +465,9 @@ btnConfirmarRecorte.addEventListener("click", async () => {
         }
 
         preview.classList.remove("oculto");
+        if (typeof reiniciarVista === "function") {
+            reiniciarVista();
+        }
         mostrarMensaje("");
         establecerModoRecorte(false);
     } catch (error) {
@@ -464,5 +488,23 @@ btnConfirmarRecorte.addEventListener("click", async () => {
         }
     }
 });
+
+if (btnRestablecer) {
+    btnRestablecer.addEventListener("click", () => {
+        if (typeof reiniciarVista === "function") {
+            reiniciarVista();
+        }
+    });
+}
+
+if (botonExportar) {
+    botonExportar.addEventListener("click", () => {
+        if (!preview.src) return;
+        const enlace = document.createElement("a");
+        enlace.href = preview.src;
+        enlace.download = "ditherix-export.jpg";
+        enlace.click();
+    });
+}
 
 actualizarControlesEdicion();
