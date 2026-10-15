@@ -14,7 +14,7 @@ from manejo_imagen import (
 )
 from ajustes_imagen import AJUSTES_DISPONIBLES, procesar_ajustes, slider_a_factor
 from recortar import aplicar_recorte
-
+from voltear_imagen import voltear_horizontal, voltear_vertical
 
 MAX_ARCHIVO_BYTES = 25 * 1024 * 1024
 MARGEN_MULTIPART_BYTES = 64 * 1024
@@ -329,6 +329,47 @@ def recortar_imagen(imagen_id: str):
             imagen_original.close()
         if imagen_procesada is not None:
             imagen_procesada.close()
+
+
+@app.post("/imagen/<imagen_id>/voltear/<direccion>")
+def voltear(imagen_id: str, direccion: str):
+    if direccion not in ("horizontal", "vertical"):
+        return respuesta_error("DIRECCION_INVALIDA", "Dirección no permitida.", 400)
+    with imagenes_lock:
+        imagen_guardada = imagenes_guardadas.get(imagen_id)
+    if imagen_guardada is None:
+        return respuesta_error("IMAGEN_NO_ENCONTRADA", "La imagen ya no está disponible.", 404)
+    imagen_original = None
+    imagen_procesada = None
+    try:
+        imagen_original = abrir_imagen(imagen_guardada.original)
+        imagen_procesada = abrir_imagen(imagen_guardada.procesada)
+        # Elegir la función según la dirección
+        funcion_voltear = voltear_horizontal if direccion == "horizontal" else voltear_vertical
+        nueva_orig = funcion_voltear(imagen_original)
+        nueva_proc = funcion_voltear(imagen_procesada)
+        # Guardar en memoria y generar nueva vista previa
+        nuevo_original = guardar_procesada_sin_perdida(nueva_orig)
+        nueva_procesada = guardar_procesada_sin_perdida(nueva_proc)
+        vista, ancho_v, alto_v = generar_vista(nueva_proc)
+        # Actualizar el registro en memoria
+        imagen_actualizada = replace(
+            imagen_guardada,
+            original=nuevo_original,
+            procesada=nueva_procesada,
+            vista=vista,
+            ancho_vista=ancho_v,
+            alto_vista=alto_v,
+        )
+        with imagenes_lock:
+            imagenes_guardadas[imagen_id] = imagen_actualizada
+        return jsonify(
+            ok=True,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+        )
+    except Exception:
+        app.logger.exception("Error al voltear la imagen.")
+        return respuesta_error("ERROR_INTERNO", "No se pudo voltear la imagen.", 500)
 
 
 if __name__ == "__main__":

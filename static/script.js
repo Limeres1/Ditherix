@@ -8,14 +8,11 @@ const mensaje = document.getElementById("mensaje");
 const indicadorCarga = document.getElementById("cargando");
 const brilloInput = document.getElementById("brilloInput");
 const brilloValor = document.getElementById("brilloValor");
-const botonBrillo = document.getElementById("botonBrillo");
 const contrasteInput = document.getElementById("contrasteInput");
 const contrasteValor = document.getElementById("contrasteValor");
-const botonContraste = document.getElementById("botonContraste");
 const saturacionInput = document.getElementById("saturacionInput");
 const saturacionValor = document.getElementById("saturacionValor");
-const botonSaturacion = document.getElementById("botonSaturacion");
-const btnRestablecer = document.getElementById("btn-restablecer");
+const botonAplicarAjustes = document.getElementById("botonAplicarAjustes");
 const btnIniciarRecorte = document.getElementById("btn-iniciar-recorte");
 const btnConfirmarRecorte = document.getElementById("btn-confirmar-recorte");
 const btnCancelarRecorte = document.getElementById("btn-cancelar-recorte");
@@ -23,7 +20,8 @@ const cropOverlay = document.getElementById("cropOverlay");
 const cropSelection = document.getElementById("cropSelection");
 const contenedorVisor = document.getElementById("visor");
 const escenarioImagen = document.getElementById("escenario");
-
+const botonVoltearHorizontal = document.getElementById("botonVoltearHorizontal");
+const botonVoltearVertical = document.getElementById("botonVoltearVertical");
 
 let imagenActual = null;
 let solicitudActual = 0;
@@ -48,15 +46,13 @@ function mostrarValorSlider(valor) {
 function actualizarControlesEdicion() {
     const deshabilitados = !imagenActual || Boolean(controladorCarga) || procesandoAccion || modoRecorte;
     brilloInput.disabled = deshabilitados;
-    botonBrillo.disabled = deshabilitados;
     contrasteInput.disabled = deshabilitados;
-    botonContraste.disabled = deshabilitados;
     saturacionInput.disabled = deshabilitados;
-    botonSaturacion.disabled = deshabilitados;
+    botonAplicarAjustes.disabled = deshabilitados;
     btnIniciarRecorte.disabled = deshabilitados;
-    if (btnRestablecer) {
-        btnRestablecer.disabled = deshabilitados;
-    }
+    botonVoltearHorizontal.disabled = deshabilitados;
+    botonVoltearVertical.disabled = deshabilitados;
+
     if (botonExportar) {
         botonExportar.disabled = !imagenActual || Boolean(controladorCarga) || procesandoAccion;
     }
@@ -300,7 +296,7 @@ async function aplicarAjustes(nombreAjuste) {
     const imagenId = imagenActual;
     procesandoAccion = true;
     actualizarControlesEdicion();
-    indicadorCarga.textContent = `Aplicando ${nombreAjuste}…`;
+    indicadorCarga.textContent = `Aplicando ajustes...`;
     indicadorCarga.classList.remove("oculto");
 
     try {
@@ -353,9 +349,7 @@ async function aplicarAjustes(nombreAjuste) {
     }
 }
 
-botonBrillo.addEventListener("click", () => aplicarAjustes("brillo"));
-botonContraste.addEventListener("click", () => aplicarAjustes("contraste"));
-botonSaturacion.addEventListener("click", () => aplicarAjustes("saturación"));
+botonAplicarAjustes.addEventListener("click", () => aplicarAjustes());
 
 btnIniciarRecorte.addEventListener("click", () => {
     if (!imagenActual || procesandoAccion) {
@@ -489,14 +483,6 @@ btnConfirmarRecorte.addEventListener("click", async () => {
     }
 });
 
-if (btnRestablecer) {
-    btnRestablecer.addEventListener("click", () => {
-        if (typeof reiniciarVista === "function") {
-            reiniciarVista();
-        }
-    });
-}
-
 if (botonExportar) {
     botonExportar.addEventListener("click", () => {
         if (!preview.src) return;
@@ -508,3 +494,43 @@ if (botonExportar) {
 }
 
 actualizarControlesEdicion();
+
+async function voltearImagen(direccion) {
+    if (!imagenActual || procesandoAccion || modoRecorte) return;
+    const numeroSolicitud = ++solicitudActual;
+    procesandoAccion = true;
+    actualizarControlesEdicion();
+    indicadorCarga.textContent = `Volteando ${direccion}…`;
+    indicadorCarga.classList.remove("oculto");
+    try {
+        const respuesta = await fetch(`/imagen/${imagenActual}/voltear/${direccion}`, {
+            method: "POST",
+        });
+        const resultado = await respuesta.json();
+        if (numeroSolicitud !== solicitudActual) return;
+        if (!respuesta.ok || !resultado.ok) {
+            mostrarMensaje(resultado.mensaje || "No se pudo voltear la imagen.");
+            return;
+        }
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (!vistaCargada || numeroSolicitud !== solicitudActual) return;
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+    } catch (error) {
+        mostrarMensaje("No se pudo conectar con el servidor.");
+    } finally {
+        if (numeroSolicitud === solicitudActual) {
+            procesandoAccion = false;
+            actualizarControlesEdicion();
+            indicadorCarga.classList.add("oculto");
+            indicadorCarga.textContent = "Procesando imagen…";
+        }
+    }
+}
+
+botonVoltearHorizontal.addEventListener("click", () => {
+    voltearImagen("horizontal");
+});
+botonVoltearVertical.addEventListener("click", () => {
+    voltearImagen("vertical");
+});
