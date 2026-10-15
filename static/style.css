@@ -343,10 +343,69 @@ sacar el arrastre nativo
         min-width: 0;
         flex: 1 1 0;
     }
+
+    .crop-popover-container {
+        flex: 1 1 0;
+        display: flex;
+    }
+
+    .crop-popover-container>.glass-control {
+        width: 100%;
+    }
 }
 
 .btn-aplicar-ajustes {
     width: 100%;
     margin-top: 8px;
     justify-content: center;
+}
+
+.crop-popover-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.crop-menu {
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(12px) saturate(120%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+    pointer-events: auto;
+    transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+}
+
+.crop-menu.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(6px);
+    pointer-events: none;
+}
+
+.bottom-bar .crop-menu .glass-control.crop-action-btn {
+    min-width: 0;
+    flex: initial;
+    height: 32px;
+    padding: 0 10px;
+    gap: 6px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+#btn-confirmar-recorte:not(:disabled) {
+    background: rgba(0, 0, 0, 0.14);
+    color: #fff;
+    font-weight: 500;
+}
+
+#btn-confirmar-recorte:not(:disabled):hover {
+    background: rgba(0, 0, 0, 0.22);
 }

@@ -14,6 +14,7 @@ const saturacionInput = document.getElementById("saturacionInput");
 const saturacionValor = document.getElementById("saturacionValor");
 const botonAplicarAjustes = document.getElementById("botonAplicarAjustes");
 const btnIniciarRecorte = document.getElementById("btn-iniciar-recorte");
+const cropMenu = document.getElementById("crop-menu");
 const btnConfirmarRecorte = document.getElementById("btn-confirmar-recorte");
 const btnCancelarRecorte = document.getElementById("btn-cancelar-recorte");
 const cropOverlay = document.getElementById("cropOverlay");
@@ -44,14 +45,16 @@ function mostrarValorSlider(valor) {
 }
 
 function actualizarControlesEdicion() {
-    const deshabilitados = !imagenActual || Boolean(controladorCarga) || procesandoAccion || modoRecorte;
-    brilloInput.disabled = deshabilitados;
-    contrasteInput.disabled = deshabilitados;
-    saturacionInput.disabled = deshabilitados;
-    botonAplicarAjustes.disabled = deshabilitados;
+    const deshabilitados = !imagenActual || Boolean(controladorCarga) || procesandoAccion;
+    const deshabilitadosPorRecorte = deshabilitados || modoRecorte;
+
+    brilloInput.disabled = deshabilitadosPorRecorte;
+    contrasteInput.disabled = deshabilitadosPorRecorte;
+    saturacionInput.disabled = deshabilitadosPorRecorte;
+    botonAplicarAjustes.disabled = deshabilitadosPorRecorte;
     btnIniciarRecorte.disabled = deshabilitados;
-    botonVoltearHorizontal.disabled = deshabilitados;
-    botonVoltearVertical.disabled = deshabilitados;
+    botonVoltearHorizontal.disabled = deshabilitadosPorRecorte;
+    botonVoltearVertical.disabled = deshabilitadosPorRecorte;
 
     if (botonExportar) {
         botonExportar.disabled = !imagenActual || Boolean(controladorCarga) || procesandoAccion;
@@ -68,9 +71,12 @@ function establecerModoRecorte(activar) {
     contenedorVisor.classList.toggle("modo-recorte", activar);
     cropOverlay.classList.toggle("oculto", !activar);
     cropSelection.classList.add("oculto");
-    btnIniciarRecorte.classList.toggle("oculto", activar);
-    btnConfirmarRecorte.classList.toggle("oculto", !activar);
-    btnCancelarRecorte.classList.toggle("oculto", !activar);
+
+    btnIniciarRecorte.classList.toggle("active", activar);
+    btnIniciarRecorte.setAttribute("aria-expanded", String(activar));
+    if (cropMenu) {
+        cropMenu.classList.toggle("hidden", !activar);
+    }
 
     if (activar) {
         indicadorCarga.textContent = "Arrastra sobre la imagen para seleccionar el recorte.";
@@ -356,11 +362,18 @@ btnIniciarRecorte.addEventListener("click", () => {
         return;
     }
     mostrarMensaje("");
-    establecerModoRecorte(true);
+    establecerModoRecorte(!modoRecorte);
 });
 
 btnCancelarRecorte.addEventListener("click", () => {
     establecerModoRecorte(false);
+});
+
+document.addEventListener("keydown", (evento) => {
+    if (evento.key === "Escape" && modoRecorte && !procesandoAccion) {
+        establecerModoRecorte(false);
+        btnIniciarRecorte.focus();
+    }
 });
 
 cropOverlay.addEventListener("pointerdown", (evento) => {
