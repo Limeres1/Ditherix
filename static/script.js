@@ -13,6 +13,11 @@ const contrasteValor = document.getElementById("contrasteValor");
 const saturacionInput = document.getElementById("saturacionInput");
 const saturacionValor = document.getElementById("saturacionValor");
 const botonAplicarAjustes = document.getElementById("botonAplicarAjustes");
+const desenfoqueInput = document.getElementById("desenfoqueInput");
+const desenfoqueValor = document.getElementById("desenfoqueValor");
+const nitidezInput = document.getElementById("nitidezInput");
+const nitidezValor = document.getElementById("nitidezValor");
+const botonAplicarDetalle = document.getElementById("botonAplicarDetalle");
 const btnIniciarRecorte = document.getElementById("btn-iniciar-recorte");
 const cropMenu = document.getElementById("crop-menu");
 const btnConfirmarRecorte = document.getElementById("btn-confirmar-recorte");
@@ -52,6 +57,11 @@ function actualizarControlesEdicion() {
     contrasteInput.disabled = deshabilitadosPorRecorte;
     saturacionInput.disabled = deshabilitadosPorRecorte;
     botonAplicarAjustes.disabled = deshabilitadosPorRecorte;
+
+    if (desenfoqueInput) desenfoqueInput.disabled = deshabilitadosPorRecorte;
+    if (nitidezInput) nitidezInput.disabled = deshabilitadosPorRecorte;
+    if (botonAplicarDetalle) botonAplicarDetalle.disabled = deshabilitadosPorRecorte;
+
     btnIniciarRecorte.disabled = deshabilitados;
     botonVoltearHorizontal.disabled = deshabilitadosPorRecorte;
     botonVoltearVertical.disabled = deshabilitadosPorRecorte;
@@ -210,6 +220,16 @@ imageInput.addEventListener("change", async () => {
     procesandoAccion = false;
     establecerModoRecorte(false);
     imagenActual = null;
+    brilloInput.value = "0";
+    brilloValor.value = "0%";
+    contrasteInput.value = "0";
+    contrasteValor.value = "0%";
+    saturacionInput.value = "0";
+    saturacionValor.value = "0%";
+    if (desenfoqueInput) desenfoqueInput.value = "0";
+    if (desenfoqueValor) desenfoqueValor.value = "0%";
+    if (nitidezInput) nitidezInput.value = "0";
+    if (nitidezValor) nitidezValor.value = "0%";
     actualizarControlesEdicion();
 
     if (controladorCarga) {
@@ -356,6 +376,83 @@ async function aplicarAjustes(nombreAjuste) {
 }
 
 botonAplicarAjustes.addEventListener("click", () => aplicarAjustes());
+
+if (desenfoqueInput && desenfoqueValor) {
+    desenfoqueInput.addEventListener("input", () => {
+        desenfoqueValor.value = mostrarValorSlider(desenfoqueInput.value);
+    });
+}
+
+if (nitidezInput && nitidezValor) {
+    nitidezInput.addEventListener("input", () => {
+        nitidezValor.value = mostrarValorSlider(nitidezInput.value);
+    });
+}
+
+async function aplicarDetalle() {
+    if (!imagenActual || procesandoAccion || modoRecorte) {
+        return;
+    }
+
+    const numeroSolicitud = ++solicitudActual;
+    const imagenId = imagenActual;
+    procesandoAccion = true;
+    actualizarControlesEdicion();
+    indicadorCarga.textContent = "Aplicando detalle…";
+    indicadorCarga.classList.remove("oculto");
+
+    try {
+        const respuesta = await fetch(`/imagen/${imagenId}/detalle`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                desenfoque: Number(desenfoqueInput.value),
+                nitidez: Number(nitidezInput.value),
+            }),
+        });
+        const resultado = await respuesta.json();
+
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!respuesta.ok || !resultado.ok) {
+            mostrarMensaje(resultado.mensaje || "No se pudieron aplicar los ajustes de detalle.");
+            return;
+        }
+
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!vistaCargada) {
+            mostrarMensaje("No se pudo mostrar la imagen con los ajustes aplicados.");
+            return;
+        }
+
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+    } catch (error) {
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (error instanceof SyntaxError) {
+            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+        } else {
+            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        }
+    } finally {
+        if (numeroSolicitud === solicitudActual) {
+            procesandoAccion = false;
+            actualizarControlesEdicion();
+            indicadorCarga.classList.add("oculto");
+            indicadorCarga.textContent = "Procesando imagen…";
+        }
+    }
+}
+
+if (botonAplicarDetalle) {
+    botonAplicarDetalle.addEventListener("click", () => aplicarDetalle());
+}
 
 btnIniciarRecorte.addEventListener("click", () => {
     if (!imagenActual || procesandoAccion) {

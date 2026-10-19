@@ -15,6 +15,7 @@ from manejo_imagen import (
 from ajustes_imagen import AJUSTES_DISPONIBLES, procesar_ajustes, slider_a_factor
 from recortar import aplicar_recorte
 from voltear_imagen import voltear_horizontal, voltear_vertical
+from detalle import AJUSTES_DETALLE, aplicar_enfoque, aplicar_nitidez, procesar_detalle
 
 MAX_ARCHIVO_BYTES = 25 * 1024 * 1024
 MARGEN_MULTIPART_BYTES = 64 * 1024
@@ -370,6 +371,93 @@ def voltear(imagen_id: str, direccion: str):
     except Exception:
         app.logger.exception("Error al voltear la imagen.")
         return respuesta_error("ERROR_INTERNO", "No se pudo voltear la imagen.", 500)
+
+
+
+@app.post("/imagen/<imagen_id>/detalle")
+def aplicar_detalle(imagen_id: str):
+    datos = request.get_json(silent=True)
+    if not isinstance(datos, dict):
+        return respuesta_error("DATOS_INVALIDOS", "Los datos del efecto no son válidos.", 400)
+
+    factores = {}
+    for nombre, (etiqueta, _) in AJUSTES_DETALLE.items():
+        valor_slider = datos.get(nombre)
+        if valor_slider is None and nombre == "desenfoque" and "enfoque" in datos:
+            valor_slider = datos.get("enfoque")
+
+        if (
+            valor_slider is None
+            or isinstance(valor_slider, bool)
+            or not isinstance(valor_slider, (int, float))
+            or not -100 <= valor_slider <= 100
+            or not math.isfinite(valor_slider)
+        ):
+            return respuesta_error(
+                "FACTOR_INVALIDO",
+                f"El ajuste de {etiqueta} debe estar entre -100 y 100.",
+                400,
+            )
+        factores[nombre] = slider_a_factor(float(valor_slider))
+
+    with imagenes_lock:
+        imagen_guardada = imagenes_guardadas.get(imagen_id)
+
+    if imagen_guardada is None:
+        return respuesta_error(
+            "IMAGEN_NO_ENCONTRADA",
+            "La imagen ya no está disponible. Vuelve a cargarla.",
+            404,
+        )
+
+    imagen = None
+    resultado = None
+    try:
+        imagen = abrir_imagen(imagen_guardada.original)
+        resultado = procesar_detalle(imagen, factores)
+
+        procesada = guardar_procesada_sin_perdida(resultado)
+        vista, ancho_vista, alto_vista = generar_vista(resultado)
+
+        imagen_actualizada = replace(
+            imagen_guardada,
+            procesada=procesada,
+            vista=vista,
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+        )
+        with imagenes_lock:
+            if imagenes_guardadas.get(imagen_id) is not imagen_guardada:
+                return respuesta_error(
+                    "IMAGEN_MODIFICADA",
+                    "La imagen cambió durante el procesamiento. Inténtalo de nuevo.",
+                    409,
+                )
+            imagenes_guardadas[imagen_id] = imagen_actualizada
+
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+        )
+    except ErrorImagen as error:
+        return respuesta_error(error.codigo, error.mensaje, error.status)
+    except Exception:
+        app.logger.exception("Error inesperado al aplicar los ajustes de detalle a una imagen.")
+        return respuesta_error(
+            "ERROR_INTERNO",
+            "No se pudieron aplicar los ajustes a la imagen. Inténtalo de nuevo.",
+            500,
+        )
+    finally:
+        if resultado is not None and resultado is not imagen:
+            resultado.close()
+        if imagen is not None:
+            imagen.close()
+
+
 
 
 if __name__ == "__main__":
