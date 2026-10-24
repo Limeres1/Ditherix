@@ -14,6 +14,8 @@ def slider_a_factor(valor: float) -> float:
 
 
 def aplicar_nitidez(imagen: Image.Image, factor: float) -> Image.Image:
+    if factor == 1.0:
+        return imagen
     return ImageEnhance.Sharpness(imagen).enhance(factor)
 
 
@@ -49,11 +51,17 @@ def procesar_detalle(
     imagen: Image.Image,
     factores: dict[str, float],
 ) -> Image.Image:
+    if all(factores.get(nombre, 1.0) == 1.0 for nombre in AJUSTES_DETALLE):
+        return imagen
+
     resultado = imagen
     try:
         for nombre, (_, funcion) in AJUSTES_DETALLE.items():
             if nombre in factores:
-                siguiente = funcion(resultado, factores[nombre])
+                factor = factores[nombre]
+                if factor == 1.0:
+                    continue
+                siguiente = funcion(resultado, factor)
                 if resultado is not imagen and resultado is not siguiente:
                     resultado.close()
                 resultado = siguiente

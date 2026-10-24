@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 import math
 from threading import Lock
 import uuid
@@ -15,7 +15,7 @@ from manejo_imagen import (
 from ajustes_imagen import AJUSTES_DISPONIBLES, procesar_ajustes, slider_a_factor
 from recortar import aplicar_recorte
 from voltear_imagen import voltear_horizontal, voltear_vertical
-from detalle import AJUSTES_DETALLE, aplicar_enfoque, aplicar_nitidez, procesar_detalle
+from detalle import AJUSTES_DETALLE, procesar_detalle
 
 MAX_ARCHIVO_BYTES = 25 * 1024 * 1024
 MARGEN_MULTIPART_BYTES = 64 * 1024
@@ -34,6 +34,27 @@ class ImagenGuardada:
     alto: int
     ancho_vista: int
     alto_vista: int
+    ajustes: dict[str, float] = field(default_factory=dict)
+
+
+AJUSTES_DEFECTO: dict[str, float] = {
+    "brillo": 0.0,
+    "contraste": 0.0,
+    "saturacion": 0.0,
+    "desenfoque": 0.0,
+    "nitidez": 0.0,
+}
+
+
+def ejecutar_pipeline(imagen_base, factores: dict[str, float]):
+    resultado = procesar_ajustes(imagen_base, factores)
+
+    siguiente = procesar_detalle(resultado, factores)
+    if resultado is not imagen_base and resultado is not siguiente:
+        resultado.close()
+    resultado = siguiente
+
+    return resultado
 
 
 imagenes_guardadas: OrderedDict[str, ImagenGuardada] = OrderedDict()
@@ -83,6 +104,7 @@ def subir_imagen():
             alto=alto,
             ancho_vista=ancho_vista,
             alto_vista=alto_vista,
+            ajustes=dict(AJUSTES_DEFECTO),
         )
 
         with imagenes_lock:
@@ -109,28 +131,7 @@ def subir_imagen():
             500,
         )
 
-@app.post("/imagen/<imagen_id>/ajustes")
-def aplicar_ajustes(imagen_id: str):
-    datos = request.get_json(silent=True)
-    if not isinstance(datos, dict):
-        return respuesta_error("DATOS_INVALIDOS", "Los datos del efecto no son válidos.", 400)
-
-    factores = {}
-    for nombre, (etiqueta, _) in AJUSTES_DISPONIBLES.items():
-        valor_slider = datos.get(nombre)
-        if (
-            isinstance(valor_slider, bool)
-            or not isinstance(valor_slider, (int, float))
-            or not -100 <= valor_slider <= 100
-            or not math.isfinite(valor_slider)
-        ):
-            return respuesta_error(
-                "FACTOR_INVALIDO",
-                f"El ajuste de {etiqueta} debe estar entre -100 y 100.",
-                400,
-            )
-        factores[nombre] = slider_a_factor(float(valor_slider))
-
+def aplicar_ajustes_a_imagen(imagen_id: str, nuevos_valores: dict[str, float]):
     with imagenes_lock:
         imagen_guardada = imagenes_guardadas.get(imagen_id)
 
@@ -141,11 +142,26 @@ def aplicar_ajustes(imagen_id: str):
             404,
         )
 
+    ajustes_actualizados = dict(imagen_guardada.ajustes)
+    ajustes_actualizados.update(nuevos_valores)
+
+    if ajustes_actualizados == imagen_guardada.ajustes:
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            ancho_vista=imagen_guardada.ancho_vista,
+            alto_vista=imagen_guardada.alto_vista,
+            sin_cambios=True,
+        )
+
+    factores = {nombre: slider_a_factor(val) for nombre, val in ajustes_actualizados.items()}
+
     imagen = None
     resultado = None
     try:
         imagen = abrir_imagen(imagen_guardada.original)
-        resultado = procesar_ajustes(imagen, factores)
+        resultado = ejecutar_pipeline(imagen, factores)
 
         procesada = guardar_procesada_sin_perdida(resultado)
         vista, ancho_vista, alto_vista = generar_vista(resultado)
@@ -156,6 +172,7 @@ def aplicar_ajustes(imagen_id: str):
             vista=vista,
             ancho_vista=ancho_vista,
             alto_vista=alto_vista,
+            ajustes=ajustes_actualizados,
         )
         with imagenes_lock:
             if imagenes_guardadas.get(imagen_id) is not imagen_guardada:
@@ -187,6 +204,43 @@ def aplicar_ajustes(imagen_id: str):
             resultado.close()
         if imagen is not None:
             imagen.close()
+
+
+@app.post("/imagen/<imagen_id>/ajustes")
+def aplicar_ajustes(imagen_id: str):
+    datos = request.get_json(silent=True)
+    if not isinstance(datos, dict):
+        return respuesta_error("DATOS_INVALIDOS", "Los datos del efecto no son válidos.", 400)
+
+    valores = {}
+    for nombre, (etiqueta, _) in AJUSTES_DISPONIBLES.items():
+        if nombre in datos:
+            valor_slider = datos.get(nombre)
+            if (
+                isinstance(valor_slider, bool)
+                or not isinstance(valor_slider, (int, float))
+                or not -100 <= valor_slider <= 100
+                or not math.isfinite(valor_slider)
+            ):
+                return respuesta_error(
+                    "FACTOR_INVALIDO",
+                    f"El ajuste de {etiqueta} debe estar entre -100 y 100.",
+                    400,
+                )
+            valores[nombre] = float(valor_slider)
+
+    for nombre, (etiqueta, _) in AJUSTES_DETALLE.items():
+        if nombre in datos:
+            valor_slider = datos.get(nombre)
+            if (
+                not isinstance(valor_slider, bool)
+                and isinstance(valor_slider, (int, float))
+                and -100 <= valor_slider <= 100
+                and math.isfinite(valor_slider)
+            ):
+                valores[nombre] = float(valor_slider)
+
+    return aplicar_ajustes_a_imagen(imagen_id, valores)
 
 
 
@@ -345,15 +399,12 @@ def voltear(imagen_id: str, direccion: str):
     try:
         imagen_original = abrir_imagen(imagen_guardada.original)
         imagen_procesada = abrir_imagen(imagen_guardada.procesada)
-        # Elegir la función según la dirección
         funcion_voltear = voltear_horizontal if direccion == "horizontal" else voltear_vertical
         nueva_orig = funcion_voltear(imagen_original)
         nueva_proc = funcion_voltear(imagen_procesada)
-        # Guardar en memoria y generar nueva vista previa
         nuevo_original = guardar_procesada_sin_perdida(nueva_orig)
         nueva_procesada = guardar_procesada_sin_perdida(nueva_proc)
         vista, ancho_v, alto_v = generar_vista(nueva_proc)
-        # Actualizar el registro en memoria
         imagen_actualizada = replace(
             imagen_guardada,
             original=nuevo_original,
@@ -380,82 +431,38 @@ def aplicar_detalle(imagen_id: str):
     if not isinstance(datos, dict):
         return respuesta_error("DATOS_INVALIDOS", "Los datos del efecto no son válidos.", 400)
 
-    factores = {}
+    valores = {}
     for nombre, (etiqueta, _) in AJUSTES_DETALLE.items():
         valor_slider = datos.get(nombre)
         if valor_slider is None and nombre == "desenfoque" and "enfoque" in datos:
             valor_slider = datos.get("enfoque")
 
-        if (
-            valor_slider is None
-            or isinstance(valor_slider, bool)
-            or not isinstance(valor_slider, (int, float))
-            or not -100 <= valor_slider <= 100
-            or not math.isfinite(valor_slider)
-        ):
-            return respuesta_error(
-                "FACTOR_INVALIDO",
-                f"El ajuste de {etiqueta} debe estar entre -100 y 100.",
-                400,
-            )
-        factores[nombre] = slider_a_factor(float(valor_slider))
-
-    with imagenes_lock:
-        imagen_guardada = imagenes_guardadas.get(imagen_id)
-
-    if imagen_guardada is None:
-        return respuesta_error(
-            "IMAGEN_NO_ENCONTRADA",
-            "La imagen ya no está disponible. Vuelve a cargarla.",
-            404,
-        )
-
-    imagen = None
-    resultado = None
-    try:
-        imagen = abrir_imagen(imagen_guardada.original)
-        resultado = procesar_detalle(imagen, factores)
-
-        procesada = guardar_procesada_sin_perdida(resultado)
-        vista, ancho_vista, alto_vista = generar_vista(resultado)
-
-        imagen_actualizada = replace(
-            imagen_guardada,
-            procesada=procesada,
-            vista=vista,
-            ancho_vista=ancho_vista,
-            alto_vista=alto_vista,
-        )
-        with imagenes_lock:
-            if imagenes_guardadas.get(imagen_id) is not imagen_guardada:
+        if valor_slider is not None:
+            if (
+                isinstance(valor_slider, bool)
+                or not isinstance(valor_slider, (int, float))
+                or not -100 <= valor_slider <= 100
+                or not math.isfinite(valor_slider)
+            ):
                 return respuesta_error(
-                    "IMAGEN_MODIFICADA",
-                    "La imagen cambió durante el procesamiento. Inténtalo de nuevo.",
-                    409,
+                    "FACTOR_INVALIDO",
+                    f"El ajuste de {etiqueta} debe estar entre -100 y 100.",
+                    400,
                 )
-            imagenes_guardadas[imagen_id] = imagen_actualizada
+            valores[nombre] = float(valor_slider)
 
-        return jsonify(
-            ok=True,
-            id=imagen_id,
-            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
-            ancho_vista=ancho_vista,
-            alto_vista=alto_vista,
-        )
-    except ErrorImagen as error:
-        return respuesta_error(error.codigo, error.mensaje, error.status)
-    except Exception:
-        app.logger.exception("Error inesperado al aplicar los ajustes de detalle a una imagen.")
-        return respuesta_error(
-            "ERROR_INTERNO",
-            "No se pudieron aplicar los ajustes a la imagen. Inténtalo de nuevo.",
-            500,
-        )
-    finally:
-        if resultado is not None and resultado is not imagen:
-            resultado.close()
-        if imagen is not None:
-            imagen.close()
+    for nombre in ("brillo", "contraste", "saturacion"):
+        if nombre in datos:
+            valor_slider = datos.get(nombre)
+            if (
+                not isinstance(valor_slider, bool)
+                and isinstance(valor_slider, (int, float))
+                and -100 <= valor_slider <= 100
+                and math.isfinite(valor_slider)
+            ):
+                valores[nombre] = float(valor_slider)
+
+    return aplicar_ajustes_a_imagen(imagen_id, valores)
 
 
 

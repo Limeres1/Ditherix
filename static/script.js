@@ -313,6 +313,16 @@ saturacionInput.addEventListener("input", () => {
     saturacionValor.value = mostrarValorSlider(saturacionInput.value);
 });
 
+function obtenerTodosLosAjustes() {
+    return {
+        brillo: Number(brilloInput ? brilloInput.value : 0),
+        contraste: Number(contrasteInput ? contrasteInput.value : 0),
+        saturacion: Number(saturacionInput ? saturacionInput.value : 0),
+        desenfoque: Number(desenfoqueInput ? desenfoqueInput.value : 0),
+        nitidez: Number(nitidezInput ? nitidezInput.value : 0),
+    };
+}
+
 async function aplicarAjustes(nombreAjuste) {
     if (!imagenActual || procesandoAccion || modoRecorte) {
         return;
@@ -329,11 +339,7 @@ async function aplicarAjustes(nombreAjuste) {
         const respuesta = await fetch(`/imagen/${imagenId}/ajustes`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                brillo: Number(brilloInput.value),
-                contraste: Number(contrasteInput.value),
-                saturacion: Number(saturacionInput.value),
-            }),
+            body: JSON.stringify(obtenerTodosLosAjustes()),
         });
         const resultado = await respuesta.json();
 
@@ -405,10 +411,7 @@ async function aplicarDetalle() {
         const respuesta = await fetch(`/imagen/${imagenId}/detalle`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                desenfoque: Number(desenfoqueInput.value),
-                nitidez: Number(nitidezInput.value),
-            }),
+            body: JSON.stringify(obtenerTodosLosAjustes()),
         });
         const resultado = await respuesta.json();
 
