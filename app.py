@@ -67,6 +67,16 @@ def respuesta_error(codigo: str, mensaje: str, status: int):
 
 @app.get("/")
 def index():
+    return render_template("landing.html")
+
+
+@app.get("/editor")
+def editor():
+    return render_template("index.html")
+
+
+@app.get("/app")
+def app_view():
     return render_template("index.html")
 
 

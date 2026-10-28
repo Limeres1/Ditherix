@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ditherix // Y2K Visual Alchemy & Dithering Engine</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon/icon.jpeg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+</head>
+
+<body class="crt-overlay">
+    <!-- Scanline & Noise Screen FX -->
+    <div class="screen-scanlines" aria-hidden="true"></div>
+    <div class="screen-vignette" aria-hidden="true"></div>
+
+    <!-- Top Technical HUD Navigation -->
+    <header class="hud-header">
+        <div class="hud-header-inner">
+            <div class="hud-left">
+                <div class="portal-badge-dropdown" id="portalDropdownWrap">
+                    <button class="hud-portal-btn" id="portalBtn" type="button" aria-expanded="false"
+                        aria-haspopup="true">
+                        <span class="hud-bullet">■</span>
+                        <span class="hud-portal-text">PORTAL</span>
+                        <span class="hud-arrow">▾</span>
+                    </button>
+                    <div class="portal-dropdown-menu" id="portalMenu" role="menu">
+                        <a href="/editor" class="portal-dropdown-item" role="menuitem">
+                            <span class="p-icon">◈</span>
+                            <span>Abrir Editor Directo</span>
+                        </a>
+                        <a href="#caracteristicas" class="portal-dropdown-item" role="menuitem">
+                            <span class="p-icon">⟐</span>
+                            <span>Guías profesionales</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Live HUD Clock & Coordinates -->
+            <div class="hud-center" id="hudClock" aria-label="HUD Timestamp">
+                <span class="hud-bracket">[</span><span id="hudDay">12</span><span class="hud-bracket">]</span>
+                <span class="hud-bracket">[</span><span id="hudMonth">08</span><span class="hud-bracket">]</span>
+                <span class="hud-bracket">[</span><span id="hudYear">2026</span><span class="hud-bracket">]</span>
+                <span class="hud-epoch">CE •</span>
+                <span class="hud-time" id="hudTime">02:04:04:91 PM</span>
+            </div>
+
+            <div class="hud-right">
+                <span class="hud-status-indicator">
+                    <span class="status-dot"></span> SYSTEM [ ONLINE ]
+                </span>
+                <a href="/editor" class="hud-cart-pill" title="Ingresar al Editor">
+                    <span>LAUNCH</span>
+                    <span class="hud-bracket">[</span> <span class="arrow-right">→</span> <span
+                        class="hud-bracket">]</span>
+                </a>
+            </div>
+        </div>
+        <!-- Figma Cyber Blue Accent Line -->
+        <div class="hud-blue-stripe"></div>
+    </header>
+
+    <main class="landing-main">
+        <!-- Hero Section -->
+        <section class="hero-section" id="inicio">
+            <div class="hero-hud-frame">
+                <span class="bracket-tl">┌</span>
+                <span class="bracket-tr">┐</span>
+                <span class="bracket-bl">└</span>
+                <span class="bracket-br">┘</span>
+
+                <!-- Arcane Rotating HUD Mandala Icon -->
+                <div class="hero-emblem-wrap" aria-hidden="true">
+                    <div class="hero-mandala-ring">
+                        <svg viewBox="0 0 100 100" class="rotating-mandala">
+                            <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="1" fill="none"
+                                stroke-dasharray="4 3" />
+                            <circle cx="50" cy="50" r="34" stroke="currentColor" stroke-width="0.8" fill="none" />
+                            <circle cx="50" cy="50" r="22" stroke="currentColor" stroke-width="1.2" fill="none"
+                                stroke-dasharray="8 6" />
+                            <polygon points="50,6 62,38 94,50 62,62 50,94 38,62 6,50 38,38" fill="none"
+                                stroke="currentColor" stroke-width="0.8" />
+                            <polygon points="50,20 58,42 80,50 58,58 50,80 42,58 20,50 42,42" fill="none"
+                                stroke="currentColor" stroke-width="0.8" />
+                            <circle cx="50" cy="50" r="4" fill="currentColor" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Main Brand Title in Synkopy -->
+                <h1 class="hero-title" data-text="DITHERIX">DITHERIX</h1>
+                <!-- Descriptive Sci-Fi Paragraph -->
+                <div class="hero-desc-box">
+                    <span class="box-bracket-tl">┌</span>
+                    <span class="box-bracket-tr">┐</span>
+                    <span class="box-bracket-bl">└</span>
+                    <span class="box-bracket-br">┘</span>
+                    <p class="hero-description">
+                        Con Ditherix puedes crear arte único, transformando tus imágenes fotográficas mediante
+                        algoritmos de dithering, modulación tonal, patrones de semitono y texturas CRT de alto
+                        contraste.
+                    </p>
+                </div>
+
+                <!-- Figma Oval CTA Button -->
+                <div class="hero-cta-wrapper">
+                    <a href="/editor" class="figma-pill-btn hero-pill-btn" id="heroCtaBtn">
+                        <span class="btn-glow-layer"></span>
+                        <span class="btn-text">Empieza a usar Ditherix</span>
+                        <span class="btn-arrow">✦</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Glitch / Audio Waveform Frequency Bar (From Reference Image 3) -->
+        <section class="soundwave-divider" aria-label="Visualizador de frecuencia Y2K">
+            <div class="soundwave-header">
+                <span class="sw-label">FREQ_MATRIX // 9901101 // SAMPLING RATE: 44.1 KHZ</span>
+                <span class="sw-sigil">◬ ◭ ▲ ◈ ▼ ◮ ◬</span>
+                <span class="sw-status">SIGNAL: STABLE</span>
+            </div>
+            <div class="soundwave-canvas-wrap">
+                <canvas id="waveformCanvas" width="1200" height="70"></canvas>
+            </div>
+        </section>
+
+        <!-- Feature Zig-Zag Sections (Matching Figma Diagram Layout) -->
+        <section class="features-section" id="caracteristicas">
+            <!-- Row 1: Left Showcase Image, Right Text Block -->
+            <article class="feature-row row-image-left">
+                <div class="feature-visual-col">
+                    <div class="tech-card-viewport">
+                        <span class="tc-corner tc-tl">┌</span>
+                        <span class="tc-corner tc-tr">┐</span>
+                        <span class="tc-corner tc-bl">└</span>
+                        <span class="tc-corner tc-br">┘</span>
+                        <div class="tc-header-hud">
+                            <span class="tc-badge">[ SEC_01 // TEXTURE_ALGORITHM ]</span>
+                            <span class="tc-coords">MATRIX: BAYER_8X8</span>
+                        </div>
+                        <div class="tc-image-container">
+                            <img src="{{ url_for('static', filename='images/Imagen-1.png') }}" alt="Ejemplo Matrix"
+                                class="tc-img" loading="lazy">
+                            <div class="tc-scanline-fx"></div>
+                            <div class="tc-crosshair ch-1">+</div>
+                            <div class="tc-crosshair ch-2">+</div>
+                        </div>
+                        <div class="tc-footer-hud">
+                            <span class="tc-footer-tag">STATUS: 1-BIT DITHER RASTER</span>
+                            <span class="tc-footer-id">ID #8841-DX</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-text-col">
+                    <div class="text-meta-badge">
+                        <span class="meta-bracket">[</span>
+                        <span class="meta-number">01</span>
+                        <span class="meta-sep">//</span>
+                        <span class="meta-name">DITHERING DE SEMITONO</span>
+                        <span class="meta-bracket">]</span>
+                    </div>
+                    <h2 class="feature-title">Algoritmos de Difusión y Textura Binaria</h2>
+                    <p class="feature-body">
+                        Transforma gradientes continuos en patrones de ruido estructurado, tramas de difusión de error y
+                        matrices de dispersión inspiradas en los primeros motores de renderizado de los 90s y 2000s.
+                    </p>
+                    <p class="feature-body-secondary">
+                        Genera texturas táctiles e hiper-estilizadas que preservan la silueta y tridimensionalidad de
+                        tus retratos con una crudeza cibernética inconfundible.
+                    </p>
+                    <ul class="tech-spec-list">
+                        <li><span class="spec-bullet">◈</span> Difusión de error Floyd-Steinberg estocástica</li>
+                        <li><span class="spec-bullet">◈</span> Matriz de dispersión Bayer y semitonos CRT</li>
+                        <li><span class="spec-bullet">◈</span> Conversión monocromo de alto impacto visual</li>
+                    </ul>
+                </div>
+            </article>
+
+            <!-- Row 2: Left Text Block, Right Showcase Image -->
+            <article class="feature-row row-text-left">
+                <div class="feature-text-col">
+                    <div class="text-meta-badge">
+                        <span class="meta-bracket">[</span>
+                        <span class="meta-number">02</span>
+                        <span class="meta-sep">//</span>
+                        <span class="meta-name">DINÁMICA TONAL</span>
+                        <span class="meta-bracket">]</span>
+                    </div>
+                    <h2 class="feature-title">Control Analógico de Exposición y Detalle</h2>
+                    <p class="feature-body">
+                        Modula brillo, contraste brutal, saturación desaturada o sobreexpuesta, nitidez extrema y
+                        desenfoque analógico para evocar la imperfección cruda de cámaras de vigilancia y monitores de
+                        tubo catódico.
+                    </p>
+                    <p class="feature-body-secondary">
+                        Ajusta en tiempo real cada canal con respuesta instantánea de previsualización sin alterar el
+                        archivo original.
+                    </p>
+                    <ul class="tech-spec-list">
+                        <li><span class="spec-bullet">◈</span> Contraste brutalista con negros profundos</li>
+                        <li><span class="spec-bullet">◈</span> Nitidez quirúrgica y desenfoque cinematográfico</li>
+                        <li><span class="spec-bullet">◈</span> Control no destructivo con memoria en sesión</li>
+                    </ul>
+                </div>
+
+                <div class="feature-visual-col">
+                    <div class="tech-card-viewport">
+                        <span class="tc-corner tc-tl">┌</span>
+                        <span class="tc-corner tc-tr">┐</span>
+                        <span class="tc-corner tc-bl">└</span>
+                        <span class="tc-corner tc-br">┘</span>
+                        <div class="tc-header-hud">
+                            <span class="tc-badge">[ SEC_02 // SHADOW_PORTAL ]</span>
+                            <span class="tc-coords">EXPOSURE: DYNAMIC_CLAMP</span>
+                        </div>
+                        <div class="tc-image-container">
+                            <img src="{{ url_for('static', filename='images/Imagen-3.png') }}" alt="Ejemplo One piece"
+                                class="tc-img" loading="lazy">
+                            <div class="tc-scanline-fx"></div>
+                            <div class="tc-crosshair ch-1">+</div>
+                            <div class="tc-crosshair ch-2">+</div>
+                        </div>
+                        <div class="tc-footer-hud">
+                            <span class="tc-footer-tag">PIPELINE: EXPOSURE + SHARPNESS</span>
+                            <span class="tc-footer-id">ID #2209-SP</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Row 3: Left Showcase Image, Right Text Block -->
+            <article class="feature-row row-image-left">
+                <div class="feature-visual-col">
+                    <div class="tech-card-viewport">
+                        <span class="tc-corner tc-tl">┌</span>
+                        <span class="tc-corner tc-tr">┐</span>
+                        <span class="tc-corner tc-bl">└</span>
+                        <span class="tc-corner tc-br">┘</span>
+                        <div class="tc-header-hud">
+                            <span class="tc-badge">[ SEC_03 // ALCHEMY_MATRIX ]</span>
+                            <span class="tc-coords">BUFFER: 25MB_LOSSLESS</span>
+                        </div>
+                        <div class="tc-image-container">
+                            <img src="{{ url_for('static', filename='images/Imagen-2.png') }}" alt="Ejemplo pintura"
+                                class="tc-img" loading="lazy">
+                            <div class="tc-scanline-fx"></div>
+                            <div class="tc-crosshair ch-1">+</div>
+                            <div class="tc-crosshair ch-2">+</div>
+                        </div>
+                        <div class="tc-footer-hud">
+                            <span class="tc-footer-tag">EXPORT: LOSSLESS FULL RESOLUTION</span>
+                            <span class="tc-footer-id">ID #9901-AM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-text-col">
+                    <div class="text-meta-badge">
+                        <span class="meta-bracket">[</span>
+                        <span class="meta-number">03</span>
+                        <span class="meta-sep">//</span>
+                        <span class="meta-name">PRECISIÓN Y GEOMETRÍA</span>
+                        <span class="meta-bracket">]</span>
+                    </div>
+                    <h2 class="feature-title">Recorte de Precisión y Exportación Sin Pérdidas</h2>
+                    <p class="feature-body">
+                        Manipulación de perspectiva, volteo horizontal y vertical dimensional, y recorte milimétrico
+                        interactivo sobre el visor panorámico.
+                    </p>
+                    <p class="feature-body-secondary">
+                        Procesa archivos de hasta 25 MB directamente en memoria con cero pérdida de píxeles, entregando
+                        composiciones listas para imprenta, portadas musicales o publicaciones digitales.
+                    </p>
+                    <ul class="tech-spec-list">
+                        <li><span class="spec-bullet">◈</span> Visor panorámico con zoom táctil y arrastre</li>
+                        <li><span class="spec-bullet">◈</span> Recorte interactivo con relación de aspecto libre</li>
+                        <li><span class="spec-bullet">◈</span> Descarga inmediata sin compresión destructiva</li>
+                    </ul>
+                </div>
+            </article>
+        </section>
+
+        <!-- Bottom CTA Section (Matching Figma Wireframe) -->
+        <section class="bottom-cta-section" id="acerca">
+            <div class="bottom-cta-inner">
+                <div class="cyber-sigil-icon" aria-hidden="true">
+                    <span>◈</span>
+                </div>
+                <h2 class="bottom-cta-title">TRANSFORMA TU FOTOGRAFÍA AL VACÍO CIBERNÉTICO</h2>
+                <p class="bottom-cta-subtitle">
+                    Sin registros obligatorios ni marcas de agua. Carga tu imagen y explora la estética Y2K de
+                    inmediato.
+                </p>
+
+                <!-- Figma Oval CTA Button (Bottom) -->
+                <div class="bottom-pill-wrap">
+                    <a href="/editor" class="figma-pill-btn bottom-pill-btn">
+                        <span class="btn-glow-layer"></span>
+                        <span class="btn-text">Empieza a usar Ditherix</span>
+                        <span class="btn-arrow">→</span>
+                    </a>
+                </div>
+
+                <div class="cyber-glyphs-line" aria-hidden="true">
+                    <span>◬</span> <span>◭</span> <span>▲</span> <span>◈</span> <span>▼</span> <span>◮</span>
+                    <span>◬</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer (Matching Figma Wireframe: Left Ditherix, Right limeresjoaquin@gmail.com) -->
+    <footer class="landing-footer" id="contacto">
+        <div class="footer-inner">
+            <div class="footer-left">
+                <span class="footer-logo">Ditherix</span>
+            </div>
+            <div class="footer-center">
+                <span class="footer-coords">[ LAT: 34.6037° S • LON: 58.3816° W ]</span>
+            </div>
+            <div class="footer-right">
+                <a href="mailto:limeresjoaquin@gmail.com" class="footer-email">limeresjoaquin@gmail.com</a>
+            </div>
+        </div>
+        <div class="footer-bottom-bar">
+            <span>© 2026 DITHERIX.</span>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='landing.js') }}"></script>
+</body>
+
+</html>
