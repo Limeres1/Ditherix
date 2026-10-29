@@ -21,6 +21,15 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: 'Neoform Demo';
+    src: local('Neoform Demo'), local('Neoform-Demo'), local('Neoform'),
+         url('/static/fonts/Neoform-Demo.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --bg-primary: #030303;
     --bg-surface: #0a0a0c;
@@ -42,8 +51,8 @@
     
     --font-heading: 'Synkopy', 'Cinzel', 'Trajan Pro', 'Georgia', serif;
     --font-heading-alt: 'Synkopy Flipside', 'Synkopy', serif;
-    --font-hud: ui-monospace, 'SF Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
-    --font-body: 'Synkopy', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-hud: 'Neoform Demo', ui-monospace, 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    --font-body: 'Neoform Demo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     
     --max-w: 1240px;
     --header-h: 52px;
@@ -609,7 +618,7 @@ body {
     background: #000000;
     color: #ffffff;
     border: 1.5px solid #ffffff;
-    font-family: var(--font-heading);
+    font-family: var(--font-body);
     font-size: 1.12rem;
     letter-spacing: 0.08em;
     cursor: pointer;
