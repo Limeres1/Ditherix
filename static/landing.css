@@ -172,19 +172,22 @@ body {
     transform: rotate(180deg);
 }
 
-/* Portal Dropdown Menu */
+/* Portal Dropdown Menu (Frosted Glass Aesthetic Matching Reference Image) */
 .portal-dropdown-menu {
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 4px);
     left: 0;
-    width: 230px;
-    background: rgba(8, 8, 10, 0.96);
-    border: 1px solid var(--border-tech);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+    width: 220px;
+    background: rgba(238, 238, 242, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75);
     display: none;
     flex-direction: column;
     z-index: 1010;
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
 }
 
 .portal-badge-dropdown.open .portal-dropdown-menu {
@@ -194,13 +197,13 @@ body {
 .portal-dropdown-item {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.75rem 1rem;
-    color: var(--text-muted);
+    padding: 0.65rem 1rem;
+    color: #15151a;
     text-decoration: none;
     font-family: var(--font-hud);
-    font-size: 0.78rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
     transition: all 0.15s ease;
 }
 
@@ -209,14 +212,9 @@ body {
 }
 
 .portal-dropdown-item:hover {
-    background: rgba(255, 42, 42, 0.08);
-    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.08);
+    color: #000000;
     padding-left: 1.25rem;
-}
-
-.portal-dropdown-item .p-icon {
-    color: var(--accent-red);
-    font-size: 0.75rem;
 }
 
 /* Center HUD Clock */
@@ -275,32 +273,26 @@ body {
 .hud-cart-pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.8rem;
+    gap: 0.25rem;
+    padding: 0.35rem 0.75rem;
     background: transparent;
     border: 1px solid var(--border-tech);
     color: var(--text-primary);
     text-decoration: none;
     font-family: var(--font-hud);
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
     transition: all 0.2s ease;
 }
 
 .hud-cart-pill:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: var(--text-primary);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #ffffff;
+    color: #ffffff;
 }
 
-.hud-cart-pill .arrow-right {
-    color: var(--accent-red);
-    font-weight: bold;
-    transition: transform 0.2s ease;
-}
-
-.hud-cart-pill:hover .arrow-right {
-    transform: translateX(3px);
+.hud-cart-text {
+    font-weight: 600;
 }
 
 /* Figma Cyber Red Accent Stripe */
@@ -319,140 +311,278 @@ body {
 }
 
 /* ==========================================================================
-   MAIN LAYOUT & HERO SECTION
+   CINEMATIC FULLSCREEN HERO SECTION (Exact Reference Layout with tesla.png)
    ========================================================================== */
-.landing-main {
-    max-width: var(--max-w);
-    margin: 0 auto;
-    padding: 2.5rem 1.25rem 5rem;
-}
-
-/* Hero Frame */
-.hero-section {
-    padding: 4rem 1rem 3.5rem;
-    text-align: center;
+.hero-cinematic {
     position: relative;
+    width: 100%;
+    min-height: calc(100vh - var(--header-h));
+    height: calc(100vh - var(--header-h));
+    display: flex;
+    align-items: center;
+    background-color: #020203;
+    overflow: hidden;
 }
 
-.hero-hud-frame {
+/* Background Layer with tesla.png */
+.hero-bg-layer {
+    position: absolute;
+    inset: 0;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    z-index: 1;
+    filter: brightness(0.96) contrast(1.06);
+}
+
+/* Ambient Scanline & Fine Dot Matrix CRT Overlay */
+.hero-mesh-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+        linear-gradient(rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.55) 50%);
+    background-size: 3px 3px, 100% 4px;
+    opacity: 0.95;
+}
+
+/* Technical HUD Axis Lines & Crosshair Points (Matching Reference) */
+.hero-hud-reticle-wrap {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.hud-axis-vert {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 34%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.13);
+}
+
+.hud-axis-horiz {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 68%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.hud-reticle-point {
+    position: absolute;
+    font-family: var(--font-hud);
+    font-size: 14px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.38);
+    user-select: none;
+    transform: translate(-50%, -50%);
+}
+
+.rp-cross {
+    left: 34%;
+    top: 68%;
+}
+
+.rp-top {
+    left: 34%;
+    top: 22%;
+}
+
+.rp-bottom {
+    left: 34%;
+    top: 88%;
+}
+
+/* Overlaid Left Cinematic HUD Card */
+.hero-overlay-card {
     position: relative;
-    max-width: 880px;
-    margin: 0 auto;
-    padding: 3.5rem 2rem 3rem;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    background: radial-gradient(
-        circle at 50% 20%, 
-        rgba(255, 255, 255, 0.02) 0%, 
-        rgba(0, 0, 0, 0.4) 100%
-    );
+    z-index: 10;
+    margin-left: clamp(2rem, 7.5vw, 7.5rem);
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.15rem;
+    padding: 1rem 0;
 }
 
-/* Technical Bracket Corners */
+/* Sigil / Rune Emblem Badge */
+.hero-sigil-badge {
+    width: 42px;
+    height: 42px;
+    background: rgba(8, 8, 12, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85);
+    transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.hero-sigil-badge:hover {
+    border-color: #ffffff;
+    transform: scale(1.05);
+}
+
+.hero-sigil-badge .sigil-icon {
+    width: 26px;
+    height: 26px;
+}
+
+/* Title Frame with Corner Brackets */
+.hero-title-bracket-box {
+    position: relative;
+    padding: 0.75rem 1.75rem 0.65rem;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: inline-block;
+}
+
+.hero-title-bracket-box .box-corner,
+.hero-statement-box .box-corner,
 .bracket-tl, .bracket-tr, .bracket-bl, .bracket-br,
 .box-bracket-tl, .box-bracket-tr, .box-bracket-bl, .box-bracket-br,
 .tc-corner {
     position: absolute;
-    color: var(--text-dim);
+    color: #ffffff;
     font-family: var(--font-hud);
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     line-height: 1;
     user-select: none;
     pointer-events: none;
 }
 
-.bracket-tl { top: -6px; left: -6px; }
-.bracket-tr { top: -6px; right: -6px; }
-.bracket-bl { bottom: -6px; left: -6px; }
-.bracket-br { bottom: -6px; right: -6px; }
+.c-tl, .bracket-tl, .box-bracket-tl { top: -6px; left: -6px; }
+.c-tr, .bracket-tr, .box-bracket-tr { top: -6px; right: -6px; }
+.c-bl, .bracket-bl, .box-bracket-bl { bottom: -6px; left: -6px; }
+.c-br, .bracket-br, .box-bracket-br { bottom: -6px; right: -6px; }
 
-/* Rotating Cyber Mandala Emblem */
-.hero-emblem-wrap {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-}
-
-.hero-mandala-ring {
-    width: 60px;
-    height: 60px;
-    color: var(--text-primary);
-    opacity: 0.85;
-    animation: rotateGlyph 30s linear infinite;
-}
-
-@keyframes rotateGlyph {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.rotating-mandala {
-    width: 100%;
-    height: 100%;
-}
-
-/* Hero Brand Title in Synkopy */
-.hero-title {
-    font-family: var(--font-heading);
-    font-size: clamp(3rem, 8vw, 6rem);
-    letter-spacing: 0.18em;
+.hero-cyber-title {
+    font-family: var(--font-heading-alt);
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: #ffffff;
-    margin-bottom: 1rem;
     line-height: 1.05;
-    position: relative;
-    display: inline-block;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
-    transition: letter-spacing 0.3s ease;
+    margin: 0;
+    text-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
 }
 
-.hero-title:hover {
-    letter-spacing: 0.22em;
-}
-
-/* Hero Cyber Tag Badge */
-.hero-tag-badge {
+/* Category Pill */
+.hero-pill-tag {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    padding: 0.35rem 1.15rem;
+    border-radius: 9999px;
+    background: rgba(5, 5, 8, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #e4e4ed;
+    font-family: var(--font-hud);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Statement / Description Box with Corner Brackets */
+.hero-statement-box {
+    position: relative;
+    padding: 1rem 1.35rem;
+    background: rgba(5, 5, 8, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    max-width: 410px;
+}
+
+.hero-statement-p {
+    font-family: var(--font-hud);
+    font-size: 0.78rem;
+    line-height: 1.6;
+    letter-spacing: 0.03em;
+    color: #cfcfda;
+    margin: 0;
+}
+
+/* Action Button: + FULL PROJECT + */
+.hero-cta-action {
+    margin-top: 0.25rem;
+}
+
+.hero-full-project-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #000000;
+    color: #ffffff;
+    border: 1px solid #ffffff;
     font-family: var(--font-hud);
     font-size: 0.8rem;
-    letter-spacing: 0.12em;
-    color: var(--text-muted);
-    margin-bottom: 2rem;
-    border: 1px solid var(--border-tech);
-    padding: 0.4rem 1.1rem;
-    background: rgba(0, 0, 0, 0.6);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    padding: 0.65rem 1.85rem;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+    transition: all 0.2s ease;
 }
 
-.hero-tag-badge .tag-bracket {
-    color: var(--accent-red);
+.hero-full-project-btn:hover {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.65);
+    transform: translateY(-1px);
 }
 
-.hero-tag-badge .tag-content {
-    color: var(--text-primary);
+/* Scroll Down Cue */
+.hero-scroll-cue {
+    position: absolute;
+    bottom: 1.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    font-family: var(--font-hud);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
-/* Hero Description Box with Sci-Fi Brackets */
-.hero-desc-box {
-    position: relative;
-    max-width: 680px;
-    margin: 0 auto 2.75rem;
-    padding: 1.25rem 1.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    background: rgba(5, 5, 8, 0.7);
+.hero-scroll-cue:hover {
+    color: #ffffff;
+    transform: translateX(-50%) translateY(2px);
 }
 
-.box-bracket-tl { top: -4px; left: -4px; }
-.box-bracket-tr { top: -4px; right: -4px; }
-.box-bracket-bl { bottom: -4px; left: -4px; }
-.box-bracket-br { bottom: -4px; right: -4px; }
+.hero-scroll-cue .cue-arrow {
+    font-size: 0.95rem;
+    animation: bounceDown 2s infinite ease-in-out;
+}
 
-.hero-description {
-    font-family: var(--font-body);
-    font-size: 1.02rem;
-    line-height: 1.7;
-    color: #d1d1d8;
-    letter-spacing: 0.03em;
+@keyframes bounceDown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+}
+
+/* ==========================================================================
+   MAIN CONTENT & LOWER SECTIONS (Option 2)
+   ========================================================================== */
+.landing-main {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 3.5rem 1.25rem 5rem;
 }
 
 /* ==========================================================================
@@ -943,12 +1073,35 @@ body {
         display: none;
     }
 
-    .hero-section {
-        padding: 2.5rem 0.5rem 2rem;
+    .hero-cinematic {
+        height: auto;
+        min-height: calc(100vh - var(--header-h));
+        padding: 3rem 1rem 4.5rem;
+        align-items: center;
     }
 
-    .hero-hud-frame {
-        padding: 2rem 1rem 1.75rem;
+    .hero-overlay-card {
+        margin-left: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .hud-axis-vert,
+    .hud-reticle-point {
+        display: none;
+    }
+
+    .hero-cyber-title {
+        font-size: clamp(2rem, 9vw, 3rem);
+    }
+
+    .hero-pill-tag {
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+    }
+
+    .hero-statement-box {
+        max-width: 100%;
     }
 
     .figma-pill-btn {
@@ -956,9 +1109,5 @@ body {
         font-size: 1rem;
         width: 100%;
         max-width: 320px;
-    }
-
-    .hero-desc-box {
-        padding: 1rem;
     }
 }

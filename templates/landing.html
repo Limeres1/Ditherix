@@ -23,16 +23,16 @@
                         aria-haspopup="true">
                         <span class="hud-bullet">■</span>
                         <span class="hud-portal-text">PORTAL</span>
-                        <span class="hud-arrow">▾</span>
                     </button>
                     <div class="portal-dropdown-menu" id="portalMenu" role="menu">
+                        <a href="#caracteristicas" class="portal-dropdown-item" role="menuitem">
+                            <span>Guías profesionales</span>
+                        </a>
                         <a href="/editor" class="portal-dropdown-item" role="menuitem">
-                            <span class="p-icon">◈</span>
-                            <span>Abrir Editor Directo</span>
+                            <span>Proyectos por encargo</span>
                         </a>
                         <a href="#caracteristicas" class="portal-dropdown-item" role="menuitem">
-                            <span class="p-icon">⟐</span>
-                            <span>Guías profesionales</span>
+                            <span>Aprendizaje creativo</span>
                         </a>
                     </div>
                 </div>
@@ -48,72 +48,89 @@
             </div>
 
             <div class="hud-right">
-                <span class="hud-status-indicator">
-                    <span class="status-dot"></span> SYSTEM [ ONLINE ]
-                </span>
                 <a href="/editor" class="hud-cart-pill" title="Ingresar al Editor">
-                    <span>LAUNCH</span>
-                    <span class="hud-bracket">[</span> <span class="arrow-right">→</span> <span
-                        class="hud-bracket">]</span>
+                    <span class="hud-cart-text">CART</span>
+                    <span class="hud-bracket">[</span> <span class="hud-bracket">]</span>
                 </a>
             </div>
         </div>
-        <!-- Figma Cyber Blue Accent Line -->
+        <!-- Figma Cyber Accent Line -->
         <div class="hud-blue-stripe"></div>
     </header>
 
-    <main class="landing-main">
-        <!-- Hero Section -->
-        <section class="hero-section" id="inicio">
-            <div class="hero-hud-frame">
-                <span class="bracket-tl">┌</span>
-                <span class="bracket-tr">┐</span>
-                <span class="bracket-bl">└</span>
-                <span class="bracket-br">┘</span>
+    <!-- Fullscreen Cinematic Hero Section (Exact Reference Layout) -->
+    <section class="hero-cinematic" id="inicio">
+        <!-- Tesla PNG Background Layer -->
+        <div class="hero-bg-layer"
+            style="background-image: url('{{ url_for('static', filename='images/tesla.png') }}');"></div>
 
-                <!-- Arcane Rotating HUD Mandala Icon -->
-                <div class="hero-emblem-wrap" aria-hidden="true">
-                    <div class="hero-mandala-ring">
-                        <svg viewBox="0 0 100 100" class="rotating-mandala">
-                            <circle cx="50" cy="50" r="46" stroke="currentColor" stroke-width="1" fill="none"
-                                stroke-dasharray="4 3" />
-                            <circle cx="50" cy="50" r="34" stroke="currentColor" stroke-width="0.8" fill="none" />
-                            <circle cx="50" cy="50" r="22" stroke="currentColor" stroke-width="1.2" fill="none"
-                                stroke-dasharray="8 6" />
-                            <polygon points="50,6 62,38 94,50 62,62 50,94 38,62 6,50 38,38" fill="none"
-                                stroke="currentColor" stroke-width="0.8" />
-                            <polygon points="50,20 58,42 80,50 58,58 50,80 42,58 20,50 42,42" fill="none"
-                                stroke="currentColor" stroke-width="0.8" />
-                            <circle cx="50" cy="50" r="4" fill="currentColor" />
-                        </svg>
-                    </div>
-                </div>
+        <!-- Ambient CRT Scanline & Dot Mesh Overlay -->
+        <div class="hero-mesh-overlay" aria-hidden="true"></div>
 
-                <!-- Main Brand Title in Synkopy -->
-                <h1 class="hero-title" data-text="DITHERIX">DITHERIX</h1>
-                <!-- Descriptive Sci-Fi Paragraph -->
-                <div class="hero-desc-box">
-                    <span class="box-bracket-tl">┌</span>
-                    <span class="box-bracket-tr">┐</span>
-                    <span class="box-bracket-bl">└</span>
-                    <span class="box-bracket-br">┘</span>
-                    <p class="hero-description">
-                        Con Ditherix puedes crear arte único, transformando tus imágenes fotográficas mediante
-                        algoritmos de dithering, modulación tonal, patrones de semitono y texturas CRT de alto
-                        contraste.
-                    </p>
-                </div>
+        <!-- Subtle HUD Crosshair Coordinates & Axis Guides -->
+        <div class="hero-hud-reticle-wrap" aria-hidden="true">
+            <div class="hud-axis-vert"></div>
+            <div class="hud-axis-horiz"></div>
+            <span class="hud-reticle-point rp-cross">+</span>
+            <span class="hud-reticle-point rp-top">+</span>
+            <span class="hud-reticle-point rp-bottom">+</span>
+        </div>
 
-                <!-- Figma Oval CTA Button -->
-                <div class="hero-cta-wrapper">
-                    <a href="/editor" class="figma-pill-btn hero-pill-btn" id="heroCtaBtn">
-                        <span class="btn-glow-layer"></span>
-                        <span class="btn-text">Empieza a usar Ditherix</span>
-                        <span class="btn-arrow">✦</span>
-                    </a>
-                </div>
+        <!-- Left Overlaid HUD Card -->
+        <div class="hero-overlay-card">
+            <!-- Top Sigil / Hourglass Emblem -->
+            <div class="hero-sigil-badge" aria-hidden="true">
+                <svg class="sigil-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor">
+                    <path d="M5 6 L12 14 L5 22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M23 6 L16 14 L23 22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <line x1="8" y1="10" x2="20" y2="10" stroke-width="1.8" />
+                    <line x1="7" y1="14" x2="21" y2="14" stroke-width="2.2" />
+                    <line x1="8" y1="18" x2="20" y2="18" stroke-width="1.8" />
+                </svg>
             </div>
-        </section>
+
+            <!-- Title in Corner Brackets -->
+            <div class="hero-title-bracket-box">
+                <span class="box-corner c-tl">┌</span>
+                <span class="box-corner c-tr">┐</span>
+                <span class="box-corner c-bl">└</span>
+                <span class="box-corner c-br">┘</span>
+                <h1 class="hero-cyber-title">DITHERIX</h1>
+            </div>
+
+            <!-- Category Pill -->
+            <div class="hero-pill-tag">
+                <span>FASHION + 3D + COMPOSITING</span>
+            </div>
+
+            <!-- Description Box in Corner Brackets -->
+            <div class="hero-statement-box">
+                <span class="box-corner c-tl">┌</span>
+                <span class="box-corner c-tr">┐</span>
+                <span class="box-corner c-bl">└</span>
+                <span class="box-corner c-br">┘</span>
+                <p class="hero-statement-p">
+                    A conflict between digital &amp; analog, ancient &amp; futuristic, machine &amp; organic. This one
+                    in the form of contemporary sunglasses.
+                </p>
+            </div>
+
+            <!-- Full Project CTA Button -->
+            <div class="hero-cta-action">
+                <a href="/editor" class="hero-full-project-btn" id="fullProjectBtn">
+                    + FULL PROJECT +
+                </a>
+            </div>
+        </div>
+
+        <!-- Subtle Scroll Down Indicator -->
+        <a href="#frecuencia" class="hero-scroll-cue" aria-label="Desplazar a características">
+            <span class="cue-label">ARCHIVE // SCROLL</span>
+            <span class="cue-arrow">↓</span>
+        </a>
+    </section>
+
+    <main class="landing-main" id="frecuencia">
 
         <!-- Glitch / Audio Waveform Frequency Bar (From Reference Image 3) -->
         <section class="soundwave-divider" aria-label="Visualizador de frecuencia Y2K">

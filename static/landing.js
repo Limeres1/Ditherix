@@ -67,6 +67,16 @@ function initPortalDropdown() {
         portalBtn.setAttribute("aria-expanded", String(isOpen));
     });
 
+    // Close when clicking dropdown items
+    if (portalMenu) {
+        portalMenu.querySelectorAll("a").forEach((item) => {
+            item.addEventListener("click", () => {
+                dropdownWrap.classList.remove("open");
+                portalBtn.setAttribute("aria-expanded", "false");
+            });
+        });
+    }
+
     // Close when clicking outside
     document.addEventListener("click", (e) => {
         if (!dropdownWrap.contains(e.target)) {
