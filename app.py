@@ -28,13 +28,17 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_ARCHIVO_BYTES + MARGEN_MULTIPART_BYTES
 @dataclass(frozen=True)
 class ImagenGuardada:
     original: bytes
+    original_inicial: bytes
     procesada: bytes
     vista: bytes
     ancho: int
     alto: int
+    ancho_inicial: int
+    alto_inicial: int
     ancho_vista: int
     alto_vista: int
     ajustes: dict[str, float] = field(default_factory=dict)
+    fue_recortada: bool = False
 
 
 AJUSTES_DEFECTO: dict[str, float] = {
@@ -108,10 +112,14 @@ def subir_imagen():
         imagen_id = uuid.uuid4().hex
         imagen_guardada = ImagenGuardada(
             original=datos_originales,
+            original_inicial=datos_originales,
             procesada=procesada,
             vista=vista,
             ancho=ancho,
             alto=alto,
+            ancho_inicial=ancho,
+            alto_inicial=alto,
+            fue_recortada=False,
             ancho_vista=ancho_vista,
             alto_vista=alto_vista,
             ajustes=dict(AJUSTES_DEFECTO),
@@ -128,6 +136,9 @@ def subir_imagen():
             url=url_for("ver_imagen", imagen_id=imagen_id),
             ancho=ancho,
             alto=alto,
+            ancho_inicial=ancho,
+            alto_inicial=alto,
+            fue_recortada=False,
             ancho_vista=ancho_vista,
             alto_vista=alto_vista,
         )
@@ -325,11 +336,13 @@ def recortar_imagen(imagen_id: str):
 
     imagen_original = None
     imagen_procesada = None
+
     original_recortado = None
     procesada_recortada = None
     try:
         imagen_original = abrir_imagen(imagen_guardada.original)
         imagen_procesada = abrir_imagen(imagen_guardada.procesada)
+
         if imagen_original.size != imagen_procesada.size:
             return respuesta_error(
                 "IMAGEN_MODIFICADA",
@@ -357,6 +370,7 @@ def recortar_imagen(imagen_id: str):
             vista=vista,
             ancho=nuevo_ancho,
             alto=nuevo_alto,
+            fue_recortada=True,
             ancho_vista=ancho_vista,
             alto_vista=alto_vista,
         )
@@ -376,6 +390,7 @@ def recortar_imagen(imagen_id: str):
             url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
             ancho=nuevo_ancho,
             alto=nuevo_alto,
+            fue_recortada=True,
             ancho_vista=ancho_vista,
             alto_vista=alto_vista,
         )
@@ -396,6 +411,89 @@ def recortar_imagen(imagen_id: str):
             imagen_procesada.close()
 
 
+@app.post("/imagen/<imagen_id>/restablecer-recorte")
+def restablecer_recorte(imagen_id: str):
+    with imagenes_lock:
+        imagen_guardada = imagenes_guardadas.get(imagen_id)
+
+    if imagen_guardada is None:
+        return respuesta_error(
+            "IMAGEN_NO_ENCONTRADA",
+            "La imagen ya no está disponible. Vuelve a cargarla.",
+            404,
+        )
+
+    if not imagen_guardada.fue_recortada:
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            ancho=imagen_guardada.ancho,
+            alto=imagen_guardada.alto,
+            ancho_vista=imagen_guardada.ancho_vista,
+            alto_vista=imagen_guardada.alto_vista,
+            sin_cambios=True,
+            fue_recortada=False,
+        )
+
+    imagen = None
+    resultado = None
+    try:
+        imagen = abrir_imagen(imagen_guardada.original_inicial)
+        factores = {nombre: slider_a_factor(val) for nombre, val in imagen_guardada.ajustes.items()}
+        resultado = ejecutar_pipeline(imagen, factores)
+
+        procesada = guardar_procesada_sin_perdida(resultado)
+        vista, ancho_vista, alto_vista = generar_vista(resultado)
+
+        imagen_actualizada = replace(
+            imagen_guardada,
+            original=imagen_guardada.original_inicial,
+            procesada=procesada,
+            vista=vista,
+            ancho=imagen_guardada.ancho_inicial,
+            alto=imagen_guardada.alto_inicial,
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            fue_recortada=False,
+        )
+
+        with imagenes_lock:
+            if imagenes_guardadas.get(imagen_id) is not imagen_guardada:
+                return respuesta_error(
+                    "IMAGEN_MODIFICADA",
+                    "La imagen cambió durante el procesamiento. Inténtalo de nuevo.",
+                    409,
+                )
+            imagenes_guardadas[imagen_id] = imagen_actualizada
+
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            ancho=imagen_guardada.ancho_inicial,
+            alto=imagen_guardada.alto_inicial,
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            fue_recortada=False,
+        )
+
+    except ErrorImagen as error:
+        return respuesta_error(error.codigo, error.mensaje, error.status)
+    except Exception:
+        app.logger.exception("Error al restablecer el recorte de la imagen.")
+        return respuesta_error(
+            "ERROR_INTERNO",
+            "No se pudo restablecer el tamaño original de la imagen.",
+            500,
+        )
+    finally:
+        if resultado is not None and resultado is not imagen:
+            resultado.close()
+        if imagen is not None:
+            imagen.close()
+
+
 @app.post("/imagen/<imagen_id>/voltear/<direccion>")
 def voltear(imagen_id: str, direccion: str):
     if direccion not in ("horizontal", "vertical"):
@@ -406,20 +504,26 @@ def voltear(imagen_id: str, direccion: str):
         return respuesta_error("IMAGEN_NO_ENCONTRADA", "La imagen ya no está disponible.", 404)
     imagen_original = None
     imagen_procesada = None
+
     try:
         imagen_original = abrir_imagen(imagen_guardada.original)
         imagen_procesada = abrir_imagen(imagen_guardada.procesada)
+
+        imagen_inicial = abrir_imagen(imagen_guardada.original_inicial)
         funcion_voltear = voltear_horizontal if direccion == "horizontal" else voltear_vertical
         nueva_orig = funcion_voltear(imagen_original)
         nueva_proc = funcion_voltear(imagen_procesada)
+        nueva_inic = funcion_voltear(imagen_inicial)
         nuevo_original = guardar_procesada_sin_perdida(nueva_orig)
         nueva_procesada = guardar_procesada_sin_perdida(nueva_proc)
+        nuevo_inicial = guardar_procesada_sin_perdida(nueva_inic)
         vista, ancho_v, alto_v = generar_vista(nueva_proc)
         imagen_actualizada = replace(
             imagen_guardada,
             original=nuevo_original,
             procesada=nueva_procesada,
             vista=vista,
+            original_inicial=nuevo_inicial,
             ancho_vista=ancho_v,
             alto_vista=alto_v,
         )

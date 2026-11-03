@@ -85,6 +85,15 @@
                                 </svg>
                                 <span>Cancelar</span>
                             </button>
+                            <button id="btn-restablecer-recorte" class="glass-control crop-action-btn" type="button"
+                                disabled title="Restablecer tamaño original">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
+                                    width="16px" fill="currentColor">
+                                    <path
+                                        d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
+                                </svg>
+                                <span>Restablecer tamaño</span>
+                            </button>
                         </div>
                     </div>
                     <button class="glass-control" id="botonVoltearHorizontal" type="button" disabled><svg
@@ -129,7 +138,10 @@
                     <input id="saturacionInput" type="range" min="-100" max="100" step="1" value="0"
                         aria-label="Nivel de saturación" disabled>
                 </div>
-                <button class="glass-control" id="botonAplicarAjustes" type="button" disabled>Aplicar</button>
+                <div class="edit-actions">
+                    <button class="glass-control" id="botonResetAjustes" type="button" disabled>Restablecer</button>
+                    <button class="glass-control" id="botonAplicarAjustes" type="button" disabled>Aplicar</button>
+                </div>
             </section>
             <!--Desenfoque y Nitidez-->
             <section id="detalle-menu" class="edit-panel hidden" aria-label="Ajustes de detalle" aria-hidden="true">
@@ -152,7 +164,10 @@
                     <input id="nitidezInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Nitidez"
                         disabled>
                 </div>
-                <button class="glass-control" id="botonAplicarDetalle" type="button" disabled>Aplicar</button>
+                <div class="edit-actions">
+                    <button class="glass-control" id="botonResetDetalle" type="button" disabled>Restablecer</button>
+                    <button class="glass-control" id="botonAplicarDetalle" type="button" disabled>Aplicar</button>
+                </div>
             </section>
         </div>
         <p id="mensaje" class="oculto" role="alert" aria-live="assertive"></p>

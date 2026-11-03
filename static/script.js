@@ -13,15 +13,18 @@ const contrasteValor = document.getElementById("contrasteValor");
 const saturacionInput = document.getElementById("saturacionInput");
 const saturacionValor = document.getElementById("saturacionValor");
 const botonAplicarAjustes = document.getElementById("botonAplicarAjustes");
+const botonResetAjustes = document.getElementById("botonResetAjustes");
 const desenfoqueInput = document.getElementById("desenfoqueInput");
 const desenfoqueValor = document.getElementById("desenfoqueValor");
 const nitidezInput = document.getElementById("nitidezInput");
 const nitidezValor = document.getElementById("nitidezValor");
 const botonAplicarDetalle = document.getElementById("botonAplicarDetalle");
+const botonResetDetalle = document.getElementById("botonResetDetalle");
 const btnIniciarRecorte = document.getElementById("btn-iniciar-recorte");
 const cropMenu = document.getElementById("crop-menu");
 const btnConfirmarRecorte = document.getElementById("btn-confirmar-recorte");
 const btnCancelarRecorte = document.getElementById("btn-cancelar-recorte");
+const btnRestablecerRecorte = document.getElementById("btn-restablecer-recorte");
 const cropOverlay = document.getElementById("cropOverlay");
 const cropSelection = document.getElementById("cropSelection");
 const contenedorVisor = document.getElementById("visor");
@@ -38,6 +41,7 @@ let procesandoAccion = false;
 let puntoInicioRecorte = null;
 let puntoFinRecorte = null;
 let punteroRecorte = null;
+let imagenFueRecortada = false;
 
 function mostrarMensaje(texto) {
     mensaje.textContent = texto;
@@ -57,10 +61,12 @@ function actualizarControlesEdicion() {
     contrasteInput.disabled = deshabilitadosPorRecorte;
     saturacionInput.disabled = deshabilitadosPorRecorte;
     botonAplicarAjustes.disabled = deshabilitadosPorRecorte;
+    if (botonResetAjustes) botonResetAjustes.disabled = deshabilitadosPorRecorte;
 
     if (desenfoqueInput) desenfoqueInput.disabled = deshabilitadosPorRecorte;
     if (nitidezInput) nitidezInput.disabled = deshabilitadosPorRecorte;
     if (botonAplicarDetalle) botonAplicarDetalle.disabled = deshabilitadosPorRecorte;
+    if (botonResetDetalle) botonResetDetalle.disabled = deshabilitadosPorRecorte;
 
     btnIniciarRecorte.disabled = deshabilitados;
     botonVoltearHorizontal.disabled = deshabilitadosPorRecorte;
@@ -71,6 +77,9 @@ function actualizarControlesEdicion() {
     }
     btnConfirmarRecorte.disabled = !modoRecorte || !obtenerCoordenadasRecorte() || procesandoAccion;
     btnCancelarRecorte.disabled = !modoRecorte || procesandoAccion;
+    if (btnRestablecerRecorte) {
+        btnRestablecerRecorte.disabled = !imagenActual || !imagenFueRecortada || procesandoAccion;
+    }
 }
 
 function establecerModoRecorte(activar) {
@@ -220,6 +229,7 @@ imageInput.addEventListener("change", async () => {
     procesandoAccion = false;
     establecerModoRecorte(false);
     imagenActual = null;
+    imagenFueRecortada = false;
     brilloInput.value = "0";
     brilloValor.value = "0%";
     contrasteInput.value = "0";
@@ -268,6 +278,7 @@ imageInput.addEventListener("change", async () => {
         }
 
         imagenActual = resultado.id;
+        imagenFueRecortada = Boolean(resultado.fue_recortada);
         actualizarControlesEdicion();
         const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
         if (numeroSolicitud !== solicitudActual) {
@@ -277,6 +288,7 @@ imageInput.addEventListener("change", async () => {
             mostrarMensaje("No se pudo mostrar la imagen procesada. Inténtalo de nuevo.");
             return;
         }
+
 
         preview.classList.remove("oculto");
         if (typeof reiniciarVista === "function") {
@@ -361,6 +373,7 @@ async function aplicarAjustes(nombreAjuste) {
         }
 
         mostrarMensaje("");
+
         preview.classList.remove("oculto");
     } catch (error) {
         if (numeroSolicitud !== solicitudActual) {
@@ -382,6 +395,19 @@ async function aplicarAjustes(nombreAjuste) {
 }
 
 botonAplicarAjustes.addEventListener("click", () => aplicarAjustes());
+
+if (botonResetAjustes) {
+    botonResetAjustes.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        brilloInput.value = "0";
+        brilloValor.value = "0%";
+        contrasteInput.value = "0";
+        contrasteValor.value = "0%";
+        saturacionInput.value = "0";
+        saturacionValor.value = "0%";
+        aplicarAjustes();
+    });
+}
 
 if (desenfoqueInput && desenfoqueValor) {
     desenfoqueInput.addEventListener("input", () => {
@@ -433,6 +459,7 @@ async function aplicarDetalle() {
         }
 
         mostrarMensaje("");
+
         preview.classList.remove("oculto");
     } catch (error) {
         if (numeroSolicitud !== solicitudActual) {
@@ -455,6 +482,17 @@ async function aplicarDetalle() {
 
 if (botonAplicarDetalle) {
     botonAplicarDetalle.addEventListener("click", () => aplicarDetalle());
+}
+
+if (botonResetDetalle) {
+    botonResetDetalle.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        if (desenfoqueInput) desenfoqueInput.value = "0";
+        if (desenfoqueValor) desenfoqueValor.value = "0%";
+        if (nitidezInput) nitidezInput.value = "0";
+        if (nitidezValor) nitidezValor.value = "0%";
+        aplicarDetalle();
+    });
 }
 
 btnIniciarRecorte.addEventListener("click", () => {
@@ -570,6 +608,12 @@ btnConfirmarRecorte.addEventListener("click", async () => {
             mostrarMensaje("No se pudo mostrar la imagen recortada.");
             return;
         }
+        imagenFueRecortada = true;
+        actualizarControlesEdicion();
+        if (false) {
+            return;
+        }
+
 
         preview.classList.remove("oculto");
         if (typeof reiniciarVista === "function") {
@@ -595,6 +639,59 @@ btnConfirmarRecorte.addEventListener("click", async () => {
         }
     }
 });
+
+
+if (btnRestablecerRecorte) {
+    btnRestablecerRecorte.addEventListener("click", async () => {
+        if (!imagenActual || !imagenFueRecortada || procesandoAccion) {
+            return;
+        }
+
+        const numeroSolicitud = ++solicitudActual;
+        procesandoAccion = true;
+        actualizarControlesEdicion();
+        indicadorCarga.textContent = "Restableciendo tamaño original…";
+        indicadorCarga.classList.remove("oculto");
+
+        try {
+            const respuesta = await fetch(`/imagen/${imagenActual}/restablecer-recorte`, {
+                method: "POST",
+            });
+            const resultado = await respuesta.json();
+
+            if (numeroSolicitud !== solicitudActual) return;
+            if (!respuesta.ok || !resultado.ok) {
+                mostrarMensaje(resultado.mensaje || "No se pudo restablecer el tamaño.");
+                return;
+            }
+
+            const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+            if (numeroSolicitud !== solicitudActual) return;
+            if (!vistaCargada) {
+                mostrarMensaje("No se pudo mostrar la imagen restablecida.");
+                return;
+            }
+
+            imagenFueRecortada = false;
+            preview.classList.remove("oculto");
+            if (typeof reiniciarVista === "function") {
+                reiniciarVista();
+            }
+            mostrarMensaje("");
+            establecerModoRecorte(false);
+        } catch (error) {
+            if (numeroSolicitud !== solicitudActual) return;
+            mostrarMensaje("No se pudo conectar con el servidor.");
+        } finally {
+            if (numeroSolicitud === solicitudActual) {
+                procesandoAccion = false;
+                actualizarControlesEdicion();
+                indicadorCarga.classList.add("oculto");
+                indicadorCarga.textContent = "Procesando imagen…";
+            }
+        }
+    });
+}
 
 if (botonExportar) {
     botonExportar.addEventListener("click", () => {
@@ -628,6 +725,7 @@ async function voltearImagen(direccion) {
         const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
         if (!vistaCargada || numeroSolicitud !== solicitudActual) return;
         mostrarMensaje("");
+
         preview.classList.remove("oculto");
     } catch (error) {
         mostrarMensaje("No se pudo conectar con el servidor.");

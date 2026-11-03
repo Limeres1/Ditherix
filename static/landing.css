@@ -337,6 +337,7 @@ body {
 .hero-bg-layer {
     position: absolute;
     inset: 0;
+    background-image: url('/static/images/tesla.png');
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;

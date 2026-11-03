@@ -321,6 +321,13 @@ sacar el arrastre nativo
     justify-self: end;
 }
 
+.edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+}
+
 .close-btn:focus-visible,
 .edit-panel .glass-control:focus-visible {
     outline: 2px solid #fff;

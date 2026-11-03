@@ -1,0 +1,29 @@
+# ============================================================
+# DITHERIX — COMANDOS PARA ENTORNO VIRTUAL Y DEPENDENCIAS
+# ============================================================
+
+1. CREAR EL ENTORNO VIRTUAL (.venv)  
+   python -m venv .venv
+
+2. ACTIVAR EL ENTORNO VIRTUAL
+
+   En Windows PowerShell:
+   .\.venv\Scripts\Activate.ps1
+
+   NOTA: Si PowerShell da un error de "política de ejecución" (ExecutionPolicy),
+   ejecutá esto antes una sola vez:
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+3. INSTALAR LOS REQUISITOS (Librerías del proyecto)
+   (Con el entorno activado)
+   
+   pip install -r requirements.txt
+
+4. INICIAR LA APLICACIÓN
+   
+   python app.py
+
+5. DESACTIVAR EL ENTORNO (Cuando termines de trabajar)
+   
+   deactivate
+

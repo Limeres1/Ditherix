@@ -10,11 +10,9 @@
 </head>
 
 <body class="crt-overlay">
-    <!-- Scanline & Noise Screen FX -->
     <div class="screen-scanlines" aria-hidden="true"></div>
     <div class="screen-vignette" aria-hidden="true"></div>
 
-    <!-- Top Technical HUD Navigation -->
     <header class="hud-header">
         <div class="hud-header-inner">
             <div class="hud-left">
@@ -38,7 +36,6 @@
                 </div>
             </div>
 
-            <!-- Dynamic Live HUD Clock & Coordinates -->
             <div class="hud-center" id="hudClock" aria-label="HUD Timestamp">
                 <span class="hud-bracket">[</span><span id="hudDay">12</span><span class="hud-bracket">]</span>
                 <span class="hud-bracket">[</span><span id="hudMonth">08</span><span class="hud-bracket">]</span>
@@ -59,8 +56,7 @@
     </header>
 
     <section class="hero-cinematic" id="inicio">
-        <div class="hero-bg-layer"
-            style="background-image: url('{{ url_for('static', filename='images/tesla.png') }}');"></div>
+        <div class="hero-bg-layer" aria-hidden="true"></div>
 
         <div class="hero-mesh-overlay" aria-hidden="true"></div>
 
