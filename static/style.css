@@ -321,6 +321,50 @@ sacar el arrastre nativo
     justify-self: end;
 }
 
+.select-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+.select-group label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.glass-select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e3e3e3;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: border-color 150ms ease, background 150ms ease;
+}
+
+.glass-select:focus-visible {
+    border-color: #fff;
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.glass-select option {
+    background: #18181b;
+    color: #e3e3e3;
+}
+
+.glass-select:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 .edit-actions {
     display: flex;
     justify-content: flex-end;

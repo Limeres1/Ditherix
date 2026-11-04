@@ -1,4 +1,4 @@
-"user strict";
+"use strict";
 
 const visor = document.getElementById("visor");
 const escenario = document.getElementById("escenario");
@@ -91,9 +91,14 @@ const btnToggleDetalle = document.getElementById("btn-toggle-detalle");
 const btnCloseDetalle = document.getElementById("btn-close-detalle");
 const detalleMenu = document.getElementById("detalle-menu");
 
+const btnToggleDither = document.getElementById("btn-toggle-dither");
+const btnCloseDither = document.getElementById("btn-close-dither");
+const ditherMenu = document.getElementById("dither-menu");
+
 function setEditMenuOpen(open) {
-    if (open && typeof setDetalleMenuOpen === "function") {
-        setDetalleMenuOpen(false);
+    if (open) {
+        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
+        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
     }
     if (editMenu && btnToggleEdit) {
         editMenu.classList.toggle("hidden", !open);
@@ -105,13 +110,27 @@ function setEditMenuOpen(open) {
 
 function setDetalleMenuOpen(open) {
     if (open) {
-        setEditMenuOpen(false);
+        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
+        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
     }
     if (detalleMenu && btnToggleDetalle) {
         detalleMenu.classList.toggle("hidden", !open);
         detalleMenu.setAttribute("aria-hidden", String(!open));
         btnToggleDetalle.setAttribute("aria-expanded", String(open));
         btnToggleDetalle.classList.toggle("active", open);
+    }
+}
+
+function setDitherMenuOpen(open) {
+    if (open) {
+        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
+        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
+    }
+    if (ditherMenu && btnToggleDither) {
+        ditherMenu.classList.toggle("hidden", !open);
+        ditherMenu.setAttribute("aria-hidden", String(!open));
+        btnToggleDither.setAttribute("aria-expanded", String(open));
+        btnToggleDither.classList.toggle("active", open);
     }
 }
 
@@ -141,12 +160,28 @@ if (btnCloseDetalle) {
     });
 }
 
+if (btnToggleDither) {
+    btnToggleDither.addEventListener("click", () => {
+        setDitherMenuOpen(ditherMenu.classList.contains("hidden"));
+    });
+}
+
+if (btnCloseDither) {
+    btnCloseDither.addEventListener("click", () => {
+        setDitherMenuOpen(false);
+        btnToggleDither.focus();
+    });
+}
+
 document.addEventListener("click", (event) => {
     if (editMenu && btnToggleEdit && !editMenu.contains(event.target) && !btnToggleEdit.contains(event.target)) {
         setEditMenuOpen(false);
     }
     if (detalleMenu && btnToggleDetalle && !detalleMenu.contains(event.target) && !btnToggleDetalle.contains(event.target)) {
         setDetalleMenuOpen(false);
+    }
+    if (ditherMenu && btnToggleDither && !ditherMenu.contains(event.target) && !btnToggleDither.contains(event.target)) {
+        setDitherMenuOpen(false);
     }
 });
 
@@ -159,6 +194,10 @@ document.addEventListener("keydown", (event) => {
         if (detalleMenu && !detalleMenu.classList.contains("hidden")) {
             setDetalleMenuOpen(false);
             btnToggleDetalle.focus();
+        }
+        if (ditherMenu && !ditherMenu.classList.contains("hidden")) {
+            setDitherMenuOpen(false);
+            btnToggleDither.focus();
         }
     }
 });

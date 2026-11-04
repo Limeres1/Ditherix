@@ -20,6 +20,12 @@ const nitidezInput = document.getElementById("nitidezInput");
 const nitidezValor = document.getElementById("nitidezValor");
 const botonAplicarDetalle = document.getElementById("botonAplicarDetalle");
 const botonResetDetalle = document.getElementById("botonResetDetalle");
+const ditherAlgoritmo = document.getElementById("ditherAlgoritmo");
+const ditherPaleta = document.getElementById("ditherPaleta");
+const ditherPixelInput = document.getElementById("ditherPixelInput");
+const ditherPixelValor = document.getElementById("ditherPixelValor");
+const botonAplicarDither = document.getElementById("botonAplicarDither");
+const botonResetDither = document.getElementById("botonResetDither");
 const btnIniciarRecorte = document.getElementById("btn-iniciar-recorte");
 const cropMenu = document.getElementById("crop-menu");
 const btnConfirmarRecorte = document.getElementById("btn-confirmar-recorte");
@@ -67,6 +73,12 @@ function actualizarControlesEdicion() {
     if (nitidezInput) nitidezInput.disabled = deshabilitadosPorRecorte;
     if (botonAplicarDetalle) botonAplicarDetalle.disabled = deshabilitadosPorRecorte;
     if (botonResetDetalle) botonResetDetalle.disabled = deshabilitadosPorRecorte;
+
+    if (ditherAlgoritmo) ditherAlgoritmo.disabled = deshabilitadosPorRecorte;
+    if (ditherPaleta) ditherPaleta.disabled = deshabilitadosPorRecorte;
+    if (ditherPixelInput) ditherPixelInput.disabled = deshabilitadosPorRecorte;
+    if (botonAplicarDither) botonAplicarDither.disabled = deshabilitadosPorRecorte;
+    if (botonResetDither) botonResetDither.disabled = deshabilitadosPorRecorte;
 
     btnIniciarRecorte.disabled = deshabilitados;
     botonVoltearHorizontal.disabled = deshabilitadosPorRecorte;
@@ -240,6 +252,10 @@ imageInput.addEventListener("change", async () => {
     if (desenfoqueValor) desenfoqueValor.value = "0%";
     if (nitidezInput) nitidezInput.value = "0";
     if (nitidezValor) nitidezValor.value = "0%";
+    if (ditherAlgoritmo) ditherAlgoritmo.value = "ninguno";
+    if (ditherPaleta) ditherPaleta.value = "bn";
+    if (ditherPixelInput) ditherPixelInput.value = "1";
+    if (ditherPixelValor) ditherPixelValor.value = "1 px";
     actualizarControlesEdicion();
 
     if (controladorCarga) {
@@ -492,6 +508,93 @@ if (botonResetDetalle) {
         if (nitidezInput) nitidezInput.value = "0";
         if (nitidezValor) nitidezValor.value = "0%";
         aplicarDetalle();
+    });
+}
+
+if (ditherPixelInput && ditherPixelValor) {
+    ditherPixelInput.addEventListener("input", () => {
+        ditherPixelValor.value = `${ditherPixelInput.value} px`;
+    });
+}
+
+async function aplicarDithering() {
+    if (!imagenActual || procesandoAccion || modoRecorte) {
+        return;
+    }
+
+    const algo = ditherAlgoritmo ? ditherAlgoritmo.value : "ninguno";
+    const pal = ditherPaleta ? ditherPaleta.value : "bn";
+    const pixel = Number(ditherPixelInput ? ditherPixelInput.value : 1);
+
+    const numeroSolicitud = ++solicitudActual;
+    const imagenId = imagenActual;
+    procesandoAccion = true;
+    actualizarControlesEdicion();
+    indicadorCarga.textContent = "Aplicando dithering…";
+    indicadorCarga.classList.remove("oculto");
+
+    try {
+        const respuesta = await fetch(`/imagen/${imagenId}/dithering`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                algoritmo: algo,
+                paleta: pal,
+                tamano_pixel: pixel,
+            }),
+        });
+        const resultado = await respuesta.json();
+
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!respuesta.ok || !resultado.ok) {
+            mostrarMensaje(resultado.mensaje || "No se pudo aplicar el efecto de dithering.");
+            return;
+        }
+
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!vistaCargada) {
+            mostrarMensaje("No se pudo mostrar la imagen con el dithering aplicado.");
+            return;
+        }
+
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+    } catch (error) {
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (error instanceof SyntaxError) {
+            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+        } else {
+            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        }
+    } finally {
+        if (numeroSolicitud === solicitudActual) {
+            procesandoAccion = false;
+            actualizarControlesEdicion();
+            indicadorCarga.classList.add("oculto");
+            indicadorCarga.textContent = "Procesando imagen…";
+        }
+    }
+}
+
+if (botonAplicarDither) {
+    botonAplicarDither.addEventListener("click", () => aplicarDithering());
+}
+
+if (botonResetDither) {
+    botonResetDither.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        if (ditherAlgoritmo) ditherAlgoritmo.value = "ninguno";
+        if (ditherPaleta) ditherPaleta.value = "bn";
+        if (ditherPixelInput) ditherPixelInput.value = "1";
+        if (ditherPixelValor) ditherPixelValor.value = "1 px";
+        aplicarDithering();
     });
 }
 

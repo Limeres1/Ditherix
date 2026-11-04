@@ -16,6 +16,7 @@ from ajustes_imagen import AJUSTES_DISPONIBLES, procesar_ajustes, slider_a_facto
 from recortar import aplicar_recorte
 from voltear_imagen import voltear_horizontal, voltear_vertical
 from detalle import AJUSTES_DETALLE, procesar_detalle
+from dithering import aplicar_dithering
 
 MAX_ARCHIVO_BYTES = 25 * 1024 * 1024
 MARGEN_MULTIPART_BYTES = 64 * 1024
@@ -39,6 +40,9 @@ class ImagenGuardada:
     alto_vista: int
     ajustes: dict[str, float] = field(default_factory=dict)
     fue_recortada: bool = False
+    dither_algoritmo: str = "ninguno"
+    dither_paleta: str = "bn"
+    dither_pixel: int = 1
 
 
 AJUSTES_DEFECTO: dict[str, float] = {
@@ -50,13 +54,25 @@ AJUSTES_DEFECTO: dict[str, float] = {
 }
 
 
-def ejecutar_pipeline(imagen_base, factores: dict[str, float]):
+def ejecutar_pipeline(
+    imagen_base,
+    factores: dict[str, float],
+    dither_algoritmo: str = "ninguno",
+    dither_paleta: str = "bn",
+    dither_pixel: int = 1,
+):
     resultado = procesar_ajustes(imagen_base, factores)
 
     siguiente = procesar_detalle(resultado, factores)
     if resultado is not imagen_base and resultado is not siguiente:
         resultado.close()
     resultado = siguiente
+
+    if dither_algoritmo and dither_algoritmo != "ninguno":
+        siguiente = aplicar_dithering(resultado, dither_algoritmo, dither_paleta, dither_pixel)
+        if resultado is not imagen_base and resultado is not siguiente:
+            resultado.close()
+        resultado = siguiente
 
     return resultado
 
@@ -182,7 +198,13 @@ def aplicar_ajustes_a_imagen(imagen_id: str, nuevos_valores: dict[str, float]):
     resultado = None
     try:
         imagen = abrir_imagen(imagen_guardada.original)
-        resultado = ejecutar_pipeline(imagen, factores)
+        resultado = ejecutar_pipeline(
+            imagen,
+            factores,
+            imagen_guardada.dither_algoritmo,
+            imagen_guardada.dither_paleta,
+            imagen_guardada.dither_pixel,
+        )
 
         procesada = guardar_procesada_sin_perdida(resultado)
         vista, ancho_vista, alto_vista = generar_vista(resultado)
@@ -441,7 +463,13 @@ def restablecer_recorte(imagen_id: str):
     try:
         imagen = abrir_imagen(imagen_guardada.original_inicial)
         factores = {nombre: slider_a_factor(val) for nombre, val in imagen_guardada.ajustes.items()}
-        resultado = ejecutar_pipeline(imagen, factores)
+        resultado = ejecutar_pipeline(
+            imagen,
+            factores,
+            imagen_guardada.dither_algoritmo,
+            imagen_guardada.dither_paleta,
+            imagen_guardada.dither_pixel,
+        )
 
         procesada = guardar_procesada_sin_perdida(resultado)
         vista, ancho_vista, alto_vista = generar_vista(resultado)
@@ -579,6 +607,121 @@ def aplicar_detalle(imagen_id: str):
     return aplicar_ajustes_a_imagen(imagen_id, valores)
 
 
+
+
+
+ALGORITMOS_DITHERING_VALIDOS = {
+    "ninguno",
+    "floyd_steinberg",
+    "bayer_4",
+    "bayer_8",
+    "atkinson",
+    "cuantizacion",
+}
+
+PALETAS_DITHERING_VALIDAS = {
+    "bn",
+    "gameboy",
+    "cga",
+    "ambar",
+    "cyberpunk",
+}
+
+
+@app.post("/imagen/<imagen_id>/dithering")
+def aplicar_dithering_ruta(imagen_id: str):
+    datos = request.get_json(silent=True)
+    if not isinstance(datos, dict):
+        return respuesta_error("DATOS_INVALIDOS", "Los datos del efecto no son válidos.", 400)
+
+    algoritmo = datos.get("algoritmo", "ninguno")
+    paleta = datos.get("paleta", "bn")
+    tamano_pixel = datos.get("tamano_pixel", 1)
+
+    if algoritmo not in ALGORITMOS_DITHERING_VALIDOS:
+        return respuesta_error("ALGORITMO_INVALIDO", "El algoritmo de dithering seleccionado no es válido.", 400)
+
+    if paleta not in PALETAS_DITHERING_VALIDAS:
+        return respuesta_error("PALETA_INVALIDA", "La paleta de color seleccionada no es válida.", 400)
+
+    if (
+        isinstance(tamano_pixel, bool)
+        or not isinstance(tamano_pixel, int)
+        or not 1 <= tamano_pixel <= 8
+    ):
+        return respuesta_error("PIXEL_INVALIDO", "El tamaño de píxel debe ser un número entero entre 1 y 8.", 400)
+
+    with imagenes_lock:
+        imagen_guardada = imagenes_guardadas.get(imagen_id)
+
+    if imagen_guardada is None:
+        return respuesta_error("IMAGEN_NO_ENCONTRADA", "La imagen ya no está disponible. Vuelve a cargarla.", 404)
+
+    if (
+        imagen_guardada.dither_algoritmo == algoritmo
+        and imagen_guardada.dither_paleta == paleta
+        and imagen_guardada.dither_pixel == tamano_pixel
+    ):
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            ancho_vista=imagen_guardada.ancho_vista,
+            alto_vista=imagen_guardada.alto_vista,
+            sin_cambios=True,
+        )
+
+    imagen = None
+    resultado = None
+    try:
+        imagen = abrir_imagen(imagen_guardada.original)
+        factores = {nombre: slider_a_factor(val) for nombre, val in imagen_guardada.ajustes.items()}
+        resultado = ejecutar_pipeline(imagen, factores, algoritmo, paleta, tamano_pixel)
+
+        procesada = guardar_procesada_sin_perdida(resultado)
+        vista, ancho_vista, alto_vista = generar_vista(resultado)
+
+        imagen_actualizada = replace(
+            imagen_guardada,
+            procesada=procesada,
+            vista=vista,
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            dither_algoritmo=algoritmo,
+            dither_paleta=paleta,
+            dither_pixel=tamano_pixel,
+        )
+
+        with imagenes_lock:
+            if imagenes_guardadas.get(imagen_id) is not imagen_guardada:
+                return respuesta_error(
+                    "IMAGEN_MODIFICADA",
+                    "La imagen cambió durante el procesamiento. Inténtalo de nuevo.",
+                    409,
+                )
+            imagenes_guardadas[imagen_id] = imagen_actualizada
+
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+        )
+    except ErrorImagen as error:
+        return respuesta_error(error.codigo, error.mensaje, error.status)
+    except Exception:
+        app.logger.exception("Error inesperado al aplicar dithering a una imagen.")
+        return respuesta_error(
+            "ERROR_INTERNO",
+            "No se pudo aplicar el efecto de dithering a la imagen.",
+            500,
+        )
+    finally:
+        if resultado is not None and resultado is not imagen:
+            resultado.close()
+        if imagen is not None:
+            imagen.close()
 
 
 if __name__ == "__main__":

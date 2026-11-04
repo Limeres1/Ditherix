@@ -58,6 +58,14 @@
                                 d="M176-120q-19-4-35.5-20.5T120-176l664-664q21 5 36 20.5t21 35.5L176-120Zm-56-252v-112l356-356h112L120-372Zm0-308v-80q0-33 23.5-56.5T200-840h80L120-680Zm560 560 160-160v80q0 33-23.5 56.5T760-120h-80Zm-308 0 468-468v112L484-120H372Z" />
                         </svg>
                     </button>
+                    <button class="glass-control" id="btn-toggle-dither" type="button" aria-controls="dither-menu"
+                        aria-expanded="false" title="Dithering y Estilo Retro">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                            fill="currentColor">
+                            <path
+                                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h160v-160H200v160Zm240 0h160v-160H440v160Zm240 0h80v-80H680v80Zm0-160h80v-160H680v160Zm-240 0h160v-160H440v160Zm-240 0h160v-160H200v160Zm0-240h80v-80H200v80Zm160 0h160v-160H360v160Zm240 0h160v-160H600v160Z" />
+                        </svg>
+                    </button>
                     <div class="crop-popover-container">
                         <button id="btn-iniciar-recorte" class="glass-control" type="button" title="Recorte" disabled
                             aria-expanded="false" aria-controls="crop-menu">
@@ -167,6 +175,50 @@
                 <div class="edit-actions">
                     <button class="glass-control" id="botonResetDetalle" type="button" disabled>Restablecer</button>
                     <button class="glass-control" id="botonAplicarDetalle" type="button" disabled>Aplicar</button>
+                </div>
+            </section>
+            <!--Dithering y Estilo Retro-->
+            <section id="dither-menu" class="edit-panel hidden" aria-label="Efecto Dithering" aria-hidden="true">
+                <div class="edit-header">
+                    <h2>Dithering</h2>
+                    <button class="close-btn" id="btn-close-dither" type="button" aria-label="Cerrar dithering">
+                        &times;
+                    </button>
+                </div>
+
+                <div class="select-group">
+                    <label for="ditherAlgoritmo">Algoritmo</label>
+                    <select id="ditherAlgoritmo" class="glass-select" disabled>
+                        <option value="ninguno">Ninguno</option>
+                        <option value="floyd_steinberg">Floyd-Steinberg (Difusión)</option>
+                        <option value="bayer_4">Bayer 4x4 (Trama ordenada)</option>
+                        <option value="bayer_8">Bayer 8x8 (Trama fina)</option>
+                        <option value="atkinson">Atkinson (Macintosh 1984)</option>
+                        <option value="cuantizacion">Cuantización directa (Póster)</option>
+                    </select>
+                </div>
+
+                <div class="select-group">
+                    <label for="ditherPaleta">Paleta de color</label>
+                    <select id="ditherPaleta" class="glass-select" disabled>
+                        <option value="bn">Monocromo B&N (1 bit)</option>
+                        <option value="gameboy">Game Boy (Verde retro)</option>
+                        <option value="cga">CGA Retro (Cian / Magenta)</option>
+                        <option value="ambar">Ámbar CRT (Fósforo monocromo)</option>
+                        <option value="cyberpunk">Cyberpunk (Neón / Magenta)</option>
+                    </select>
+                </div>
+
+                <div class="slider-group">
+                    <label for="ditherPixelInput">Tamaño de píxel <output id="ditherPixelValor"
+                            for="ditherPixelInput">1 px</output></label>
+                    <input id="ditherPixelInput" type="range" min="1" max="8" step="1" value="1"
+                        aria-label="Tamaño de píxel retro" disabled>
+                </div>
+
+                <div class="edit-actions">
+                    <button class="glass-control" id="botonResetDither" type="button" disabled>Restablecer</button>
+                    <button class="glass-control" id="botonAplicarDither" type="button" disabled>Aplicar</button>
                 </div>
             </section>
         </div>
