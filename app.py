@@ -51,7 +51,18 @@ AJUSTES_DEFECTO: dict[str, float] = {
     "saturacion": 0.0,
     "desenfoque": 0.0,
     "nitidez": 0.0,
+    "grano": 0.0,
 }
+
+
+def calcular_factores(ajustes: dict[str, float]) -> dict[str, float]:
+    factores = {}
+    for nombre, val in ajustes.items():
+        if nombre == "grano":
+            factores[nombre] = float(val)
+        else:
+            factores[nombre] = slider_a_factor(val)
+    return factores
 
 
 def ejecutar_pipeline(
@@ -192,7 +203,7 @@ def aplicar_ajustes_a_imagen(imagen_id: str, nuevos_valores: dict[str, float]):
             sin_cambios=True,
         )
 
-    factores = {nombre: slider_a_factor(val) for nombre, val in ajustes_actualizados.items()}
+    factores = calcular_factores(ajustes_actualizados)
 
     imagen = None
     resultado = None
@@ -275,10 +286,11 @@ def aplicar_ajustes(imagen_id: str):
     for nombre, (etiqueta, _) in AJUSTES_DETALLE.items():
         if nombre in datos:
             valor_slider = datos.get(nombre)
+            min_val = 0 if nombre == "grano" else -100
             if (
                 not isinstance(valor_slider, bool)
                 and isinstance(valor_slider, (int, float))
-                and -100 <= valor_slider <= 100
+                and min_val <= valor_slider <= 100
                 and math.isfinite(valor_slider)
             ):
                 valores[nombre] = float(valor_slider)
@@ -462,7 +474,7 @@ def restablecer_recorte(imagen_id: str):
     resultado = None
     try:
         imagen = abrir_imagen(imagen_guardada.original_inicial)
-        factores = {nombre: slider_a_factor(val) for nombre, val in imagen_guardada.ajustes.items()}
+        factores = calcular_factores(imagen_guardada.ajustes)
         resultado = ejecutar_pipeline(
             imagen,
             factores,
@@ -580,15 +592,16 @@ def aplicar_detalle(imagen_id: str):
             valor_slider = datos.get("enfoque")
 
         if valor_slider is not None:
+            min_val = 0 if nombre == "grano" else -100
             if (
                 isinstance(valor_slider, bool)
                 or not isinstance(valor_slider, (int, float))
-                or not -100 <= valor_slider <= 100
+                or not min_val <= valor_slider <= 100
                 or not math.isfinite(valor_slider)
             ):
                 return respuesta_error(
                     "FACTOR_INVALIDO",
-                    f"El ajuste de {etiqueta} debe estar entre -100 y 100.",
+                    f"El ajuste de {etiqueta} debe estar entre {min_val} y 100.",
                     400,
                 )
             valores[nombre] = float(valor_slider)
@@ -675,7 +688,7 @@ def aplicar_dithering_ruta(imagen_id: str):
     resultado = None
     try:
         imagen = abrir_imagen(imagen_guardada.original)
-        factores = {nombre: slider_a_factor(val) for nombre, val in imagen_guardada.ajustes.items()}
+        factores = calcular_factores(imagen_guardada.ajustes)
         resultado = ejecutar_pipeline(imagen, factores, algoritmo, paleta, tamano_pixel)
 
         procesada = guardar_procesada_sin_perdida(resultado)

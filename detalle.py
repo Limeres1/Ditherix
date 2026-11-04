@@ -1,3 +1,4 @@
+import random
 from collections.abc import Callable
 
 from PIL import Image, ImageEnhance, ImageFilter
@@ -41,9 +42,36 @@ def aplicar_desenfoque(imagen: Image.Image, factor: float) -> Image.Image:
         return imagen.filter(ImageFilter.UnsharpMask(radius=2, percent=percent, threshold=3))
 
 
+_CACHE_GRANO: dict[tuple[int, int], Image.Image] = {}
+
+
+def _obtener_trama_grano(ancho: int, alto: int) -> Image.Image:
+    """Genera una trama de ruido monocromático reproducible y la guarda en caché por resolución."""
+    clave = (ancho, alto)
+    if clave not in _CACHE_GRANO:
+        rng = random.Random(1984)  # Semilla fija para evitar parpadeos al ajustar otros controles
+        datos = rng.randbytes(ancho * alto)
+        _CACHE_GRANO[clave] = Image.frombytes("L", (ancho, alto), datos)
+    return _CACHE_GRANO[clave]
+
+
+def aplicar_grano(imagen: Image.Image, valor: float) -> Image.Image:
+    """
+    Agrega textura granulada analógica.
+    valor: 0 a 100. Neutro es 0 (o menor), donde devuelve la imagen original sin tocar.
+    """
+    if valor <= 0:
+        return imagen
+    ancho, alto = imagen.size
+    trama_rgb = _obtener_trama_grano(ancho, alto).convert("RGB")
+    alpha = (limitar(valor, 0, 100) / 100.0) * 0.28
+    return Image.blend(imagen, trama_rgb, alpha)
+
+
 AJUSTES_DETALLE: dict[str, tuple[str, TipoAjuste]] = {
     "desenfoque": ("desenfoque", aplicar_desenfoque),
     "nitidez": ("nitidez", aplicar_nitidez),
+    "grano": ("grano", aplicar_grano),
 }
 
 
@@ -51,7 +79,12 @@ def procesar_detalle(
     imagen: Image.Image,
     factores: dict[str, float],
 ) -> Image.Image:
-    if all(factores.get(nombre, 1.0) == 1.0 for nombre in AJUSTES_DETALLE):
+    def es_neutro(nombre: str, val: float) -> bool:
+        if nombre == "grano":
+            return val <= 0
+        return val == 1.0
+
+    if all(es_neutro(nombre, factores.get(nombre, 0.0 if nombre == "grano" else 1.0)) for nombre in AJUSTES_DETALLE):
         return imagen
 
     resultado = imagen
@@ -59,7 +92,7 @@ def procesar_detalle(
         for nombre, (_, funcion) in AJUSTES_DETALLE.items():
             if nombre in factores:
                 factor = factores[nombre]
-                if factor == 1.0:
+                if es_neutro(nombre, factor):
                     continue
                 siguiente = funcion(resultado, factor)
                 if resultado is not imagen and resultado is not siguiente:

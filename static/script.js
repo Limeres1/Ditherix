@@ -18,6 +18,8 @@ const desenfoqueInput = document.getElementById("desenfoqueInput");
 const desenfoqueValor = document.getElementById("desenfoqueValor");
 const nitidezInput = document.getElementById("nitidezInput");
 const nitidezValor = document.getElementById("nitidezValor");
+const granoInput = document.getElementById("granoInput");
+const granoValor = document.getElementById("granoValor");
 const botonAplicarDetalle = document.getElementById("botonAplicarDetalle");
 const botonResetDetalle = document.getElementById("botonResetDetalle");
 const ditherAlgoritmo = document.getElementById("ditherAlgoritmo");
@@ -71,6 +73,7 @@ function actualizarControlesEdicion() {
 
     if (desenfoqueInput) desenfoqueInput.disabled = deshabilitadosPorRecorte;
     if (nitidezInput) nitidezInput.disabled = deshabilitadosPorRecorte;
+    if (granoInput) granoInput.disabled = deshabilitadosPorRecorte;
     if (botonAplicarDetalle) botonAplicarDetalle.disabled = deshabilitadosPorRecorte;
     if (botonResetDetalle) botonResetDetalle.disabled = deshabilitadosPorRecorte;
 
@@ -252,6 +255,8 @@ imageInput.addEventListener("change", async () => {
     if (desenfoqueValor) desenfoqueValor.value = "0%";
     if (nitidezInput) nitidezInput.value = "0";
     if (nitidezValor) nitidezValor.value = "0%";
+    if (granoInput) granoInput.value = "0";
+    if (granoValor) granoValor.value = "0%";
     if (ditherAlgoritmo) ditherAlgoritmo.value = "ninguno";
     if (ditherPaleta) ditherPaleta.value = "bn";
     if (ditherPixelInput) ditherPixelInput.value = "1";
@@ -348,6 +353,7 @@ function obtenerTodosLosAjustes() {
         saturacion: Number(saturacionInput ? saturacionInput.value : 0),
         desenfoque: Number(desenfoqueInput ? desenfoqueInput.value : 0),
         nitidez: Number(nitidezInput ? nitidezInput.value : 0),
+        grano: Number(granoInput ? granoInput.value : 0),
     };
 }
 
@@ -500,6 +506,12 @@ if (botonAplicarDetalle) {
     botonAplicarDetalle.addEventListener("click", () => aplicarDetalle());
 }
 
+if (granoInput && granoValor) {
+    granoInput.addEventListener("input", () => {
+        granoValor.value = `${granoInput.value}%`;
+    });
+}
+
 if (botonResetDetalle) {
     botonResetDetalle.addEventListener("click", () => {
         if (!imagenActual || procesandoAccion || modoRecorte) return;
@@ -507,6 +519,8 @@ if (botonResetDetalle) {
         if (desenfoqueValor) desenfoqueValor.value = "0%";
         if (nitidezInput) nitidezInput.value = "0";
         if (nitidezValor) nitidezValor.value = "0%";
+        if (granoInput) granoInput.value = "0";
+        if (granoValor) granoValor.value = "0%";
         aplicarDetalle();
     });
 }
