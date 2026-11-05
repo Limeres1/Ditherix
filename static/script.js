@@ -81,6 +81,73 @@ function crearEstadoMarcoDefecto() {
 
 let estadoMarco = crearEstadoMarcoDefecto();
 
+const bynActivoInput = document.getElementById("bynActivoInput");
+const bynControlsWrap = document.getElementById("bynControlsWrap");
+const bynFiltroPreset = document.getElementById("bynFiltroPreset");
+const bynRojoInput = document.getElementById("bynRojoInput");
+const bynRojoValor = document.getElementById("bynRojoValor");
+const bynNaranjaInput = document.getElementById("bynNaranjaInput");
+const bynNaranjaValor = document.getElementById("bynNaranjaValor");
+const bynAmarilloInput = document.getElementById("bynAmarilloInput");
+const bynAmarilloValor = document.getElementById("bynAmarilloValor");
+const bynVerdeInput = document.getElementById("bynVerdeInput");
+const bynVerdeValor = document.getElementById("bynVerdeValor");
+const bynCyanInput = document.getElementById("bynCyanInput");
+const bynCyanValor = document.getElementById("bynCyanValor");
+const bynAzulInput = document.getElementById("bynAzulInput");
+const bynAzulValor = document.getElementById("bynAzulValor");
+const bynVioletaInput = document.getElementById("bynVioletaInput");
+const bynVioletaValor = document.getElementById("bynVioletaValor");
+const bynRosaInput = document.getElementById("bynRosaInput");
+const bynRosaValor = document.getElementById("bynRosaValor");
+const bynViradoSelect = document.getElementById("bynViradoSelect");
+const bynViradoIntensidadInput = document.getElementById("bynViradoIntensidadInput");
+const bynViradoIntensidadValor = document.getElementById("bynViradoIntensidadValor");
+const botonResetByn = document.getElementById("botonResetByn");
+const botonAplicarByn = document.getElementById("botonAplicarByn");
+
+const FILTROS_BYN_MAP = {
+    neutro: { rojo: 0, naranja: 0, amarillo: 0, verde: 0, cyan: 0, azul: 0, violeta: 0, rosa: 0 },
+    rojo: { rojo: 40, naranja: 20, amarillo: 0, verde: -20, cyan: -30, azul: -40, violeta: -20, rosa: 20 },
+    naranja: { rojo: 30, naranja: 40, amarillo: 20, verde: -10, cyan: -20, azul: -30, violeta: -10, rosa: 10 },
+    amarillo: { rojo: 15, naranja: 25, amarillo: 35, verde: 10, cyan: -10, azul: -20, violeta: -10, rosa: 5 },
+    verde: { rojo: -25, naranja: -15, amarillo: 20, verde: 45, cyan: 15, azul: -20, violeta: -20, rosa: -15 },
+    azul: { rojo: -30, naranja: -20, amarillo: -20, verde: -10, cyan: 20, azul: 45, violeta: 30, rosa: 0 },
+    infrarrojo: { rojo: 80, naranja: 50, amarillo: 60, verde: 70, cyan: -50, azul: -70, violeta: -60, rosa: 30 },
+};
+
+const CANALES_BYN_INPUTS = {
+    rojo: { input: bynRojoInput, output: bynRojoValor },
+    naranja: { input: bynNaranjaInput, output: bynNaranjaValor },
+    amarillo: { input: bynAmarilloInput, output: bynAmarilloValor },
+    verde: { input: bynVerdeInput, output: bynVerdeValor },
+    cyan: { input: bynCyanInput, output: bynCyanValor },
+    azul: { input: bynAzulInput, output: bynAzulValor },
+    violeta: { input: bynVioletaInput, output: bynVioletaValor },
+    rosa: { input: bynRosaInput, output: bynRosaValor },
+};
+
+function crearEstadoBynDefecto() {
+    return {
+        activo: false,
+        preset: "neutro",
+        canales: {
+            rojo: 0,
+            naranja: 0,
+            amarillo: 0,
+            verde: 0,
+            cyan: 0,
+            azul: 0,
+            violeta: 0,
+            rosa: 0,
+        },
+        virado: "ninguno",
+        virado_intensidad: 70,
+    };
+}
+
+let estadoByn = crearEstadoBynDefecto();
+
 const CANALES_COLOR_INFO = {
     rojo: { nombre: "Rojo", color: "#ff3b30" },
     naranja: { nombre: "Naranja", color: "#ff9500" },
@@ -191,6 +258,21 @@ function actualizarControlesEdicion() {
     if (botonAplicarMarco) botonAplicarMarco.disabled = deshabilitadosPorRecorte;
     presetColorDots.forEach(dot => dot.disabled = deshabilitadosPorRecorte);
 
+    if (bynActivoInput) bynActivoInput.disabled = deshabilitadosPorRecorte;
+    const bynInternosDeshabilitados = deshabilitadosPorRecorte || !estadoByn.activo;
+    if (bynFiltroPreset) bynFiltroPreset.disabled = bynInternosDeshabilitados;
+    Object.keys(CANALES_BYN_INPUTS).forEach(canal => {
+        const inp = CANALES_BYN_INPUTS[canal].input;
+        if (inp) inp.disabled = bynInternosDeshabilitados;
+    });
+    if (bynViradoSelect) bynViradoSelect.disabled = bynInternosDeshabilitados;
+    if (bynViradoIntensidadInput) bynViradoIntensidadInput.disabled = bynInternosDeshabilitados;
+    if (botonResetByn) botonResetByn.disabled = deshabilitadosPorRecorte;
+    if (botonAplicarByn) botonAplicarByn.disabled = deshabilitadosPorRecorte;
+    if (bynControlsWrap) {
+        bynControlsWrap.classList.toggle("byn-disabled", bynInternosDeshabilitados);
+    }
+
     btnIniciarRecorte.disabled = deshabilitados;
     botonVoltearHorizontal.disabled = deshabilitadosPorRecorte;
     botonVoltearVertical.disabled = deshabilitadosPorRecorte;
@@ -225,6 +307,7 @@ function establecerModoRecorte(activar) {
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
         if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
         if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
         indicadorCarga.textContent = "Arrastra sobre la imagen para seleccionar el recorte.";
         indicadorCarga.classList.remove("oculto");
@@ -384,6 +467,8 @@ async function procesarArchivoSubida(archivo) {
     if (marcoGrosorInput) marcoGrosorInput.value = "24";
     if (marcoGrosorValor) marcoGrosorValor.value = "24 px";
     if (typeof actualizarOpcionesMarcoUI === "function") actualizarOpcionesMarcoUI();
+    estadoByn = crearEstadoBynDefecto();
+    if (typeof sincronizarTodosLosControlesByn === "function") sincronizarTodosLosControlesByn();
     actualizarControlesEdicion();
 
     if (controladorCarga) {
@@ -1388,5 +1473,161 @@ if (botonResetMarco) {
         if (marcoEstiloSelect) marcoEstiloSelect.value = "ninguno";
         actualizarOpcionesMarcoUI();
         aplicarMarco();
+    });
+}
+
+function sincronizarTodosLosControlesByn() {
+    if (bynActivoInput) {
+        bynActivoInput.checked = Boolean(estadoByn.activo);
+    }
+    if (bynFiltroPreset) {
+        bynFiltroPreset.value = estadoByn.preset || "neutro";
+    }
+    Object.keys(CANALES_BYN_INPUTS).forEach((canal) => {
+        const item = CANALES_BYN_INPUTS[canal];
+        const val = estadoByn.canales[canal] ?? 0;
+        if (item.input) item.input.value = String(val);
+        if (item.output) item.output.value = mostrarValorEntero(val);
+    });
+    if (bynViradoSelect) {
+        bynViradoSelect.value = estadoByn.virado || "ninguno";
+    }
+    if (bynViradoIntensidadInput) {
+        bynViradoIntensidadInput.value = String(estadoByn.virado_intensidad ?? 70);
+    }
+    if (bynViradoIntensidadValor) {
+        bynViradoIntensidadValor.value = `${estadoByn.virado_intensidad ?? 70}%`;
+    }
+    if (bynControlsWrap) {
+        bynControlsWrap.classList.toggle("byn-disabled", !estadoByn.activo);
+    }
+}
+
+if (bynActivoInput) {
+    bynActivoInput.addEventListener("change", () => {
+        estadoByn.activo = bynActivoInput.checked;
+        actualizarControlesEdicion();
+    });
+}
+
+if (bynFiltroPreset) {
+    bynFiltroPreset.addEventListener("change", () => {
+        const presetVal = bynFiltroPreset.value;
+        estadoByn.preset = presetVal;
+        if (presetVal !== "personalizado" && FILTROS_BYN_MAP[presetVal]) {
+            const vals = FILTROS_BYN_MAP[presetVal];
+            Object.keys(vals).forEach((canal) => {
+                estadoByn.canales[canal] = vals[canal];
+            });
+            sincronizarTodosLosControlesByn();
+        }
+    });
+}
+
+Object.keys(CANALES_BYN_INPUTS).forEach((canal) => {
+    const item = CANALES_BYN_INPUTS[canal];
+    if (item.input) {
+        item.input.addEventListener("input", () => {
+            const val = Number(item.input.value);
+            estadoByn.canales[canal] = val;
+            if (item.output) {
+                item.output.value = mostrarValorEntero(val);
+            }
+            estadoByn.preset = "personalizado";
+            if (bynFiltroPreset) {
+                bynFiltroPreset.value = "personalizado";
+            }
+        });
+    }
+});
+
+if (bynViradoSelect) {
+    bynViradoSelect.addEventListener("change", () => {
+        estadoByn.virado = bynViradoSelect.value;
+    });
+}
+
+if (bynViradoIntensidadInput) {
+    bynViradoIntensidadInput.addEventListener("input", () => {
+        estadoByn.virado_intensidad = Number(bynViradoIntensidadInput.value);
+        if (bynViradoIntensidadValor) {
+            bynViradoIntensidadValor.value = `${bynViradoIntensidadInput.value}%`;
+        }
+    });
+}
+
+async function aplicarByn() {
+    if (!imagenActual || procesandoAccion || modoRecorte) {
+        return;
+    }
+
+    const numeroSolicitud = ++solicitudActual;
+    const imagenId = imagenActual;
+    procesandoAccion = true;
+    actualizarControlesEdicion();
+    indicadorCarga.textContent = "Aplicando blanco y negro…";
+    indicadorCarga.classList.remove("oculto");
+
+    try {
+        const respuesta = await fetch(`/imagen/${imagenId}/byn`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                activo: estadoByn.activo,
+                canales: estadoByn.canales,
+                virado: estadoByn.virado,
+                virado_intensidad: estadoByn.virado_intensidad,
+            }),
+        });
+        const resultado = await respuesta.json();
+
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!respuesta.ok || !resultado.ok) {
+            mostrarMensaje(resultado.mensaje || "No se pudieron aplicar los ajustes de blanco y negro.");
+            return;
+        }
+
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!vistaCargada) {
+            mostrarMensaje("No se pudo mostrar la imagen en blanco y negro.");
+            return;
+        }
+
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+    } catch (error) {
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (error instanceof SyntaxError) {
+            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+        } else {
+            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        }
+    } finally {
+        if (numeroSolicitud === solicitudActual) {
+            procesandoAccion = false;
+            actualizarControlesEdicion();
+            indicadorCarga.classList.add("oculto");
+            indicadorCarga.textContent = "Procesando imagen…";
+        }
+    }
+}
+
+if (botonAplicarByn) {
+    botonAplicarByn.addEventListener("click", () => aplicarByn());
+}
+
+if (botonResetByn) {
+    botonResetByn.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        estadoByn = crearEstadoBynDefecto();
+        sincronizarTodosLosControlesByn();
+        aplicarByn();
     });
 }

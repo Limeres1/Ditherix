@@ -58,6 +58,14 @@
                                 d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-156t86-127Q252-817 325-848.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm-180-280q25 0 42.5-17.5T360-500q0-25-17.5-42.5T300-560q-25 0-42.5 17.5T240-500q0 25 17.5 42.5T300-440Zm120-140q25 0 42.5-17.5T480-640q0-25-17.5-42.5T420-700q-25 0-42.5 17.5T360-640q0 25 17.5 42.5T420-580Zm180 0q25 0 42.5-17.5T660-640q0-25-17.5-42.5T600-700q-25 0-42.5 17.5T540-640q0 25 17.5 42.5T600-580Zm120 140q25 0 42.5-17.5T780-500q0-25-17.5-42.5T720-560q-25 0-42.5 17.5T660-500q0 25 17.5 42.5T720-440Z" />
                         </svg>
                     </button>
+                    <button class="glass-control" id="btn-toggle-byn" type="button" aria-controls="byn-menu"
+                        aria-expanded="false" title="Blanco y Negro / Mezclador de Canales">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                            fill="currentColor">
+                            <path
+                                d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80v-640q-134 0-227 93t-93 227q0 134 93 227t227 93Z" />
+                        </svg>
+                    </button>
                     <button class="glass-control" id="btn-toggle-detalle" type="button" aria-controls="detalle-menu"
                         aria-expanded="false" title="Ajustes de detalle">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
@@ -329,6 +337,112 @@
                 <div class="edit-actions">
                     <button class="glass-control" id="botonResetColor" type="button" disabled>Restablecer</button>
                     <button class="glass-control" id="botonAplicarColor" type="button" disabled>Aplicar</button>
+                </div>
+            </section>
+            <!-- Blanco y Negro / Mezclador de Canales -->
+            <section id="byn-menu" class="edit-panel hidden" aria-label="Ajustes de Blanco y Negro" aria-hidden="true">
+                <div class="edit-header">
+                    <h2>Blanco y Negro</h2>
+                    <button class="close-btn" id="btn-close-byn" type="button" aria-label="Cerrar blanco y negro">
+                        &times;
+                    </button>
+                </div>
+
+                <div class="byn-toggle-wrap">
+                    <label class="byn-switch-label" for="bynActivoInput">
+                        <input type="checkbox" id="bynActivoInput" class="byn-checkbox" disabled>
+                        <span class="byn-switch-text">Activar Monocromo</span>
+                    </label>
+                </div>
+
+                <div id="bynControlsWrap" class="byn-controls-wrap byn-disabled">
+                    <div class="select-group">
+                        <label for="bynFiltroPreset">Filtro Óptico Predefinido</label>
+                        <select id="bynFiltroPreset" class="glass-select" disabled>
+                            <option value="personalizado">Personalizado</option>
+                            <option value="neutro" selected>Neutro (Luminancia estándar)</option>
+                            <option value="rojo">Filtro Rojo (Cielo dramático)</option>
+                            <option value="naranja">Filtro Naranja (Paisajes suaves)</option>
+                            <option value="amarillo">Filtro Amarillo (Clásico sutil)</option>
+                            <option value="verde">Filtro Verde (Follaje natural)</option>
+                            <option value="azul">Filtro Azul (Neblina atmosférica)</option>
+                            <option value="infrarrojo">Infrarrojo (Efecto Wood)</option>
+                        </select>
+                    </div>
+
+                    <span class="byn-section-title">Mezclador de Canales</span>
+
+                    <div class="slider-group">
+                        <label for="bynRojoInput"><span class="chan-dot" style="background: #ff3b30; box-shadow: 0 0 6px #ff3b30;"></span>Rojo</label>
+                        <output id="bynRojoValor" for="bynRojoInput">0</output>
+                        <input id="bynRojoInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Rojo en B&N" disabled>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="bynNaranjaInput"><span class="chan-dot" style="background: #ff9500; box-shadow: 0 0 6px #ff9500;"></span>Naranja</label>
+                        <output id="bynNaranjaValor" for="bynNaranjaInput">0</output>
+                        <input id="bynNaranjaInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Naranja en B&N" disabled>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="bynAmarilloInput"><span class="chan-dot" style="background: #ffcc00; box-shadow: 0 0 6px #ffcc00;"></span>Amarillo</label>
+                        <output id="bynAmarilloValor" for="bynAmarilloInput">0</output>
+                        <input id="bynAmarilloInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Amarillo en B&N" disabled>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="bynVerdeInput"><span class="chan-dot" style="background: #34c759; box-shadow: 0 0 6px #34c759;"></span>Verde</label>
+                        <output id="bynVerdeValor" for="bynVerdeInput">0</output>
+                        <input id="bynVerdeInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Verde en B&N" disabled>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="bynCyanInput"><span class="chan-dot" style="background: #32ade6; box-shadow: 0 0 6px #32ade6;"></span>Cyan</label>
+                        <output id="bynCyanValor" for="bynCyanInput">0</output>
+                        <input id="bynCyanInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Cyan en B&N" disabled>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="bynAzulInput"><span class="chan-dot" style="background: #007aff; box-shadow: 0 0 6px #007aff;"></span>Azul</label>
+                        <output id="bynAzulValor" for="bynAzulInput">0</output>
+                        <input id="bynAzulInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Azul en B&N" disabled>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="bynVioletaInput"><span class="chan-dot" style="background: #af52de; box-shadow: 0 0 6px #af52de;"></span>Violeta</label>
+                        <output id="bynVioletaValor" for="bynVioletaInput">0</output>
+                        <input id="bynVioletaInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Violeta en B&N" disabled>
+                    </div>
+
+                    <div class="slider-group">
+                        <label for="bynRosaInput"><span class="chan-dot" style="background: #ff2d55; box-shadow: 0 0 6px #ff2d55;"></span>Rosa</label>
+                        <output id="bynRosaValor" for="bynRosaInput">0</output>
+                        <input id="bynRosaInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Rosa en B&N" disabled>
+                    </div>
+
+                    <span class="byn-section-title">Virado de Laboratorio</span>
+
+                    <div class="select-group">
+                        <label for="bynViradoSelect">Virado Químico</label>
+                        <select id="bynViradoSelect" class="glass-select" disabled>
+                            <option value="ninguno" selected>Ninguno (Monocromo puro)</option>
+                            <option value="sepia">Sepia (Cálido clásico vintage)</option>
+                            <option value="cianotipia">Cianotipia (Azul Prusia profundo)</option>
+                            <option value="selenio">Selenio (Sombras frías y púrpuras)</option>
+                            <option value="platino">Platino (Tonos neutros cálidos suaves)</option>
+                        </select>
+                    </div>
+
+                    <div class="slider-group" id="bynViradoIntensidadGroup">
+                        <label for="bynViradoIntensidadInput">Intensidad del virado</label>
+                        <output id="bynViradoIntensidadValor" for="bynViradoIntensidadInput">70%</output>
+                        <input id="bynViradoIntensidadInput" type="range" min="0" max="100" step="1" value="70" aria-label="Intensidad del virado" disabled>
+                    </div>
+                </div>
+
+                <div class="edit-actions">
+                    <button class="glass-control" id="botonResetByn" type="button" disabled>Restablecer</button>
+                    <button class="glass-control" id="botonAplicarByn" type="button" disabled>Aplicar</button>
                 </div>
             </section>
             <!-- Marcos Decorativos -->

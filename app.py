@@ -19,6 +19,7 @@ from detalle import AJUSTES_DETALLE, procesar_detalle
 from dithering import aplicar_dithering
 from color_mixer import COLORES_CANALES, procesar_color
 from marcos import ESTILOS_MARCO, aplicar_marco
+from byn import FILTROS_BYN, VIRADOS_BYN, procesar_byn
 
 MAX_ARCHIVO_BYTES = 25 * 1024 * 1024
 MARGEN_MULTIPART_BYTES = 64 * 1024
@@ -52,6 +53,10 @@ class ImagenGuardada:
     marco_estilo: str = "ninguno"
     marco_color: str = "#ffffff"
     marco_grosor: int = 24
+    byn_activo: bool = False
+    byn_canales: dict[str, float] = field(default_factory=dict)
+    byn_virado: str = "ninguno"
+    byn_virado_intensidad: float = 70.0
 
 
 AJUSTES_DEFECTO: dict[str, float] = {
@@ -87,6 +92,10 @@ def ejecutar_pipeline(
     marco_estilo: str = "ninguno",
     marco_color: str = "#ffffff",
     marco_grosor: int = 24,
+    byn_activo: bool = False,
+    byn_canales: dict[str, float] | None = None,
+    byn_virado: str = "ninguno",
+    byn_virado_intensidad: float = 70.0,
 ):
     resultado = procesar_ajustes(imagen_base, factores)
 
@@ -94,6 +103,18 @@ def ejecutar_pipeline(
     if resultado is not imagen_base and resultado is not siguiente:
         resultado.close()
     resultado = siguiente
+
+    if byn_activo:
+        siguiente = procesar_byn(
+            resultado,
+            activo=True,
+            canales=byn_canales,
+            virado=byn_virado,
+            virado_intensidad=byn_virado_intensidad,
+        )
+        if resultado is not imagen_base and resultado is not siguiente:
+            resultado.close()
+        resultado = siguiente
 
     siguiente = procesar_detalle(resultado, factores)
     if resultado is not imagen_base and resultado is not siguiente:
@@ -255,6 +276,10 @@ def aplicar_ajustes_a_imagen(imagen_id: str, nuevos_valores: dict[str, float]):
             marco_estilo=imagen_guardada.marco_estilo,
             marco_color=imagen_guardada.marco_color,
             marco_grosor=imagen_guardada.marco_grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -528,6 +553,10 @@ def restablecer_recorte(imagen_id: str):
             marco_estilo=imagen_guardada.marco_estilo,
             marco_color=imagen_guardada.marco_color,
             marco_grosor=imagen_guardada.marco_grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -779,6 +808,10 @@ def aplicar_dithering_ruta(imagen_id: str):
             marco_estilo=imagen_guardada.marco_estilo,
             marco_color=imagen_guardada.marco_color,
             marco_grosor=imagen_guardada.marco_grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -895,6 +928,10 @@ def aplicar_color(imagen_id: str):
             marco_estilo=imagen_guardada.marco_estilo,
             marco_color=imagen_guardada.marco_color,
             marco_grosor=imagen_guardada.marco_grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -912,6 +949,10 @@ def aplicar_color(imagen_id: str):
             marco_estilo=imagen_guardada.marco_estilo,
             marco_color=imagen_guardada.marco_color,
             marco_grosor=imagen_guardada.marco_grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
         )
 
         with imagenes_lock:
@@ -935,6 +976,10 @@ def aplicar_color(imagen_id: str):
             marco_estilo=imagen_guardada.marco_estilo,
             marco_color=imagen_guardada.marco_color,
             marco_grosor=imagen_guardada.marco_grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
         )
     except ErrorImagen as error:
         return respuesta_error(error.codigo, error.mensaje, error.status)
@@ -1035,6 +1080,113 @@ def aplicar_marco_ruta(imagen_id: str):
         return respuesta_error(
             "ERROR_INTERNO",
             "No se pudo aplicar el marco decorativo a la imagen.",
+            500,
+        )
+    finally:
+        if resultado is not None and resultado is not imagen:
+            resultado.close()
+        if imagen is not None:
+            imagen.close()
+
+
+@app.post("/imagen/<imagen_id>/byn")
+def aplicar_byn_ruta(imagen_id: str):
+    datos = request.get_json(silent=True)
+    if not isinstance(datos, dict):
+        return respuesta_error("DATOS_INVALIDOS", "Los datos de blanco y negro no son válidos.", 400)
+
+    activo = bool(datos.get("activo", False))
+    virado = str(datos.get("virado", "ninguno")).strip().lower()
+    try:
+        virado_intensidad = float(datos.get("virado_intensidad", 70.0))
+    except (ValueError, TypeError):
+        virado_intensidad = 70.0
+
+    canales_raw = datos.get("canales", {})
+    canales = {}
+    if isinstance(canales_raw, dict):
+        for c in COLORES_CANALES:
+            val = canales_raw.get(c, 0.0)
+            if not isinstance(val, bool) and isinstance(val, (int, float)) and math.isfinite(val) and -100 <= val <= 100:
+                canales[c] = float(val)
+            else:
+                canales[c] = 0.0
+    else:
+        canales = {c: 0.0 for c in COLORES_CANALES}
+
+    with imagenes_lock:
+        imagen_guardada = imagenes_guardadas.get(imagen_id)
+
+    if imagen_guardada is None:
+        return respuesta_error("IMAGEN_NO_ENCONTRADA", "La imagen ya no está disponible.", 404)
+
+    factores = calcular_factores(imagen_guardada.ajustes)
+
+    imagen = None
+    resultado = None
+    try:
+        imagen = abrir_imagen(imagen_guardada.original)
+        resultado = ejecutar_pipeline(
+            imagen,
+            factores,
+            imagen_guardada.dither_algoritmo,
+            imagen_guardada.dither_paleta,
+            imagen_guardada.dither_pixel,
+            imagen_guardada.dither_intensidad,
+            temperatura=imagen_guardada.temperatura,
+            tinte=imagen_guardada.tinte,
+            mezcla_color=imagen_guardada.mezcla_color,
+            marco_estilo=imagen_guardada.marco_estilo,
+            marco_color=imagen_guardada.marco_color,
+            marco_grosor=imagen_guardada.marco_grosor,
+            byn_activo=activo,
+            byn_canales=canales,
+            byn_virado=virado,
+            byn_virado_intensidad=virado_intensidad,
+        )
+
+        procesada = guardar_procesada_sin_perdida(resultado)
+        vista, ancho_vista, alto_vista = generar_vista(resultado)
+
+        imagen_actualizada = replace(
+            imagen_guardada,
+            procesada=procesada,
+            vista=vista,
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            byn_activo=activo,
+            byn_canales=canales,
+            byn_virado=virado,
+            byn_virado_intensidad=virado_intensidad,
+        )
+
+        with imagenes_lock:
+            if imagenes_guardadas.get(imagen_id) is not imagen_guardada:
+                return respuesta_error(
+                    "IMAGEN_MODIFICADA",
+                    "La imagen cambió durante el procesamiento. Inténtalo de nuevo.",
+                    409,
+                )
+            imagenes_guardadas[imagen_id] = imagen_actualizada
+
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            byn_activo=activo,
+            byn_canales=canales,
+            byn_virado=virado,
+            byn_virado_intensidad=virado_intensidad,
+        )
+    except ErrorImagen as error:
+        return respuesta_error(error.codigo, error.mensaje, error.status)
+    except Exception:
+        app.logger.exception("Error al aplicar blanco y negro a la imagen.")
+        return respuesta_error(
+            "ERROR_INTERNO",
+            "No se pudieron aplicar los ajustes de blanco y negro.",
             500,
         )
     finally:

@@ -99,6 +99,10 @@ const btnToggleColor = document.getElementById("btn-toggle-color");
 const btnCloseColor = document.getElementById("btn-close-color");
 const colorMenu = document.getElementById("color-menu");
 
+const btnToggleByn = document.getElementById("btn-toggle-byn");
+const btnCloseByn = document.getElementById("btn-close-byn");
+const bynMenu = document.getElementById("byn-menu");
+
 const btnToggleMarcos = document.getElementById("btn-toggle-marcos");
 const btnCloseMarcos = document.getElementById("btn-close-marcos");
 const marcosMenu = document.getElementById("marcos-menu");
@@ -108,6 +112,7 @@ function setEditMenuOpen(open) {
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
         if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
         if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
     }
     if (editMenu && btnToggleEdit) {
@@ -123,6 +128,7 @@ function setDetalleMenuOpen(open) {
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
         if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
         if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
     }
     if (detalleMenu && btnToggleDetalle) {
@@ -138,6 +144,7 @@ function setDitherMenuOpen(open) {
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
         if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
     }
     if (ditherMenu && btnToggleDither) {
@@ -153,6 +160,7 @@ function setColorMenuOpen(open) {
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
+        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
         if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
     }
     if (colorMenu && btnToggleColor) {
@@ -164,12 +172,30 @@ function setColorMenuOpen(open) {
 }
 window.setColorMenuOpen = setColorMenuOpen;
 
+function setBynMenuOpen(open) {
+    if (open) {
+        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
+        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
+        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
+        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
+    }
+    if (bynMenu && btnToggleByn) {
+        bynMenu.classList.toggle("hidden", !open);
+        bynMenu.setAttribute("aria-hidden", String(!open));
+        btnToggleByn.setAttribute("aria-expanded", String(open));
+        btnToggleByn.classList.toggle("active", open);
+    }
+}
+window.setBynMenuOpen = setBynMenuOpen;
+
 function setMarcosMenuOpen(open) {
     if (open) {
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
         if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
     }
     if (marcosMenu && btnToggleMarcos) {
         marcosMenu.classList.toggle("hidden", !open);
@@ -240,6 +266,21 @@ if (btnCloseColor) {
     });
 }
 
+if (btnToggleByn) {
+    btnToggleByn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setBynMenuOpen(bynMenu.classList.contains("hidden"));
+    });
+}
+
+if (btnCloseByn) {
+    btnCloseByn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setBynMenuOpen(false);
+        btnToggleByn.focus();
+    });
+}
+
 if (btnToggleMarcos) {
     btnToggleMarcos.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -255,7 +296,7 @@ if (btnCloseMarcos) {
     });
 }
 
-[editMenu, detalleMenu, ditherMenu, colorMenu, marcosMenu].forEach((menu) => {
+[editMenu, detalleMenu, ditherMenu, colorMenu, bynMenu, marcosMenu].forEach((menu) => {
     if (menu) {
         menu.addEventListener("click", (e) => e.stopPropagation());
     }
@@ -273,6 +314,9 @@ document.addEventListener("click", (event) => {
     }
     if (colorMenu && !colorMenu.classList.contains("hidden") && !colorMenu.contains(event.target) && !btnToggleColor.contains(event.target)) {
         setColorMenuOpen(false);
+    }
+    if (bynMenu && !bynMenu.classList.contains("hidden") && !bynMenu.contains(event.target) && !btnToggleByn.contains(event.target)) {
+        setBynMenuOpen(false);
     }
     if (marcosMenu && !marcosMenu.classList.contains("hidden") && !marcosMenu.contains(event.target) && !btnToggleMarcos.contains(event.target)) {
         setMarcosMenuOpen(false);
@@ -296,6 +340,10 @@ document.addEventListener("keydown", (event) => {
         if (colorMenu && !colorMenu.classList.contains("hidden")) {
             setColorMenuOpen(false);
             btnToggleColor.focus();
+        }
+        if (bynMenu && !bynMenu.classList.contains("hidden")) {
+            setBynMenuOpen(false);
+            btnToggleByn.focus();
         }
         if (marcosMenu && !marcosMenu.classList.contains("hidden")) {
             setMarcosMenuOpen(false);
