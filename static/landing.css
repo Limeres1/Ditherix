@@ -127,7 +127,7 @@
   --color-mesh-grid: oklch(90% 0.005 260 / 0.04);
 
   /* Typography */
-  --font-display: 'Synkopy', 'Cinzel', serif;
+  --font-display: 'Instrument Serif', 'Synkopy', 'Cinzel', serif;
   --font-body: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --display-weight: 400;
   --tracking-display: 0.02em;
@@ -496,127 +496,35 @@ button, input, select, textarea {
   position: relative;
   z-index: var(--z-content);
   width: 100%;
-  padding-inline: var(--space-2xl);
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: clamp(24px, 5vw, 64px);
   display: flex;
   justify-content: flex-start;
   align-items: center;
 }
 
-/* Hero Left-Aligned Liquid Glass Card */
-.hero-overlay-card {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: var(--space-md);
-  padding: var(--space-xl) var(--space-xl);
-  max-width: 540px;
-  width: 100%;
-  background: linear-gradient(135deg, var(--color-liquid-top), var(--color-liquid-bot));
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  border: var(--rule-hair) solid var(--color-glass-border-bright);
-  border-radius: 0;
-  box-shadow: 0 8px 16px var(--color-glass-shadow), inset 0 1px 0 var(--color-liquid-rim), inset 1px 0 0 var(--color-liquid-specular);
-  color: var(--color-ink);
-}
-
-.hero-overlay-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 40%;
-  background: linear-gradient(180deg, var(--color-liquid-gloss), var(--color-liquid-gloss-fade));
-  pointer-events: none;
-}
-
-.hero-sigil-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 0;
-  border: var(--rule-hair) solid var(--color-liquid-badge-border);
-  background-color: var(--color-liquid-badge-bg);
-  box-shadow: inset 0 1px 0 var(--color-liquid-rim);
-  color: var(--color-accent);
-}
-
-.sigil-icon {
-  width: 22px;
-  height: 22px;
-}
-
-.hero-title-bracket-box {
-  position: relative;
-  padding: var(--space-2xs) var(--space-sm);
-  margin-inline: calc(-1 * var(--space-sm));
-  align-self: flex-start;
-}
-
-.box-corner {
-  position: absolute;
-  color: var(--color-accent);
-  font-size: var(--text-sm);
-  line-height: 1;
-  pointer-events: none;
-}
-
-.c-tl { top: calc(-1 * var(--space-3xs)); left: calc(-1 * var(--space-3xs)); }
-.c-tr { top: calc(-1 * var(--space-3xs)); right: calc(-1 * var(--space-3xs)); }
-.c-bl { bottom: calc(-1 * var(--space-3xs)); left: calc(-1 * var(--space-3xs)); }
-.c-br { bottom: calc(-1 * var(--space-3xs)); right: calc(-1 * var(--space-3xs)); }
-
-h1.hero-cyber-title {
+/* Floating Title "PNG sin fondo" - Solo las letras flotando a la izquierda */
+h1.hero-floating-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.25rem, 4.2vw, 3.4rem);
+  font-size: clamp(3.6rem, 11.5vw, 9.8rem);
   font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: 0.08em;
+  line-height: 0.92;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--color-ink);
-  text-shadow: 0 0 20px var(--color-title-glow);
-}
-
-.hero-category-meta {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3xs);
-  font-size: var(--text-xs);
-  color: var(--color-muted);
-}
-
-.meta-bracket {
-  color: var(--color-dim);
-}
-
-.hero-statement-box {
-  position: relative;
-  max-width: 44ch;
-}
-
-.hero-statement-p {
-  font-size: var(--text-lead);
-  color: var(--color-ink-2);
-  line-height: 1.5;
-}
-
-.hero-cta-action {
-  padding-top: var(--space-xs);
-}
-
-.hero-project-btn {
-  min-height: 48px;
-  padding-inline: var(--space-xl);
-  font-size: var(--text-md);
-  border-radius: 0;
+  color: #ffffff;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  text-shadow:
+    0 2px 14px rgba(0, 0, 0, 0.85),
+    0 6px 36px rgba(0, 0, 0, 0.65),
+    0 0 60px rgba(0, 0, 0, 0.45);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
 }
 
 .hero-scroll-cue {
@@ -940,8 +848,8 @@ h1.hero-cyber-title {
     --section-gap-l: 80px;
   }
 
-  .hero-overlay-card {
-    padding: var(--space-lg) var(--space-md);
+  h1.hero-floating-title {
+    font-size: clamp(2.8rem, 14vw, 5rem);
   }
 
   .footer-inner {
