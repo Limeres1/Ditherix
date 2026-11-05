@@ -4,59 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ditherix</title>
+    <title>Ditherix: difusion y grano analogo</title>
+    <meta name="description"
+        content="Editor fotografico monocromo con difusion Floyd-Steinberg, tramado Bayer, inyeccion de grano analogico y exportacion sin perdida.">
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon/icon.jpeg') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../static/landing.css">
 </head>
 
-<body class="crt-overlay">
+<body>
     <div class="screen-scanlines" aria-hidden="true"></div>
     <div class="screen-vignette" aria-hidden="true"></div>
 
     <header class="hud-header">
         <div class="hud-header-inner">
             <div class="hud-left">
-                <div class="portal-badge-dropdown" id="portalDropdownWrap">
-                    <button class="hud-portal-btn" id="portalBtn" type="button" aria-expanded="false"
-                        aria-haspopup="true">
-                        <span class="hud-bullet">■</span>
-                        <span class="hud-portal-text">PORTAL</span>
-                    </button>
-                    <div class="portal-dropdown-menu" id="portalMenu" role="menu">
-                        <a href="#caracteristicas" class="portal-dropdown-item" role="menuitem">
-                            <span>Guías profesionales</span>
-                        </a>
-                        <a href="/editor" class="portal-dropdown-item" role="menuitem">
-                            <span>Proyectos por encargo</span>
-                        </a>
-                        <a href="#caracteristicas" class="portal-dropdown-item" role="menuitem">
-                            <span>Aprendizaje creativo</span>
-                        </a>
-                    </div>
+                <a href="#inicio" class="hud-logo-link">
+                    <span class="hud-bullet" aria-hidden="true">■</span>
+                    <span class="hud-brand-name">Ditherix</span>
+                </a>
+            </div>
+
+            <div class="hud-center">
+                <div class="hud-clock-badge" id="hudClock" aria-label="Reloj de sistema">
+                    <span class="hud-bracket" aria-hidden="true">[</span><span id="hudDay" class="num">04</span><span
+                        class="hud-bracket" aria-hidden="true">]</span>
+                    <span class="hud-bracket" aria-hidden="true">[</span><span id="hudMonth" class="num">11</span><span
+                        class="hud-bracket" aria-hidden="true">]</span>
+                    <span class="hud-bracket" aria-hidden="true">[</span><span id="hudYear" class="num">2026</span><span
+                        class="hud-bracket" aria-hidden="true">]</span>
+                    <span class="hud-time num" id="hudTime">16:50:00</span>
                 </div>
             </div>
 
-            <div class="hud-center" id="hudClock" aria-label="HUD Timestamp">
-                <span class="hud-bracket">[</span><span id="hudDay">12</span><span class="hud-bracket">]</span>
-                <span class="hud-bracket">[</span><span id="hudMonth">08</span><span class="hud-bracket">]</span>
-                <span class="hud-bracket">[</span><span id="hudYear">2026</span><span class="hud-bracket">]</span>
-                <span class="hud-epoch">CE •</span>
-                <span class="hud-time" id="hudTime">02:04:04:91 PM</span>
-            </div>
-
             <div class="hud-right">
-                <a href="/editor" class="hud-cart-pill" title="Ingresar al Editor">
-                    <span class="hud-cart-text">DITHERIX</span>
-                    <span class="hud-bracket">[</span> <span class="hud-bracket">]</span>
+                <a href="/editor" class="btn btn--primary">
+                    <span>Abrir editor</span>
                 </a>
             </div>
         </div>
-
-        <div class="hud-blue-stripe"></div>
     </header>
 
     <section class="hero-cinematic" id="inicio">
-        <div class="hero-bg-layer" aria-hidden="true"></div>
+        <div class="hero-bg-layer"
+            style="background-image: url('{{ url_for('static', filename='images/tesla.png') }}');" aria-hidden="true">
+        </div>
 
         <div class="hero-mesh-overlay" aria-hidden="true"></div>
 
@@ -68,258 +63,325 @@
             <span class="hud-reticle-point rp-bottom">+</span>
         </div>
 
-        <div class="hero-overlay-card">
-            <div class="hero-sigil-badge" aria-hidden="true">
-                <svg class="sigil-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor">
-                    <path d="M5 6 L12 14 L5 22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M23 6 L16 14 L23 22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <line x1="8" y1="10" x2="20" y2="10" stroke-width="1.8" />
-                    <line x1="7" y1="14" x2="21" y2="14" stroke-width="2.2" />
-                    <line x1="8" y1="18" x2="20" y2="18" stroke-width="1.8" />
-                </svg>
-            </div>
+        <div class="hero-container">
+            <div class="hero-overlay-card">
+                <div class="hero-sigil-badge" aria-hidden="true">
+                    <svg class="sigil-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor">
+                        <path d="M5 6 L12 14 L5 22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M23 6 L16 14 L23 22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <line x1="8" y1="10" x2="20" y2="10" stroke-width="1.8" />
+                        <line x1="7" y1="14" x2="21" y2="14" stroke-width="2.2" />
+                        <line x1="8" y1="18" x2="20" y2="18" stroke-width="1.8" />
+                    </svg>
+                </div>
 
-            <div class="hero-title-bracket-box">
-                <span class="box-corner c-tl">┌</span>
-                <span class="box-corner c-tr">┐</span>
-                <span class="box-corner c-bl">└</span>
-                <span class="box-corner c-br">┘</span>
-                <h1 class="hero-cyber-title">DITHERIX</h1>
-            </div>
+                <div class="hero-title-bracket-box">
+                    <span class="box-corner c-tl" aria-hidden="true">┌</span>
+                    <span class="box-corner c-tr" aria-hidden="true">┐</span>
+                    <span class="box-corner c-bl" aria-hidden="true">└</span>
+                    <span class="box-corner c-br" aria-hidden="true">┘</span>
+                    <h1 class="hero-cyber-title">DITHERIX</h1>
+                </div>
 
-            <div class="hero-pill-tag">
-                <span>FASHION + COMPOSITING</span>
-            </div>
+                <div class="hero-category-meta">
+                    <span class="meta-bracket" aria-hidden="true">[</span>
+                    <span class="meta-label">Estudio fotografico analogico</span>
+                    <span class="meta-bracket" aria-hidden="true">]</span>
+                </div>
 
-            <div class="hero-statement-box">
-                <span class="box-corner c-tl">┌</span>
-                <span class="box-corner c-tr">┐</span>
-                <span class="box-corner c-bl">└</span>
-                <span class="box-corner c-br">┘</span>
-                <p class="hero-statement-p">
-                    Un conflicto entre lo digital &amp; analogo, antiguo &amp; futurista, maquina &amp; organico.
-                </p>
-            </div>
+                <div class="hero-statement-box">
+                    <p class="hero-statement-p">
+                        Edicion fotografica analoga, difusion de error y estetica cyber sin perdida.
+                    </p>
+                </div>
 
-            <div class="hero-cta-action">
-                <a href="/editor" class="hero-full-project-btn" id="fullProjectBtn">
-                    + PROYECTO +
-                </a>
+                <div class="hero-cta-action">
+                    <a href="/editor" class="btn btn--primary hero-project-btn">
+                        <span>Ingresar al editor</span>
+                    </a>
+                </div>
             </div>
         </div>
 
-        <a href="#frecuencia" class="hero-scroll-cue" aria-label="Desplazar a características">
-            <span class="cue-label">SCROLL</span>
-            <span class="cue-arrow">↓</span>
+        <a href="#herramientas" class="hero-scroll-cue" aria-label="Desplazar a herramientas">
+            <span class="cue-label">Explorar</span>
+            <span class="cue-arrow" aria-hidden="true">↓</span>
         </a>
     </section>
 
-    <main class="landing-main" id="frecuencia">
+    <section class="soundwave-divider" aria-label="Visualizador de frecuencia">
+        <div class="soundwave-header">
+            <span class="sw-label">Matriz de frecuencia 44.1 kHz (buffer activo)</span>
+            <span class="sw-sigil" aria-hidden="true">▲ ◈ ▼</span>
+            <span class="sw-status">Senal calibrada</span>
+        </div>
+        <div class="soundwave-canvas-wrap">
+            <canvas id="waveformCanvas" width="1200" height="64" aria-hidden="true"></canvas>
+        </div>
+    </section>
 
-        <section class="soundwave-divider" aria-label="Visualizador de frecuencia Y2K">
-            <div class="soundwave-header">
-                <span class="sw-label">FREQ_MATRIX // 9901101 // SAMPLING RATE: 44.1 KHZ</span>
-                <span class="sw-sigil">◬ ◭ ▲ ◈ ▼ ◮ ◬</span>
-                <span class="sw-status">SIGNAL: STABLE</span>
+    <main class="tools-section" id="herramientas">
+        <div class="container">
+            <div class="section-head-wrap">
+                <h2 class="section-title">Herramientas del estudio</h2>
+                <p class="section-desc">Modulo integral de procesamiento matricial y calibracion analoga para negativos
+                    digitales.</p>
             </div>
-            <div class="soundwave-canvas-wrap">
-                <canvas id="waveformCanvas" width="1200" height="70"></canvas>
+
+            <div class="tools-grid">
+                <!-- Herramienta 01: Insertar imagen -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/Imagen-1.png') }}" alt="Carga de imagen"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Importacion</span>
+                            <span class="tool-index num">[ 01 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Insertar imagen</h3>
+                        <p class="tool-desc">Carga archivos locales en formatos JPEG, PNG y WebP directamente en memoria
+                            mediante seleccion o arrastre interactivo.</p>
+                    </div>
+                </article>
+
+                <!-- Herramienta 02: Recortar la imagen -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/Imagen-2.png') }}" alt="Recorte de imagen"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Encuadre</span>
+                            <span class="tool-index num">[ 02 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Recorte milimetrico</h3>
+                        <p class="tool-desc">Define el encuadre con relacion de aspecto libre o proporciones fijas sobre
+                            el visor panoramico sin degradar el lienzo.</p>
+                    </div>
+                </article>
+
+                <!-- Herramienta 03: Descarga de imagen -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/Imagen-3.png') }}" alt="Descarga de imagen"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Exportacion</span>
+                            <span class="tool-index num">[ 03 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Descarga sin perdida</h3>
+                        <p class="tool-desc">Exporta composiciones de hasta 25 MB en PNG o JPEG con resolucion completa
+                            y sin compresion destructiva ni marcas de agua.</p>
+                    </div>
+                </article>
+
+                <!-- Herramienta 04: Ajustes de edicion -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/tesla.png') }}" alt="Ajustes de edicion"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Luminancia</span>
+                            <span class="tool-index num">[ 04 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Ajustes de exposicion</h3>
+                        <p class="tool-desc">Controla exposicion, brillo de luminancia y curvas de contraste dinamico
+                            profundo para acentuar blancos y sombras puras.</p>
+                    </div>
+                </article>
+
+                <!-- Herramienta 05: Ajustes de detalle -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/Imagen-3.png') }}" alt="Ajustes de detalle"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Textura</span>
+                            <span class="tool-index num">[ 05 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Ajustes de detalle</h3>
+                        <p class="tool-desc">Modula la densidad de grano analogico de pelicula de 35mm, mascara de
+                            enfoque de alta frecuencia y desenfoque optico.</p>
+                    </div>
+                </article>
+
+                <!-- Herramienta 06: Dithering -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/Imagen-1.png') }}" alt="Motor de Dithering"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Difusion</span>
+                            <span class="tool-index num">[ 06 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Motor de Dithering</h3>
+                        <p class="tool-desc">Aplica difusion de error Floyd-Steinberg, matrices Bayer 4×4 y 8×8, tramado
+                            Atkinson y ocho paletas retro calibradas.</p>
+                    </div>
+                </article>
+
+                <!-- Herramienta 07: Flip horizontal y vertical -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/Imagen-2.png') }}" alt="Volteo y giro"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Geometria</span>
+                            <span class="tool-index num">[ 07 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Transformacion y giro</h3>
+                        <p class="tool-desc">Ejecuta rotacion axial ortogonal en pasos de 90 grados y volteo en espejo
+                            horizontal y vertical sin perdida de pixeles.</p>
+                    </div>
+                </article>
+
+                <!-- Herramienta 08: Marcos -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/tesla.png') }}" alt="Marcos y bordes"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Bordes</span>
+                            <span class="tool-index num">[ 08 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Marcos y delimitacion</h3>
+                        <p class="tool-desc">Incorpora contornos retro, bordes de tubo catodico y biseles de inspiracion
+                            Y2K para rematar la composicion final.</p>
+                    </div>
+                </article>
+
+                <!-- Herramienta 09: Ajustes preestablecidos -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/Imagen-1.png') }}" alt="Ajustes preestablecidos"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Presets</span>
+                            <span class="tool-index num">[ 09 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Ajustes preestablecidos</h3>
+                        <p class="tool-desc">Aplica configuraciones tonales inmediatas inspiradas en consolas clasicas,
+                            estetica cyberpunk y monitores monocromo.</p>
+                    </div>
+                </article>
+
+                <!-- Herramienta 10: Balance de temperatura y color -->
+                <article class="tool-card">
+                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+                    <div class="tool-visual">
+                        <img src="{{ url_for('static', filename='images/Imagen-2.png') }}" alt="Balance de color"
+                            class="tool-img" loading="lazy" width="600" height="340">
+                        <div class="tool-visual-meta">
+                            <span class="tool-tag">Temperatura</span>
+                            <span class="tool-index num">[ 10 ]</span>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <h3 class="tool-title">Balance de color</h3>
+                        <p class="tool-desc">Ajusta la calidez cromatica, modula la temperatura de blancos y personaliza
+                            la saturacion tonal en cada canal.</p>
+                    </div>
+                </article>
             </div>
-        </section>
-
-        <section class="features-section" id="caracteristicas">
-            <article class="feature-row row-image-left">
-                <div class="feature-visual-col">
-                    <div class="tech-card-viewport">
-                        <span class="tc-corner tc-tl">┌</span>
-                        <span class="tc-corner tc-tr">┐</span>
-                        <span class="tc-corner tc-bl">└</span>
-                        <span class="tc-corner tc-br">┘</span>
-                        <div class="tc-header-hud">
-                            <span class="tc-badge">[ SEC_01 // TEXTURE_ALGORITHM ]</span>
-                            <span class="tc-coords">MATRIX: BAYER_8X8</span>
-                        </div>
-                        <div class="tc-image-container">
-                            <img src="{{ url_for('static', filename='images/Imagen-1.png') }}" alt="Ejemplo Matrix"
-                                class="tc-img" loading="lazy">
-                            <div class="tc-scanline-fx"></div>
-                            <div class="tc-crosshair ch-1">+</div>
-                            <div class="tc-crosshair ch-2">+</div>
-                        </div>
-                        <div class="tc-footer-hud">
-                            <span class="tc-footer-tag">STATUS: 1-BIT DITHER RASTER</span>
-                            <span class="tc-footer-id">ID #8841-DX</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="feature-text-col">
-                    <div class="text-meta-badge">
-                        <span class="meta-bracket">[</span>
-                        <span class="meta-number">01</span>
-                        <span class="meta-sep">//</span>
-                        <span class="meta-name">DITHERING DE SEMITONO</span>
-                        <span class="meta-bracket">]</span>
-                    </div>
-                    <h2 class="feature-title">Algoritmos de Difusión y Textura Binaria</h2>
-                    <p class="feature-body">
-                        Transforma gradientes continuos en patrones de ruido estructurado, tramas de difusión de error y
-                        matrices de dispersión inspiradas en los primeros motores de renderizado de los 90s y 2000s.
-                    </p>
-                    <p class="feature-body-secondary">
-                        Genera texturas táctiles e hiper-estilizadas que preservan la silueta y tridimensionalidad de
-                        tus retratos con una crudeza cibernética inconfundible.
-                    </p>
-                    <ul class="tech-spec-list">
-                        <li><span class="spec-bullet">◈</span> Difusión de error Floyd-Steinberg estocástica</li>
-                        <li><span class="spec-bullet">◈</span> Matriz de dispersión Bayer y semitonos CRT</li>
-                        <li><span class="spec-bullet">◈</span> Conversión monocromo de alto impacto visual</li>
-                    </ul>
-                </div>
-            </article>
-
-            <article class="feature-row row-text-left">
-                <div class="feature-text-col">
-                    <div class="text-meta-badge">
-                        <span class="meta-bracket">[</span>
-                        <span class="meta-number">02</span>
-                        <span class="meta-sep">//</span>
-                        <span class="meta-name">DINÁMICA TONAL</span>
-                        <span class="meta-bracket">]</span>
-                    </div>
-                    <h2 class="feature-title">Control Analógico de Exposición y Detalle</h2>
-                    <p class="feature-body">
-                        Modula brillo, contraste brutal, saturación desaturada o sobreexpuesta, nitidez extrema y
-                        desenfoque analógico para evocar la imperfección cruda de cámaras de vigilancia y monitores de
-                        tubo catódico.
-                    </p>
-                    <p class="feature-body-secondary">
-                        Ajusta en tiempo real cada canal con respuesta instantánea de previsualización sin alterar el
-                        archivo original.
-                    </p>
-                    <ul class="tech-spec-list">
-                        <li><span class="spec-bullet">◈</span> Contraste brutalista con negros profundos</li>
-                        <li><span class="spec-bullet">◈</span> Nitidez quirúrgica y desenfoque cinematográfico</li>
-                        <li><span class="spec-bullet">◈</span> Control no destructivo con memoria en sesión</li>
-                    </ul>
-                </div>
-
-                <div class="feature-visual-col">
-                    <div class="tech-card-viewport">
-                        <span class="tc-corner tc-tl">┌</span>
-                        <span class="tc-corner tc-tr">┐</span>
-                        <span class="tc-corner tc-bl">└</span>
-                        <span class="tc-corner tc-br">┘</span>
-                        <div class="tc-header-hud">
-                            <span class="tc-badge">[ SEC_02 // SHADOW_PORTAL ]</span>
-                            <span class="tc-coords">EXPOSURE: DYNAMIC_CLAMP</span>
-                        </div>
-                        <div class="tc-image-container">
-                            <img src="{{ url_for('static', filename='images/Imagen-3.png') }}" alt="Ejemplo One piece"
-                                class="tc-img" loading="lazy">
-                            <div class="tc-scanline-fx"></div>
-                            <div class="tc-crosshair ch-1">+</div>
-                            <div class="tc-crosshair ch-2">+</div>
-                        </div>
-                        <div class="tc-footer-hud">
-                            <span class="tc-footer-tag">PIPELINE: EXPOSURE + SHARPNESS</span>
-                            <span class="tc-footer-id">ID #2209-SP</span>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <article class="feature-row row-image-left">
-                <div class="feature-visual-col">
-                    <div class="tech-card-viewport">
-                        <span class="tc-corner tc-tl">┌</span>
-                        <span class="tc-corner tc-tr">┐</span>
-                        <span class="tc-corner tc-bl">└</span>
-                        <span class="tc-corner tc-br">┘</span>
-                        <div class="tc-header-hud">
-                            <span class="tc-badge">[ SEC_03 // ALCHEMY_MATRIX ]</span>
-                            <span class="tc-coords">BUFFER: 25MB_LOSSLESS</span>
-                        </div>
-                        <div class="tc-image-container">
-                            <img src="{{ url_for('static', filename='images/Imagen-2.png') }}" alt="Ejemplo pintura"
-                                class="tc-img" loading="lazy">
-                            <div class="tc-scanline-fx"></div>
-                            <div class="tc-crosshair ch-1">+</div>
-                            <div class="tc-crosshair ch-2">+</div>
-                        </div>
-                        <div class="tc-footer-hud">
-                            <span class="tc-footer-tag">EXPORT: LOSSLESS FULL RESOLUTION</span>
-                            <span class="tc-footer-id">ID #9901-AM</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="feature-text-col">
-                    <div class="text-meta-badge">
-                        <span class="meta-bracket">[</span>
-                        <span class="meta-number">03</span>
-                        <span class="meta-sep">//</span>
-                        <span class="meta-name">PRECISIÓN Y GEOMETRÍA</span>
-                        <span class="meta-bracket">]</span>
-                    </div>
-                    <h2 class="feature-title">Recorte de Precisión y Exportación Sin Pérdidas</h2>
-                    <p class="feature-body">
-                        Manipulación de perspectiva, volteo horizontal y vertical dimensional, y recorte milimétrico
-                        interactivo sobre el visor panorámico.
-                    </p>
-                    <p class="feature-body-secondary">
-                        Procesa archivos de hasta 25 MB directamente en memoria con cero pérdida de píxeles, entregando
-                        composiciones listas para imprenta, portadas musicales o publicaciones digitales.
-                    </p>
-                    <ul class="tech-spec-list">
-                        <li><span class="spec-bullet">◈</span> Visor panorámico con zoom táctil y arrastre</li>
-                        <li><span class="spec-bullet">◈</span> Recorte interactivo con relación de aspecto libre</li>
-                        <li><span class="spec-bullet">◈</span> Descarga inmediata sin compresión destructiva</li>
-                    </ul>
-                </div>
-            </article>
-        </section>
-
-        <section class="bottom-cta-section" id="acerca">
-            <div class="bottom-cta-inner">
-                <div class="cyber-sigil-icon" aria-hidden="true">
-                    <span>◈</span>
-                </div>
-                <h2 class="bottom-cta-title">TRANSFORMA TU FOTOGRAFÍA AL VACÍO CIBERNÉTICO</h2>
-                <p class="bottom-cta-subtitle">
-                    Sin registros obligatorios ni marcas de agua. Carga tu imagen y explora la estética Y2K de
-                    inmediato.
-                </p>
-
-                <div class="bottom-pill-wrap">
-                    <a href="/editor" class="figma-pill-btn bottom-pill-btn">
-                        <span class="btn-glow-layer"></span>
-                        <span class="btn-text">Empieza a usar Ditherix</span>
-                        <span class="btn-arrow">→</span>
-                    </a>
-                </div>
-
-                <div class="cyber-glyphs-line" aria-hidden="true">
-                    <span>◬</span> <span>◭</span> <span>▲</span> <span>◈</span> <span>▼</span> <span>◮</span>
-                    <span>◬</span>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
+
+    <section class="bottom-action-section" id="acerca">
+        <div class="container bottom-action-inner">
+            <div class="cyber-sigil-icon" aria-hidden="true">
+                <span>◈</span>
+            </div>
+            <h2 class="bottom-action-title">Transforma tu fotografia en Ditherix</h2>
+            <p class="bottom-action-subtitle">
+                Sin registros obligatorios ni marcas de agua. Carga tu imagen y explora la estetica analogica al
+                instante.
+            </p>
+
+            <div class="bottom-pill-wrap">
+                <a href="/editor" class="btn btn--primary bottom-pill-btn">
+                    <span class="btn-text">Ingresar a Ditherix</span>
+                </a>
+            </div>
+
+            <div class="cyber-glyphs-line" aria-hidden="true">
+                <span>▲</span> <span>◈</span> <span>▼</span>
+            </div>
+        </div>
+    </section>
+
     <footer class="landing-footer" id="contacto">
-        <div class="footer-inner">
+        <div class="container footer-inner">
             <div class="footer-left">
                 <span class="footer-logo">Ditherix</span>
+                <span class="footer-sub">Laboratorio de composicion y dithering fotografico</span>
             </div>
             <div class="footer-center">
-                <span class="footer-coords">[ LAT: 34.6037° S • LON: 58.3816° W ]</span>
+                <span class="footer-coords num">Coordenadas: 34.6037° S, 58.3816° W</span>
             </div>
             <div class="footer-right">
                 <a href="mailto:limeresjoaquin@gmail.com" class="footer-email">limeresjoaquin@gmail.com</a>
             </div>
         </div>
         <div class="footer-bottom-bar">
-            <span>© 2026 DITHERIX.</span>
+            <div class="container footer-bottom-inner">
+                <span class="num">© 2026 Ditherix. Codigo abierto.</span>
+            </div>
         </div>
     </footer>
 

@@ -13,6 +13,9 @@ PALETAS = {
     "cga": [(0, 0, 0), (85, 255, 255), (255, 85, 255), (255, 255, 255)],
     "ambar": [(20, 10, 0), (100, 48, 0), (190, 110, 0), (255, 185, 0)],
     "cyberpunk": [(10, 10, 24), (255, 0, 90), (0, 235, 255), (255, 255, 255)],
+    "matrix": [(5, 15, 5), (15, 60, 20), (35, 160, 45), (140, 255, 150)],
+    "vaporwave": [(25, 10, 40), (150, 40, 140), (255, 110, 180), (100, 240, 255)],
+    "termica": [(0, 0, 40), (120, 0, 140), (230, 60, 20), (255, 220, 0), (255, 255, 255)],
 }
 
 MATRIZ_BAYER_4X4 = [
@@ -143,6 +146,7 @@ def aplicar_dithering(
     algoritmo: str,
     paleta_nombre: str = "bn",
     tamano_pixel: int = 1,
+    intensidad: int = 100,
 ) -> Image.Image:
     """
     Aplica dithering o cuantización de color sobre una imagen PIL.
@@ -192,9 +196,23 @@ def aplicar_dithering(
 
     # Restaurar tamaño original con escalado NEAREST para que los píxeles queden nítidos y cuadrados
     if tamano_pixel > 1:
-        final = dithered.resize((ancho_orig, alto_orig), Image.Resampling.NEAREST)
+        resultado = dithered.resize((ancho_orig, alto_orig), Image.Resampling.NEAREST)
         dithered.close()
-        return final
+    else:
+        resultado = dithered
 
-    return dithered
+    # Mezcla de intensidad (0..100) para permitir que la foto original se trasluzca
+    intensidad = max(0, min(100, int(intensidad)))
+    if intensidad <= 0:
+        if resultado is not imagen:
+            resultado.close()
+        return imagen
+    elif intensidad < 100:
+        alpha = intensidad / 100.0
+        mezcla = Image.blend(imagen.convert("RGB"), resultado, alpha)
+        if resultado is not imagen:
+            resultado.close()
+        return mezcla
+
+    return resultado
 

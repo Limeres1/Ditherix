@@ -4,6 +4,7 @@ const botonExportar = document.getElementById("botonExportar");
 const botonCargar = document.getElementById("botonCargar");
 const imageInput = document.getElementById("imageInput");
 const preview = document.getElementById("preview");
+const dropZone = document.getElementById("dropZone");
 const mensaje = document.getElementById("mensaje");
 const indicadorCarga = document.getElementById("cargando");
 const brilloInput = document.getElementById("brilloInput");
@@ -24,6 +25,8 @@ const botonAplicarDetalle = document.getElementById("botonAplicarDetalle");
 const botonResetDetalle = document.getElementById("botonResetDetalle");
 const ditherAlgoritmo = document.getElementById("ditherAlgoritmo");
 const ditherPaleta = document.getElementById("ditherPaleta");
+const ditherIntensidadInput = document.getElementById("ditherIntensidadInput");
+const ditherIntensidadValor = document.getElementById("ditherIntensidadValor");
 const ditherPixelInput = document.getElementById("ditherPixelInput");
 const ditherPixelValor = document.getElementById("ditherPixelValor");
 const botonAplicarDither = document.getElementById("botonAplicarDither");
@@ -39,6 +42,75 @@ const contenedorVisor = document.getElementById("visor");
 const escenarioImagen = document.getElementById("escenario");
 const botonVoltearHorizontal = document.getElementById("botonVoltearHorizontal");
 const botonVoltearVertical = document.getElementById("botonVoltearVertical");
+const tabBtnBalance = document.getElementById("tab-btn-balance");
+const tabBtnMezcla = document.getElementById("tab-btn-mezcla");
+const colorViewBalance = document.getElementById("color-view-balance");
+const colorViewMezcla = document.getElementById("color-view-mezcla");
+const temperaturaInput = document.getElementById("temperaturaInput");
+const temperaturaValor = document.getElementById("temperaturaValor");
+const tinteInput = document.getElementById("tinteInput");
+const tinteValor = document.getElementById("tinteValor");
+const swatchButtons = document.querySelectorAll(".color-swatch-circle");
+const colorActiveDot = document.getElementById("colorActiveDot");
+const colorActiveName = document.getElementById("colorActiveName");
+const hslTonoInput = document.getElementById("hslTonoInput");
+const hslTonoValor = document.getElementById("hslTonoValor");
+const hslSatInput = document.getElementById("hslSatInput");
+const hslSatValor = document.getElementById("hslSatValor");
+const hslLumInput = document.getElementById("hslLumInput");
+const hslLumValor = document.getElementById("hslLumValor");
+const botonResetColor = document.getElementById("botonResetColor");
+const botonAplicarColor = document.getElementById("botonAplicarColor");
+
+const marcoEstiloSelect = document.getElementById("marcoEstiloSelect");
+const opcionesMarcoLiso = document.getElementById("opcionesMarcoLiso");
+const marcoColorInput = document.getElementById("marcoColorInput");
+const marcoGrosorInput = document.getElementById("marcoGrosorInput");
+const marcoGrosorValor = document.getElementById("marcoGrosorValor");
+const botonResetMarco = document.getElementById("botonResetMarco");
+const botonAplicarMarco = document.getElementById("botonAplicarMarco");
+const presetColorDots = document.querySelectorAll(".preset-color-dot");
+
+function crearEstadoMarcoDefecto() {
+    return {
+        estilo: "ninguno",
+        color: "#ffffff",
+        grosor: 24,
+    };
+}
+
+let estadoMarco = crearEstadoMarcoDefecto();
+
+const CANALES_COLOR_INFO = {
+    rojo: { nombre: "Rojo", color: "#ff3b30" },
+    naranja: { nombre: "Naranja", color: "#ff9500" },
+    amarillo: { nombre: "Amarillo", color: "#ffcc00" },
+    verde: { nombre: "Verde", color: "#34c759" },
+    cyan: { nombre: "Cyan", color: "#32ade6" },
+    azul: { nombre: "Azul", color: "#007aff" },
+    violeta: { nombre: "Violeta", color: "#af52de" },
+    rosa: { nombre: "Rosa", color: "#ff2d55" }
+};
+
+function crearEstadoColorDefecto() {
+    return {
+        temperatura: 0,
+        tinte: 0,
+        mezcla: {
+            rojo: { tono: 0, saturacion: 0, luminancia: 0 },
+            naranja: { tono: 0, saturacion: 0, luminancia: 0 },
+            amarillo: { tono: 0, saturacion: 0, luminancia: 0 },
+            verde: { tono: 0, saturacion: 0, luminancia: 0 },
+            cyan: { tono: 0, saturacion: 0, luminancia: 0 },
+            azul: { tono: 0, saturacion: 0, luminancia: 0 },
+            violeta: { tono: 0, saturacion: 0, luminancia: 0 },
+            rosa: { tono: 0, saturacion: 0, luminancia: 0 }
+        }
+    };
+}
+
+let canalColorActivo = "rojo";
+let estadoColor = crearEstadoColorDefecto();
 
 let imagenActual = null;
 let solicitudActual = 0;
@@ -56,9 +128,26 @@ function mostrarMensaje(texto) {
     mensaje.classList.toggle("oculto", !texto);
 }
 
+function actualizarEstadoDropZone() {
+    if (!dropZone) return;
+    const hayImagen = Boolean(imagenActual) || (preview && preview.src && !preview.classList.contains("oculto"));
+    if (hayImagen) {
+        dropZone.classList.add("oculto");
+        dropZone.style.setProperty("display", "none", "important");
+    } else {
+        dropZone.classList.remove("oculto");
+        dropZone.style.removeProperty("display");
+    }
+}
+
 function mostrarValorSlider(valor) {
     const numero = Number(valor);
     return `${numero > 0 ? "+" : ""}${numero}%`;
+}
+
+function mostrarValorEntero(valor) {
+    const numero = Number(valor);
+    return `${numero > 0 ? "+" : ""}${numero}`;
 }
 
 function actualizarControlesEdicion() {
@@ -79,9 +168,28 @@ function actualizarControlesEdicion() {
 
     if (ditherAlgoritmo) ditherAlgoritmo.disabled = deshabilitadosPorRecorte;
     if (ditherPaleta) ditherPaleta.disabled = deshabilitadosPorRecorte;
+    if (ditherIntensidadInput) ditherIntensidadInput.disabled = deshabilitadosPorRecorte;
     if (ditherPixelInput) ditherPixelInput.disabled = deshabilitadosPorRecorte;
     if (botonAplicarDither) botonAplicarDither.disabled = deshabilitadosPorRecorte;
     if (botonResetDither) botonResetDither.disabled = deshabilitadosPorRecorte;
+
+    if (temperaturaInput) temperaturaInput.disabled = deshabilitadosPorRecorte;
+    if (tinteInput) tinteInput.disabled = deshabilitadosPorRecorte;
+    if (hslTonoInput) hslTonoInput.disabled = deshabilitadosPorRecorte;
+    if (hslSatInput) hslSatInput.disabled = deshabilitadosPorRecorte;
+    if (hslLumInput) hslLumInput.disabled = deshabilitadosPorRecorte;
+    if (botonResetColor) botonResetColor.disabled = deshabilitadosPorRecorte;
+    if (botonAplicarColor) botonAplicarColor.disabled = deshabilitadosPorRecorte;
+    swatchButtons.forEach(btn => btn.disabled = deshabilitadosPorRecorte);
+    if (tabBtnBalance) tabBtnBalance.disabled = deshabilitadosPorRecorte;
+    if (tabBtnMezcla) tabBtnMezcla.disabled = deshabilitadosPorRecorte;
+
+    if (marcoEstiloSelect) marcoEstiloSelect.disabled = deshabilitadosPorRecorte;
+    if (marcoColorInput) marcoColorInput.disabled = deshabilitadosPorRecorte;
+    if (marcoGrosorInput) marcoGrosorInput.disabled = deshabilitadosPorRecorte;
+    if (botonResetMarco) botonResetMarco.disabled = deshabilitadosPorRecorte;
+    if (botonAplicarMarco) botonAplicarMarco.disabled = deshabilitadosPorRecorte;
+    presetColorDots.forEach(dot => dot.disabled = deshabilitadosPorRecorte);
 
     btnIniciarRecorte.disabled = deshabilitados;
     botonVoltearHorizontal.disabled = deshabilitadosPorRecorte;
@@ -113,6 +221,11 @@ function establecerModoRecorte(activar) {
     }
 
     if (activar) {
+        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
+        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
+        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
+        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
         indicadorCarga.textContent = "Arrastra sobre la imagen para seleccionar el recorte.";
         indicadorCarga.classList.remove("oculto");
     } else if (!procesandoAccion && !controladorCarga) {
@@ -234,8 +347,7 @@ botonCargar.addEventListener("click", () => {
     imageInput.click();
 });
 
-imageInput.addEventListener("change", async () => {
-    const archivo = imageInput.files[0];
+async function procesarArchivoSubida(archivo) {
     if (!archivo) {
         return;
     }
@@ -259,8 +371,19 @@ imageInput.addEventListener("change", async () => {
     if (granoValor) granoValor.value = "0%";
     if (ditherAlgoritmo) ditherAlgoritmo.value = "ninguno";
     if (ditherPaleta) ditherPaleta.value = "bn";
+    if (ditherIntensidadInput) ditherIntensidadInput.value = "100";
+    if (ditherIntensidadValor) ditherIntensidadValor.value = "100%";
     if (ditherPixelInput) ditherPixelInput.value = "1";
     if (ditherPixelValor) ditherPixelValor.value = "1 px";
+    estadoColor = crearEstadoColorDefecto();
+    canalColorActivo = "rojo";
+    sincronizarTodosLosControlesColor();
+    estadoMarco = crearEstadoMarcoDefecto();
+    if (marcoEstiloSelect) marcoEstiloSelect.value = "ninguno";
+    if (marcoColorInput) marcoColorInput.value = "#ffffff";
+    if (marcoGrosorInput) marcoGrosorInput.value = "24";
+    if (marcoGrosorValor) marcoGrosorValor.value = "24 px";
+    if (typeof actualizarOpcionesMarcoUI === "function") actualizarOpcionesMarcoUI();
     actualizarControlesEdicion();
 
     if (controladorCarga) {
@@ -281,6 +404,10 @@ imageInput.addEventListener("change", async () => {
     preview.classList.add("oculto");
     preview.removeAttribute("src");
     indicadorCarga.classList.remove("oculto");
+    if (dropZone) {
+        dropZone.classList.add("oculto");
+        dropZone.style.setProperty("display", "none", "important");
+    }
 
     try {
         const respuesta = await fetch("/upload", {
@@ -295,6 +422,7 @@ imageInput.addEventListener("change", async () => {
         }
         if (!respuesta.ok || !resultado.ok) {
             mostrarMensaje(resultado.mensaje || "No se pudo procesar la imagen.");
+            actualizarEstadoDropZone();
             return;
         }
 
@@ -307,11 +435,12 @@ imageInput.addEventListener("change", async () => {
         }
         if (!vistaCargada) {
             mostrarMensaje("No se pudo mostrar la imagen procesada. Inténtalo de nuevo.");
+            actualizarEstadoDropZone();
             return;
         }
 
-
         preview.classList.remove("oculto");
+        actualizarEstadoDropZone();
         if (typeof reiniciarVista === "function") {
             reiniciarVista();
         }
@@ -324,15 +453,99 @@ imageInput.addEventListener("change", async () => {
         } else {
             mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
         }
+        actualizarEstadoDropZone();
     } finally {
         if (numeroSolicitud === solicitudActual) {
             controladorCarga = null;
             indicadorCarga.classList.add("oculto");
             imageInput.value = "";
             actualizarControlesEdicion();
+            actualizarEstadoDropZone();
+        }
+    }
+}
+
+imageInput.addEventListener("change", () => {
+    const archivo = imageInput.files ? imageInput.files[0] : null;
+    if (archivo) {
+        procesarArchivoSubida(archivo);
+    }
+});
+
+if (dropZone) {
+    dropZone.addEventListener("click", () => {
+        imageInput.click();
+    });
+
+    dropZone.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            imageInput.click();
+        }
+    });
+
+    ["pointerdown", "dblclick"].forEach((evento) => {
+        dropZone.addEventListener(evento, (e) => e.stopPropagation());
+    });
+}
+
+// Configurar Drag and Drop en el visor
+let contadorArrastre = 0;
+
+["dragenter", "dragover", "dragleave", "drop"].forEach((nombreEvento) => {
+    window.addEventListener(nombreEvento, (e) => {
+        e.preventDefault();
+    }, false);
+});
+
+window.addEventListener("dragenter", (e) => {
+    e.preventDefault();
+    if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes("Files")) {
+        contadorArrastre++;
+        if (contenedorVisor) {
+            contenedorVisor.classList.add("drag-over");
         }
     }
 });
+
+window.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = "copy";
+    }
+});
+
+window.addEventListener("dragleave", (e) => {
+    e.preventDefault();
+    contadorArrastre = Math.max(0, contadorArrastre - 1);
+    if (contadorArrastre === 0 && contenedorVisor) {
+        contenedorVisor.classList.remove("drag-over");
+    }
+});
+
+window.addEventListener("drop", (e) => {
+    e.preventDefault();
+    contadorArrastre = 0;
+    if (contenedorVisor) {
+        contenedorVisor.classList.remove("drag-over");
+    }
+
+    const archivos = e.dataTransfer ? e.dataTransfer.files : null;
+    if (!archivos || archivos.length === 0) return;
+
+    const archivo = archivos[0];
+    const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
+    const extensionValida = /\.(jpe?g|png|webp)$/i.test(archivo.name || "");
+
+    if (!tiposPermitidos.includes(archivo.type) && !extensionValida) {
+        mostrarMensaje("Formato no compatible. Por favor sube una imagen JPEG, PNG o WebP.");
+        return;
+    }
+
+    procesarArchivoSubida(archivo);
+});
+
+actualizarEstadoDropZone();
 
 brilloInput.addEventListener("input", () => {
     brilloValor.value = mostrarValorSlider(brilloInput.value);
@@ -525,6 +738,12 @@ if (botonResetDetalle) {
     });
 }
 
+if (ditherIntensidadInput && ditherIntensidadValor) {
+    ditherIntensidadInput.addEventListener("input", () => {
+        ditherIntensidadValor.value = `${ditherIntensidadInput.value}%`;
+    });
+}
+
 if (ditherPixelInput && ditherPixelValor) {
     ditherPixelInput.addEventListener("input", () => {
         ditherPixelValor.value = `${ditherPixelInput.value} px`;
@@ -539,6 +758,7 @@ async function aplicarDithering() {
     const algo = ditherAlgoritmo ? ditherAlgoritmo.value : "ninguno";
     const pal = ditherPaleta ? ditherPaleta.value : "bn";
     const pixel = Number(ditherPixelInput ? ditherPixelInput.value : 1);
+    const intensidad = Number(ditherIntensidadInput ? ditherIntensidadInput.value : 100);
 
     const numeroSolicitud = ++solicitudActual;
     const imagenId = imagenActual;
@@ -555,6 +775,7 @@ async function aplicarDithering() {
                 algoritmo: algo,
                 paleta: pal,
                 tamano_pixel: pixel,
+                intensidad: intensidad,
             }),
         });
         const resultado = await respuesta.json();
@@ -606,9 +827,194 @@ if (botonResetDither) {
         if (!imagenActual || procesandoAccion || modoRecorte) return;
         if (ditherAlgoritmo) ditherAlgoritmo.value = "ninguno";
         if (ditherPaleta) ditherPaleta.value = "bn";
+        if (ditherIntensidadInput) ditherIntensidadInput.value = "100";
+        if (ditherIntensidadValor) ditherIntensidadValor.value = "100%";
         if (ditherPixelInput) ditherPixelInput.value = "1";
         if (ditherPixelValor) ditherPixelValor.value = "1 px";
         aplicarDithering();
+    });
+}
+
+function sincronizarSlidersCanalActivo() {
+    const canal = (estadoColor.mezcla && estadoColor.mezcla[canalColorActivo]) || { tono: 0, saturacion: 0, luminancia: 0 };
+    if (hslTonoInput) {
+        hslTonoInput.value = String(canal.tono);
+        if (hslTonoValor) hslTonoValor.value = mostrarValorEntero(canal.tono);
+    }
+    if (hslSatInput) {
+        hslSatInput.value = String(canal.saturacion);
+        if (hslSatValor) hslSatValor.value = mostrarValorSlider(canal.saturacion);
+    }
+    if (hslLumInput) {
+        hslLumInput.value = String(canal.luminancia);
+        if (hslLumValor) hslLumValor.value = mostrarValorSlider(canal.luminancia);
+    }
+
+    swatchButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.color === canalColorActivo);
+    });
+
+    const info = CANALES_COLOR_INFO[canalColorActivo];
+    if (info) {
+        if (colorActiveDot) colorActiveDot.style.background = info.color;
+        if (colorActiveName) colorActiveName.textContent = info.nombre;
+    }
+}
+
+function sincronizarTodosLosControlesColor() {
+    if (temperaturaInput) {
+        temperaturaInput.value = String(estadoColor.temperatura);
+        if (temperaturaValor) temperaturaValor.value = mostrarValorEntero(estadoColor.temperatura);
+    }
+    if (tinteInput) {
+        tinteInput.value = String(estadoColor.tinte);
+        if (tinteValor) tinteValor.value = mostrarValorEntero(estadoColor.tinte);
+    }
+    sincronizarSlidersCanalActivo();
+}
+
+if (tabBtnBalance && tabBtnMezcla) {
+    tabBtnBalance.addEventListener("click", () => {
+        tabBtnBalance.classList.add("active");
+        tabBtnMezcla.classList.remove("active");
+        if (colorViewBalance) colorViewBalance.classList.remove("hidden");
+        if (colorViewMezcla) colorViewMezcla.classList.add("hidden");
+    });
+
+    tabBtnMezcla.addEventListener("click", () => {
+        tabBtnMezcla.classList.add("active");
+        tabBtnBalance.classList.remove("active");
+        if (colorViewMezcla) colorViewMezcla.classList.remove("hidden");
+        if (colorViewBalance) colorViewBalance.classList.add("hidden");
+    });
+}
+
+swatchButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        const canal = btn.dataset.color;
+        if (canal && CANALES_COLOR_INFO[canal]) {
+            canalColorActivo = canal;
+            sincronizarSlidersCanalActivo();
+        }
+    });
+});
+
+if (temperaturaInput) {
+    temperaturaInput.addEventListener("input", () => {
+        estadoColor.temperatura = Number(temperaturaInput.value);
+        if (temperaturaValor) temperaturaValor.value = mostrarValorEntero(temperaturaInput.value);
+    });
+}
+
+if (tinteInput) {
+    tinteInput.addEventListener("input", () => {
+        estadoColor.tinte = Number(tinteInput.value);
+        if (tinteValor) tinteValor.value = mostrarValorEntero(tinteInput.value);
+    });
+}
+
+if (hslTonoInput) {
+    hslTonoInput.addEventListener("input", () => {
+        if (!estadoColor.mezcla[canalColorActivo]) {
+            estadoColor.mezcla[canalColorActivo] = { tono: 0, saturacion: 0, luminancia: 0 };
+        }
+        estadoColor.mezcla[canalColorActivo].tono = Number(hslTonoInput.value);
+        if (hslTonoValor) hslTonoValor.value = mostrarValorEntero(hslTonoInput.value);
+    });
+}
+
+if (hslSatInput) {
+    hslSatInput.addEventListener("input", () => {
+        if (!estadoColor.mezcla[canalColorActivo]) {
+            estadoColor.mezcla[canalColorActivo] = { tono: 0, saturacion: 0, luminancia: 0 };
+        }
+        estadoColor.mezcla[canalColorActivo].saturacion = Number(hslSatInput.value);
+        if (hslSatValor) hslSatValor.value = mostrarValorSlider(hslSatInput.value);
+    });
+}
+
+if (hslLumInput) {
+    hslLumInput.addEventListener("input", () => {
+        if (!estadoColor.mezcla[canalColorActivo]) {
+            estadoColor.mezcla[canalColorActivo] = { tono: 0, saturacion: 0, luminancia: 0 };
+        }
+        estadoColor.mezcla[canalColorActivo].luminancia = Number(hslLumInput.value);
+        if (hslLumValor) hslLumValor.value = mostrarValorSlider(hslLumInput.value);
+    });
+}
+
+async function aplicarColor() {
+    if (!imagenActual || procesandoAccion || modoRecorte) {
+        return;
+    }
+
+    const numeroSolicitud = ++solicitudActual;
+    const imagenId = imagenActual;
+    procesandoAccion = true;
+    actualizarControlesEdicion();
+    indicadorCarga.textContent = "Aplicando balance y mezcla de color…";
+    indicadorCarga.classList.remove("oculto");
+
+    try {
+        const respuesta = await fetch(`/imagen/${imagenId}/color`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                temperatura: estadoColor.temperatura,
+                tinte: estadoColor.tinte,
+                mezcla_color: estadoColor.mezcla
+            }),
+        });
+        const resultado = await respuesta.json();
+
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!respuesta.ok || !resultado.ok) {
+            mostrarMensaje(resultado.mensaje || "No se pudo aplicar la mezcla de color.");
+            return;
+        }
+
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!vistaCargada) {
+            mostrarMensaje("No se pudo mostrar la imagen con los ajustes de color aplicados.");
+            return;
+        }
+
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+    } catch (error) {
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (error instanceof SyntaxError) {
+            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+        } else {
+            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        }
+    } finally {
+        if (numeroSolicitud === solicitudActual) {
+            procesandoAccion = false;
+            actualizarControlesEdicion();
+            indicadorCarga.classList.add("oculto");
+            indicadorCarga.textContent = "Procesando imagen…";
+        }
+    }
+}
+
+if (botonAplicarColor) {
+    botonAplicarColor.addEventListener("click", () => aplicarColor());
+}
+
+if (botonResetColor) {
+    botonResetColor.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        estadoColor = crearEstadoColorDefecto();
+        sincronizarTodosLosControlesColor();
+        aplicarColor();
     });
 }
 
@@ -862,3 +1268,125 @@ botonVoltearHorizontal.addEventListener("click", () => {
 botonVoltearVertical.addEventListener("click", () => {
     voltearImagen("vertical");
 });
+
+function actualizarOpcionesMarcoUI() {
+    if (opcionesMarcoLiso) {
+        opcionesMarcoLiso.classList.toggle("hidden", estadoMarco.estilo !== "liso");
+    }
+    presetColorDots.forEach(dot => {
+        const dotColor = (dot.dataset.color || "").toLowerCase();
+        const activeColor = (estadoMarco.color || "").toLowerCase();
+        dot.classList.toggle("active", dotColor === activeColor);
+    });
+}
+
+if (marcoEstiloSelect) {
+    marcoEstiloSelect.addEventListener("change", () => {
+        estadoMarco.estilo = marcoEstiloSelect.value;
+        actualizarOpcionesMarcoUI();
+    });
+}
+
+if (marcoColorInput) {
+    marcoColorInput.addEventListener("input", () => {
+        estadoMarco.color = marcoColorInput.value;
+        actualizarOpcionesMarcoUI();
+    });
+}
+
+presetColorDots.forEach(dot => {
+    dot.addEventListener("click", () => {
+        const c = dot.dataset.color;
+        if (c) {
+            estadoMarco.color = c;
+            if (marcoColorInput) marcoColorInput.value = c;
+            actualizarOpcionesMarcoUI();
+        }
+    });
+});
+
+if (marcoGrosorInput) {
+    marcoGrosorInput.addEventListener("input", () => {
+        estadoMarco.grosor = Number(marcoGrosorInput.value);
+        if (marcoGrosorValor) marcoGrosorValor.value = `${marcoGrosorInput.value} px`;
+    });
+}
+
+async function aplicarMarco() {
+    if (!imagenActual || procesandoAccion || modoRecorte) {
+        return;
+    }
+
+    const numeroSolicitud = ++solicitudActual;
+    const imagenId = imagenActual;
+    procesandoAccion = true;
+    actualizarControlesEdicion();
+    indicadorCarga.textContent = "Aplicando marco decorativo…";
+    indicadorCarga.classList.remove("oculto");
+
+    try {
+        const respuesta = await fetch(`/imagen/${imagenId}/marco`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                estilo: estadoMarco.estilo,
+                color: estadoMarco.color,
+                grosor: estadoMarco.grosor,
+            }),
+        });
+        const resultado = await respuesta.json();
+
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!respuesta.ok || !resultado.ok) {
+            mostrarMensaje(resultado.mensaje || "No se pudo aplicar el marco decorativo.");
+            return;
+        }
+
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!vistaCargada) {
+            mostrarMensaje("No se pudo mostrar la imagen con el marco aplicado.");
+            return;
+        }
+
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+        if (typeof reiniciarVista === "function") {
+            reiniciarVista();
+        }
+    } catch (error) {
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (error instanceof SyntaxError) {
+            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+        } else {
+            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        }
+    } finally {
+        if (numeroSolicitud === solicitudActual) {
+            procesandoAccion = false;
+            actualizarControlesEdicion();
+            indicadorCarga.classList.add("oculto");
+            indicadorCarga.textContent = "Procesando imagen…";
+        }
+    }
+}
+
+if (botonAplicarMarco) {
+    botonAplicarMarco.addEventListener("click", () => aplicarMarco());
+}
+
+if (botonResetMarco) {
+    botonResetMarco.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        estadoMarco.estilo = "ninguno";
+        if (marcoEstiloSelect) marcoEstiloSelect.value = "ninguno";
+        actualizarOpcionesMarcoUI();
+        aplicarMarco();
+    });
+}

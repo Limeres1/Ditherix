@@ -95,10 +95,20 @@ const btnToggleDither = document.getElementById("btn-toggle-dither");
 const btnCloseDither = document.getElementById("btn-close-dither");
 const ditherMenu = document.getElementById("dither-menu");
 
+const btnToggleColor = document.getElementById("btn-toggle-color");
+const btnCloseColor = document.getElementById("btn-close-color");
+const colorMenu = document.getElementById("color-menu");
+
+const btnToggleMarcos = document.getElementById("btn-toggle-marcos");
+const btnCloseMarcos = document.getElementById("btn-close-marcos");
+const marcosMenu = document.getElementById("marcos-menu");
+
 function setEditMenuOpen(open) {
     if (open) {
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
+        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
     }
     if (editMenu && btnToggleEdit) {
         editMenu.classList.toggle("hidden", !open);
@@ -112,6 +122,8 @@ function setDetalleMenuOpen(open) {
     if (open) {
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
+        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
     }
     if (detalleMenu && btnToggleDetalle) {
         detalleMenu.classList.toggle("hidden", !open);
@@ -125,6 +137,8 @@ function setDitherMenuOpen(open) {
     if (open) {
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
+        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
     }
     if (ditherMenu && btnToggleDither) {
         ditherMenu.classList.toggle("hidden", !open);
@@ -134,54 +148,134 @@ function setDitherMenuOpen(open) {
     }
 }
 
+function setColorMenuOpen(open) {
+    if (open) {
+        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
+        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
+        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
+        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
+    }
+    if (colorMenu && btnToggleColor) {
+        colorMenu.classList.toggle("hidden", !open);
+        colorMenu.setAttribute("aria-hidden", String(!open));
+        btnToggleColor.setAttribute("aria-expanded", String(open));
+        btnToggleColor.classList.toggle("active", open);
+    }
+}
+window.setColorMenuOpen = setColorMenuOpen;
+
+function setMarcosMenuOpen(open) {
+    if (open) {
+        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
+        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
+        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
+        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+    }
+    if (marcosMenu && btnToggleMarcos) {
+        marcosMenu.classList.toggle("hidden", !open);
+        marcosMenu.setAttribute("aria-hidden", String(!open));
+        btnToggleMarcos.setAttribute("aria-expanded", String(open));
+        btnToggleMarcos.classList.toggle("active", open);
+    }
+}
+window.setMarcosMenuOpen = setMarcosMenuOpen;
+
 if (btnToggleEdit) {
-    btnToggleEdit.addEventListener("click", () => {
+    btnToggleEdit.addEventListener("click", (e) => {
+        e.stopPropagation();
         setEditMenuOpen(editMenu.classList.contains("hidden"));
     });
 }
 
 if (btnCloseEdit) {
-    btnCloseEdit.addEventListener("click", () => {
+    btnCloseEdit.addEventListener("click", (e) => {
+        e.stopPropagation();
         setEditMenuOpen(false);
         btnToggleEdit.focus();
     });
 }
 
 if (btnToggleDetalle) {
-    btnToggleDetalle.addEventListener("click", () => {
+    btnToggleDetalle.addEventListener("click", (e) => {
+        e.stopPropagation();
         setDetalleMenuOpen(detalleMenu.classList.contains("hidden"));
     });
 }
 
 if (btnCloseDetalle) {
-    btnCloseDetalle.addEventListener("click", () => {
+    btnCloseDetalle.addEventListener("click", (e) => {
+        e.stopPropagation();
         setDetalleMenuOpen(false);
         btnToggleDetalle.focus();
     });
 }
 
 if (btnToggleDither) {
-    btnToggleDither.addEventListener("click", () => {
+    btnToggleDither.addEventListener("click", (e) => {
+        e.stopPropagation();
         setDitherMenuOpen(ditherMenu.classList.contains("hidden"));
     });
 }
 
 if (btnCloseDither) {
-    btnCloseDither.addEventListener("click", () => {
+    btnCloseDither.addEventListener("click", (e) => {
+        e.stopPropagation();
         setDitherMenuOpen(false);
         btnToggleDither.focus();
     });
 }
 
+if (btnToggleColor) {
+    btnToggleColor.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setColorMenuOpen(colorMenu.classList.contains("hidden"));
+    });
+}
+
+if (btnCloseColor) {
+    btnCloseColor.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setColorMenuOpen(false);
+        btnToggleColor.focus();
+    });
+}
+
+if (btnToggleMarcos) {
+    btnToggleMarcos.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setMarcosMenuOpen(marcosMenu.classList.contains("hidden"));
+    });
+}
+
+if (btnCloseMarcos) {
+    btnCloseMarcos.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setMarcosMenuOpen(false);
+        btnToggleMarcos.focus();
+    });
+}
+
+[editMenu, detalleMenu, ditherMenu, colorMenu, marcosMenu].forEach((menu) => {
+    if (menu) {
+        menu.addEventListener("click", (e) => e.stopPropagation());
+    }
+});
+
 document.addEventListener("click", (event) => {
-    if (editMenu && btnToggleEdit && !editMenu.contains(event.target) && !btnToggleEdit.contains(event.target)) {
+    if (editMenu && !editMenu.classList.contains("hidden") && !editMenu.contains(event.target) && !btnToggleEdit.contains(event.target)) {
         setEditMenuOpen(false);
     }
-    if (detalleMenu && btnToggleDetalle && !detalleMenu.contains(event.target) && !btnToggleDetalle.contains(event.target)) {
+    if (detalleMenu && !detalleMenu.classList.contains("hidden") && !detalleMenu.contains(event.target) && !btnToggleDetalle.contains(event.target)) {
         setDetalleMenuOpen(false);
     }
-    if (ditherMenu && btnToggleDither && !ditherMenu.contains(event.target) && !btnToggleDither.contains(event.target)) {
+    if (ditherMenu && !ditherMenu.classList.contains("hidden") && !ditherMenu.contains(event.target) && !btnToggleDither.contains(event.target)) {
         setDitherMenuOpen(false);
+    }
+    if (colorMenu && !colorMenu.classList.contains("hidden") && !colorMenu.contains(event.target) && !btnToggleColor.contains(event.target)) {
+        setColorMenuOpen(false);
+    }
+    if (marcosMenu && !marcosMenu.classList.contains("hidden") && !marcosMenu.contains(event.target) && !btnToggleMarcos.contains(event.target)) {
+        setMarcosMenuOpen(false);
     }
 });
 
@@ -198,6 +292,14 @@ document.addEventListener("keydown", (event) => {
         if (ditherMenu && !ditherMenu.classList.contains("hidden")) {
             setDitherMenuOpen(false);
             btnToggleDither.focus();
+        }
+        if (colorMenu && !colorMenu.classList.contains("hidden")) {
+            setColorMenuOpen(false);
+            btnToggleColor.focus();
+        }
+        if (marcosMenu && !marcosMenu.classList.contains("hidden")) {
+            setMarcosMenuOpen(false);
+            btnToggleMarcos.focus();
         }
     }
 });

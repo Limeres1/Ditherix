@@ -17,6 +17,8 @@ from recortar import aplicar_recorte
 from voltear_imagen import voltear_horizontal, voltear_vertical
 from detalle import AJUSTES_DETALLE, procesar_detalle
 from dithering import aplicar_dithering
+from color_mixer import COLORES_CANALES, procesar_color
+from marcos import ESTILOS_MARCO, aplicar_marco
 
 MAX_ARCHIVO_BYTES = 25 * 1024 * 1024
 MARGEN_MULTIPART_BYTES = 64 * 1024
@@ -43,6 +45,13 @@ class ImagenGuardada:
     dither_algoritmo: str = "ninguno"
     dither_paleta: str = "bn"
     dither_pixel: int = 1
+    dither_intensidad: int = 100
+    temperatura: float = 0.0
+    tinte: float = 0.0
+    mezcla_color: dict[str, dict[str, float]] = field(default_factory=dict)
+    marco_estilo: str = "ninguno"
+    marco_color: str = "#ffffff"
+    marco_grosor: int = 24
 
 
 AJUSTES_DEFECTO: dict[str, float] = {
@@ -71,8 +80,20 @@ def ejecutar_pipeline(
     dither_algoritmo: str = "ninguno",
     dither_paleta: str = "bn",
     dither_pixel: int = 1,
+    dither_intensidad: int = 100,
+    temperatura: float = 0.0,
+    tinte: float = 0.0,
+    mezcla_color: dict[str, dict[str, float]] | None = None,
+    marco_estilo: str = "ninguno",
+    marco_color: str = "#ffffff",
+    marco_grosor: int = 24,
 ):
     resultado = procesar_ajustes(imagen_base, factores)
+
+    siguiente = procesar_color(resultado, temperatura, tinte, mezcla_color)
+    if resultado is not imagen_base and resultado is not siguiente:
+        resultado.close()
+    resultado = siguiente
 
     siguiente = procesar_detalle(resultado, factores)
     if resultado is not imagen_base and resultado is not siguiente:
@@ -80,7 +101,19 @@ def ejecutar_pipeline(
     resultado = siguiente
 
     if dither_algoritmo and dither_algoritmo != "ninguno":
-        siguiente = aplicar_dithering(resultado, dither_algoritmo, dither_paleta, dither_pixel)
+        siguiente = aplicar_dithering(
+            resultado,
+            dither_algoritmo,
+            dither_paleta,
+            dither_pixel,
+            dither_intensidad,
+        )
+        if resultado is not imagen_base and resultado is not siguiente:
+            resultado.close()
+        resultado = siguiente
+
+    if marco_estilo and marco_estilo != "ninguno":
+        siguiente = aplicar_marco(resultado, marco_estilo, marco_color, marco_grosor)
         if resultado is not imagen_base and resultado is not siguiente:
             resultado.close()
         resultado = siguiente
@@ -215,6 +248,13 @@ def aplicar_ajustes_a_imagen(imagen_id: str, nuevos_valores: dict[str, float]):
             imagen_guardada.dither_algoritmo,
             imagen_guardada.dither_paleta,
             imagen_guardada.dither_pixel,
+            imagen_guardada.dither_intensidad,
+            temperatura=imagen_guardada.temperatura,
+            tinte=imagen_guardada.tinte,
+            mezcla_color=imagen_guardada.mezcla_color,
+            marco_estilo=imagen_guardada.marco_estilo,
+            marco_color=imagen_guardada.marco_color,
+            marco_grosor=imagen_guardada.marco_grosor,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -481,6 +521,13 @@ def restablecer_recorte(imagen_id: str):
             imagen_guardada.dither_algoritmo,
             imagen_guardada.dither_paleta,
             imagen_guardada.dither_pixel,
+            imagen_guardada.dither_intensidad,
+            temperatura=imagen_guardada.temperatura,
+            tinte=imagen_guardada.tinte,
+            mezcla_color=imagen_guardada.mezcla_color,
+            marco_estilo=imagen_guardada.marco_estilo,
+            marco_color=imagen_guardada.marco_color,
+            marco_grosor=imagen_guardada.marco_grosor,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -552,8 +599,26 @@ def voltear(imagen_id: str, direccion: str):
         imagen_inicial = abrir_imagen(imagen_guardada.original_inicial)
         funcion_voltear = voltear_horizontal if direccion == "horizontal" else voltear_vertical
         nueva_orig = funcion_voltear(imagen_original)
-        nueva_proc = funcion_voltear(imagen_procesada)
         nueva_inic = funcion_voltear(imagen_inicial)
+
+        if imagen_guardada.marco_estilo != "ninguno":
+            factores = calcular_factores(imagen_guardada.ajustes)
+            nueva_proc = ejecutar_pipeline(
+                nueva_orig,
+                factores,
+                imagen_guardada.dither_algoritmo,
+                imagen_guardada.dither_paleta,
+                imagen_guardada.dither_pixel,
+                imagen_guardada.dither_intensidad,
+                temperatura=imagen_guardada.temperatura,
+                tinte=imagen_guardada.tinte,
+                mezcla_color=imagen_guardada.mezcla_color,
+                marco_estilo=imagen_guardada.marco_estilo,
+                marco_color=imagen_guardada.marco_color,
+                marco_grosor=imagen_guardada.marco_grosor,
+            )
+        else:
+            nueva_proc = funcion_voltear(imagen_procesada)
         nuevo_original = guardar_procesada_sin_perdida(nueva_orig)
         nueva_procesada = guardar_procesada_sin_perdida(nueva_proc)
         nuevo_inicial = guardar_procesada_sin_perdida(nueva_inic)
@@ -638,6 +703,9 @@ PALETAS_DITHERING_VALIDAS = {
     "cga",
     "ambar",
     "cyberpunk",
+    "matrix",
+    "vaporwave",
+    "termica",
 }
 
 
@@ -650,6 +718,7 @@ def aplicar_dithering_ruta(imagen_id: str):
     algoritmo = datos.get("algoritmo", "ninguno")
     paleta = datos.get("paleta", "bn")
     tamano_pixel = datos.get("tamano_pixel", 1)
+    intensidad = datos.get("intensidad", 100)
 
     if algoritmo not in ALGORITMOS_DITHERING_VALIDOS:
         return respuesta_error("ALGORITMO_INVALIDO", "El algoritmo de dithering seleccionado no es válido.", 400)
@@ -664,6 +733,13 @@ def aplicar_dithering_ruta(imagen_id: str):
     ):
         return respuesta_error("PIXEL_INVALIDO", "El tamaño de píxel debe ser un número entero entre 1 y 8.", 400)
 
+    if (
+        isinstance(intensidad, bool)
+        or not isinstance(intensidad, int)
+        or not 0 <= intensidad <= 100
+    ):
+        return respuesta_error("INTENSIDAD_INVALIDA", "La intensidad del dither debe ser un número entre 0 y 100.", 400)
+
     with imagenes_lock:
         imagen_guardada = imagenes_guardadas.get(imagen_id)
 
@@ -674,6 +750,7 @@ def aplicar_dithering_ruta(imagen_id: str):
         imagen_guardada.dither_algoritmo == algoritmo
         and imagen_guardada.dither_paleta == paleta
         and imagen_guardada.dither_pixel == tamano_pixel
+        and imagen_guardada.dither_intensidad == intensidad
     ):
         return jsonify(
             ok=True,
@@ -689,7 +766,20 @@ def aplicar_dithering_ruta(imagen_id: str):
     try:
         imagen = abrir_imagen(imagen_guardada.original)
         factores = calcular_factores(imagen_guardada.ajustes)
-        resultado = ejecutar_pipeline(imagen, factores, algoritmo, paleta, tamano_pixel)
+        resultado = ejecutar_pipeline(
+            imagen,
+            factores,
+            algoritmo,
+            paleta,
+            tamano_pixel,
+            intensidad,
+            temperatura=imagen_guardada.temperatura,
+            tinte=imagen_guardada.tinte,
+            mezcla_color=imagen_guardada.mezcla_color,
+            marco_estilo=imagen_guardada.marco_estilo,
+            marco_color=imagen_guardada.marco_color,
+            marco_grosor=imagen_guardada.marco_grosor,
+        )
 
         procesada = guardar_procesada_sin_perdida(resultado)
         vista, ancho_vista, alto_vista = generar_vista(resultado)
@@ -703,6 +793,7 @@ def aplicar_dithering_ruta(imagen_id: str):
             dither_algoritmo=algoritmo,
             dither_paleta=paleta,
             dither_pixel=tamano_pixel,
+            dither_intensidad=intensidad,
         )
 
         with imagenes_lock:
@@ -728,6 +819,222 @@ def aplicar_dithering_ruta(imagen_id: str):
         return respuesta_error(
             "ERROR_INTERNO",
             "No se pudo aplicar el efecto de dithering a la imagen.",
+            500,
+        )
+    finally:
+        if resultado is not None and resultado is not imagen:
+            resultado.close()
+        if imagen is not None:
+            imagen.close()
+
+
+@app.post("/imagen/<imagen_id>/color")
+def aplicar_color(imagen_id: str):
+    datos = request.get_json(silent=True)
+    if not isinstance(datos, dict):
+        return respuesta_error("DATOS_INVALIDOS", "Los datos de color no son válidos.", 400)
+
+    with imagenes_lock:
+        imagen_guardada = imagenes_guardadas.get(imagen_id)
+
+    if imagen_guardada is None:
+        return respuesta_error("IMAGEN_NO_ENCONTRADA", "La imagen ya no está disponible.", 404)
+
+    temperatura_val = datos.get("temperatura", imagen_guardada.temperatura)
+    tinte_val = datos.get("tinte", imagen_guardada.tinte)
+
+    if (
+        isinstance(temperatura_val, bool)
+        or not isinstance(temperatura_val, (int, float))
+        or not math.isfinite(temperatura_val)
+        or not -100 <= temperatura_val <= 100
+    ):
+        return respuesta_error("VALOR_INVALIDO", "La temperatura debe estar entre -100 y 100.", 400)
+    if (
+        isinstance(tinte_val, bool)
+        or not isinstance(tinte_val, (int, float))
+        or not math.isfinite(tinte_val)
+        or not -100 <= tinte_val <= 100
+    ):
+        return respuesta_error("VALOR_INVALIDO", "El tinte debe estar entre -100 y 100.", 400)
+
+    temperatura = float(temperatura_val)
+    tinte = float(tinte_val)
+
+    mezcla_raw = datos.get("mezcla_color", imagen_guardada.mezcla_color)
+    mezcla_color = {}
+    if isinstance(mezcla_raw, dict):
+        for canal in COLORES_CANALES:
+            c_datos = mezcla_raw.get(canal, {})
+            if isinstance(c_datos, dict):
+                canal_ajustes = {}
+                for param in ("tono", "saturacion", "luminancia"):
+                    val = c_datos.get(param, 0.0)
+                    if not isinstance(val, bool) and isinstance(val, (int, float)) and math.isfinite(val) and -100 <= val <= 100:
+                        canal_ajustes[param] = float(val)
+                    else:
+                        canal_ajustes[param] = 0.0
+                mezcla_color[canal] = canal_ajustes
+
+    factores = calcular_factores(imagen_guardada.ajustes)
+
+    imagen = None
+    resultado = None
+    try:
+        imagen = abrir_imagen(imagen_guardada.original)
+        resultado = ejecutar_pipeline(
+            imagen,
+            factores,
+            imagen_guardada.dither_algoritmo,
+            imagen_guardada.dither_paleta,
+            imagen_guardada.dither_pixel,
+            imagen_guardada.dither_intensidad,
+            temperatura=temperatura,
+            tinte=tinte,
+            mezcla_color=mezcla_color,
+            marco_estilo=imagen_guardada.marco_estilo,
+            marco_color=imagen_guardada.marco_color,
+            marco_grosor=imagen_guardada.marco_grosor,
+        )
+
+        procesada = guardar_procesada_sin_perdida(resultado)
+        vista, ancho_vista, alto_vista = generar_vista(resultado)
+
+        imagen_actualizada = replace(
+            imagen_guardada,
+            procesada=procesada,
+            vista=vista,
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            temperatura=temperatura,
+            tinte=tinte,
+            mezcla_color=mezcla_color,
+            marco_estilo=imagen_guardada.marco_estilo,
+            marco_color=imagen_guardada.marco_color,
+            marco_grosor=imagen_guardada.marco_grosor,
+        )
+
+        with imagenes_lock:
+            if imagenes_guardadas.get(imagen_id) is not imagen_guardada:
+                return respuesta_error(
+                    "IMAGEN_MODIFICADA",
+                    "La imagen cambió durante el procesamiento. Inténtalo de nuevo.",
+                    409,
+                )
+            imagenes_guardadas[imagen_id] = imagen_actualizada
+
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            temperatura=temperatura,
+            tinte=tinte,
+            mezcla_color=mezcla_color,
+            marco_estilo=imagen_guardada.marco_estilo,
+            marco_color=imagen_guardada.marco_color,
+            marco_grosor=imagen_guardada.marco_grosor,
+        )
+    except ErrorImagen as error:
+        return respuesta_error(error.codigo, error.mensaje, error.status)
+    except Exception:
+        app.logger.exception("Error al procesar balance y mezcla de color.")
+        return respuesta_error(
+            "ERROR_INTERNO",
+            "No se pudieron aplicar los ajustes de color a la imagen.",
+            500,
+        )
+    finally:
+        if resultado is not None and resultado is not imagen:
+            resultado.close()
+        if imagen is not None:
+            imagen.close()
+
+
+@app.post("/imagen/<imagen_id>/marco")
+def aplicar_marco_ruta(imagen_id: str):
+    datos = request.get_json(silent=True)
+    if not isinstance(datos, dict):
+        return respuesta_error("DATOS_INVALIDOS", "Los datos del marco no son válidos.", 400)
+
+    estilo = str(datos.get("estilo", "ninguno")).strip().lower()
+    color = str(datos.get("color", "#ffffff")).strip()
+    try:
+        grosor = int(datos.get("grosor", 24))
+    except (ValueError, TypeError):
+        grosor = 24
+
+    if estilo not in ESTILOS_MARCO:
+        return respuesta_error("ESTILO_INVALIDO", "El estilo de marco seleccionado no es válido.", 400)
+
+    with imagenes_lock:
+        imagen_guardada = imagenes_guardadas.get(imagen_id)
+
+    if imagen_guardada is None:
+        return respuesta_error("IMAGEN_NO_ENCONTRADA", "La imagen ya no está disponible.", 404)
+
+    factores = calcular_factores(imagen_guardada.ajustes)
+
+    imagen = None
+    resultado = None
+    try:
+        imagen = abrir_imagen(imagen_guardada.original)
+        resultado = ejecutar_pipeline(
+            imagen,
+            factores,
+            imagen_guardada.dither_algoritmo,
+            imagen_guardada.dither_paleta,
+            imagen_guardada.dither_pixel,
+            imagen_guardada.dither_intensidad,
+            temperatura=imagen_guardada.temperatura,
+            tinte=imagen_guardada.tinte,
+            mezcla_color=imagen_guardada.mezcla_color,
+            marco_estilo=estilo,
+            marco_color=color,
+            marco_grosor=grosor,
+        )
+
+        procesada = guardar_procesada_sin_perdida(resultado)
+        vista, ancho_vista, alto_vista = generar_vista(resultado)
+
+        imagen_actualizada = replace(
+            imagen_guardada,
+            procesada=procesada,
+            vista=vista,
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            marco_estilo=estilo,
+            marco_color=color,
+            marco_grosor=grosor,
+        )
+
+        with imagenes_lock:
+            if imagenes_guardadas.get(imagen_id) is not imagen_guardada:
+                return respuesta_error(
+                    "IMAGEN_MODIFICADA",
+                    "La imagen cambió durante el procesamiento. Inténtalo de nuevo.",
+                    409,
+                )
+            imagenes_guardadas[imagen_id] = imagen_actualizada
+
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            marco_estilo=estilo,
+            marco_color=color,
+            marco_grosor=grosor,
+        )
+    except ErrorImagen as error:
+        return respuesta_error(error.codigo, error.mensaje, error.status)
+    except Exception:
+        app.logger.exception("Error al aplicar marco decorativo a la imagen.")
+        return respuesta_error(
+            "ERROR_INTERNO",
+            "No se pudo aplicar el marco decorativo a la imagen.",
             500,
         )
     finally:
