@@ -113,13 +113,13 @@ Diez recetas artesanales completas que aprovechan simultáneamente marcos, quím
 
 ```mermaid
 flowchart TD
-    subgraph Entrada
+    subgraph Entrada ["Entrada de Imagen"]
         A["Cliente Web / Navegador"] -->|"POST /upload (FormData)"| B["app.py: subir_imagen()"]
         B --> C["manejo_imagen.py: abrir_imagen()"]
         C --> D["Sanitización EXIF + Instancia ImagenGuardada"]
     end
 
-    subgraph Pipeline No Destructivo (ejecutar_pipeline)
+    subgraph Pipeline ["Pipeline No Destructivo (ejecutar_pipeline)"]
         D --> E["1. Imagen Base (Original / Recortada)"]
         E --> F["2. Curvas Tonales (Brillo, Contraste, Saturación)"]
         F --> G["3. Preset de Autor (Curvas avanzadas + HSL)"]
@@ -130,7 +130,7 @@ flowchart TD
         K --> L["8. Aplicación de Marco Decorativo Final"]
     end
 
-    subgraph Salida
+    subgraph Salida ["Salida y Visualización"]
         L --> M["guardar_procesada_sin_perdida (PNG Master)"]
         L --> N["generar_vista (JPEG 1600px Max)"]
         N --> O["Respuesta JSON con URL y token cache-buster"]
