@@ -637,6 +637,21 @@ h1.hero-floating-title {
   box-shadow: 0 6px 14px var(--color-glass-shadow), inset 0 1px 0 var(--color-glass-rim);
   color: var(--color-ink);
   overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--dur-short) var(--ease-out),
+              background-color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out);
+}
+
+.tool-card:hover {
+  transform: translateY(-5px);
+  background-color: var(--color-glass-hover);
+  border-color: var(--color-glass-border-bright);
+  box-shadow: 0 18px 36px var(--color-glass-shadow),
+              0 0 24px rgba(255, 255, 255, 0.08),
+              inset 0 1px 0 var(--color-liquid-rim),
+              inset 1px 0 0 var(--color-liquid-specular);
 }
 
 .tc-corner {
@@ -646,6 +661,9 @@ h1.hero-floating-title {
   line-height: 1;
   z-index: var(--z-content);
   pointer-events: none;
+  transition: color var(--dur-short) var(--ease-out),
+              text-shadow var(--dur-short) var(--ease-out),
+              transform var(--dur-short) var(--ease-out);
 }
 
 .tc-tl { top: var(--space-xs); left: var(--space-xs); }
@@ -653,11 +671,26 @@ h1.hero-floating-title {
 .tc-bl { bottom: var(--space-xs); left: var(--space-xs); }
 .tc-br { bottom: var(--space-xs); right: var(--space-xs); }
 
+.tool-card:hover .tc-corner {
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.85);
+}
+
+.tool-card:hover .tc-tl { transform: translate(-2px, -2px); }
+.tool-card:hover .tc-tr { transform: translate(2px, -2px); }
+.tool-card:hover .tc-bl { transform: translate(-2px, 2px); }
+.tool-card:hover .tc-br { transform: translate(2px, 2px); }
+
 .tool-visual {
   position: relative;
   background-color: var(--color-paper);
   overflow: hidden;
   border-bottom: var(--rule-hair) solid var(--color-rule);
+  transition: border-color var(--dur-short) var(--ease-out);
+}
+
+.tool-card:hover .tool-visual {
+  border-bottom-color: var(--color-glass-border-bright);
 }
 
 .tool-img {
@@ -666,6 +699,13 @@ h1.hero-floating-title {
   aspect-ratio: 16 / 9;
   object-fit: cover;
   filter: contrast(1.1) brightness(0.9);
+  transition: transform var(--dur-long) var(--ease-out),
+              filter var(--dur-long) var(--ease-out);
+}
+
+.tool-card:hover .tool-img {
+  transform: scale(1.05);
+  filter: contrast(1.16) brightness(1.04);
 }
 
 .tool-visual-meta {
@@ -677,10 +717,34 @@ h1.hero-floating-title {
   color: var(--color-muted);
   background-color: var(--color-paper-2);
   border-top: var(--rule-hair) solid var(--color-rule);
+  transition: background-color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
+}
+
+.tool-card:hover .tool-visual-meta {
+  background-color: color-mix(in oklab, var(--color-paper-2) 80%, var(--color-paper-3));
+  border-top-color: var(--color-glass-border-bright);
+  color: var(--color-ink-2);
+}
+
+.tool-tag {
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.tool-card:hover .tool-tag {
+  color: var(--color-ink);
 }
 
 .tool-index {
   color: var(--color-accent);
+  transition: color var(--dur-short) var(--ease-out),
+              text-shadow var(--dur-short) var(--ease-out);
+}
+
+.tool-card:hover .tool-index {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.75);
 }
 
 .tool-body {
@@ -693,12 +757,24 @@ h1.hero-floating-title {
 
 .tool-title {
   color: var(--color-ink);
+  transition: color var(--dur-short) var(--ease-out),
+              text-shadow var(--dur-short) var(--ease-out);
+}
+
+.tool-card:hover .tool-title {
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
 }
 
 .tool-desc {
   font-size: var(--text-sm);
   color: var(--color-ink-2);
   line-height: 1.5;
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.tool-card:hover .tool-desc {
+  color: var(--color-ink);
 }
 
 /* Bottom Action Section */

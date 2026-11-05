@@ -154,175 +154,225 @@
                     </button>
                 </div>
             </nav>
-            <!-- Presets / Estilos Preestablecidos -->
-            <section id="presets-menu" class="edit-panel hidden" aria-label="Estilos y Presets Preestablecidos" aria-hidden="true">
+            <!-- Presets / Estilos de Autor -->
+            <section id="presets-menu" class="edit-panel hidden presets-panel" aria-label="Estilos y Presets de Autor" aria-hidden="true">
                 <div class="edit-header">
-                    <h2>Estilos Preestablecidos</h2>
+                    <div>
+                        <h2>Presets de Autor</h2>
+                        <span class="panel-subtitle">Estilos calibrados con marcos, dither, química y color</span>
+                    </div>
                     <button class="close-btn" id="btn-close-presets" type="button" aria-label="Cerrar presets">
                         &times;
                     </button>
                 </div>
 
-                <div class="slider-group preset-intensity-group">
-                    <label for="presetIntensidadInput">Intensidad del estilo <output id="presetIntensidadValor" for="presetIntensidadInput">100%</output></label>
-                    <input id="presetIntensidadInput" type="range" min="0" max="100" step="5" value="100" aria-label="Intensidad del estilo" disabled>
+                <div class="preset-top-bar">
+                    <div class="slider-group preset-intensity-group">
+                        <div class="preset-slider-meta">
+                            <label for="presetIntensidadInput">Intensidad</label>
+                            <output id="presetIntensidadValor" for="presetIntensidadInput">100%</output>
+                        </div>
+                        <input id="presetIntensidadInput" type="range" min="0" max="100" step="5" value="100" aria-label="Intensidad del estilo" disabled>
+                    </div>
+                    <button type="button" class="preset-reset-pill" id="botonResetPresets" title="Quitar cualquier estilo activo" disabled>
+                        <span class="pill-dot">&times;</span> Quitar estilo
+                    </button>
                 </div>
 
                 <div class="presets-cards-container" id="presetsCardsContainer" role="radiogroup" aria-label="Seleccionar estilo preestablecido">
-                    <!-- 1. Moody Cinematic -->
-                    <button type="button" class="preset-card" data-preset="moody_cinematic" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #00e5ff;">CINE</span>
-                            <span class="preset-name">Moody Cinematic Teal & Dark</span>
+                    <!-- 1. Polaroid 600 -->
+                    <button type="button" class="preset-card" data-preset="polaroid_vintage" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #fce4b8, #e07a42, #422013);">
+                            <span class="swatch-cat">INSTANT</span>
+                            <span class="swatch-num">01</span>
                         </div>
-                        <p class="preset-desc">Sombras desvanecidas, tonos oscuros fríos y contraste marcado en sujetos.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">Fade +25</span>
-                            <span class="ptag">Frío -12</span>
-                            <span class="ptag">Cont +28</span>
-                            <span class="ptag">Grano 20</span>
-                        </div>
-                    </button>
-
-                    <!-- 2. Golden Hour Vintage -->
-                    <button type="button" class="preset-card" data-preset="golden_hour" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #ffaa00;">35MM</span>
-                            <span class="preset-name">Golden Hour Vintage (35mm)</span>
-                        </div>
-                        <p class="preset-desc">Film analógico Kodak Portra en atardeceres: tonos ámbar suaves y grano visible.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">Ámbar +35</span>
-                            <span class="ptag">Negros +18</span>
-                            <span class="ptag">Sombras +25</span>
-                            <span class="ptag">Grano 45</span>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Polaroid 600</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Marco gastado & film ámbar</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Polaroid</span>
+                                <span class="ptool">Grano 35</span>
+                            </div>
                         </div>
                     </button>
 
-                    <!-- 3. Cyber / Neo-Tokyo -->
-                    <button type="button" class="preset-card" data-preset="cyber_neotokyo" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #ff007f;">CYBER</span>
-                            <span class="preset-name">Cyber / Neo-Tokyo Minimal</span>
+                    <!-- 2. Portra 35mm -->
+                    <button type="button" class="preset-card" data-preset="kodak_portra_35mm" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #111111, #3a200a, #d48228, #f5d061);">
+                            <span class="swatch-cat">35MM</span>
+                            <span class="swatch-num">02</span>
                         </div>
-                        <p class="preset-desc">Estética nocturna de alto impacto: sombras profundas y limpias con luces vibrantes.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">Cont +40</span>
-                            <span class="ptag">Negros -35</span>
-                            <span class="ptag">Sat +22</span>
-                            <span class="ptag">Frío -20</span>
-                        </div>
-                    </button>
-
-                    <!-- 4. Editorial B&W Fine Art -->
-                    <button type="button" class="preset-card" data-preset="editorial_bw" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #e0e0e0;">B&N</span>
-                            <span class="preset-name">Editorial B&W Fine Art</span>
-                        </div>
-                        <p class="preset-desc">Monocromo de alto contraste con textura dramática para retratos y arquitectura.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">B&N Puro</span>
-                            <span class="ptag">Cont +35</span>
-                            <span class="ptag">Ambiente +25</span>
-                            <span class="ptag">Grano 35</span>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Portra 35mm</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Celuloide & color cálido</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Película</span>
+                                <span class="ptool">Grano 45</span>
+                            </div>
                         </div>
                     </button>
 
-                    <!-- 5. Y2K Flash Nostalgia -->
-                    <button type="button" class="preset-card" data-preset="y2k_flash" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #00ff66;">Y2K</span>
-                            <span class="preset-name">Y2K Flash / Nostalgia Retro</span>
+                    <!-- 3. Cianotipia 1842 -->
+                    <button type="button" class="preset-card" data-preset="cianotipia_1842" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #041021, #0a2f54, #1b6ca8, #72efdd);">
+                            <span class="swatch-cat">QUÍMICA</span>
+                            <span class="swatch-num">03</span>
                         </div>
-                        <p class="preset-desc">Cámara compacta de los 2000: flash frontal directo, contraste punchy y grano grueso.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">Flash +30</span>
-                            <span class="ptag">Punchy +22</span>
-                            <span class="ptag">Brillo +15</span>
-                            <span class="ptag">Grano 55</span>
-                        </div>
-                    </button>
-
-                    <!-- 6. Clean Muted / Nordic Pastel -->
-                    <button type="button" class="preset-card" data-preset="clean_muted" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #88ccff;">PASTEL</span>
-                            <span class="preset-name">Clean Muted / Nordic Pastel</span>
-                        </div>
-                        <p class="preset-desc">Look nórdico minimalista: baja saturación, tonos neutros suaves y exposición luminosa.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">Muted -30</span>
-                            <span class="ptag">Suave -18</span>
-                            <span class="ptag">Brillo +12</span>
-                            <span class="ptag">Grano 10</span>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Cianotipia 1842</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Azul de Prusia & sales férricas</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Cianotipia</span>
+                                <span class="ptool">Marco Azul</span>
+                            </div>
                         </div>
                     </button>
 
-                    <!-- 7. Fallen Angels -->
-                    <button type="button" class="preset-card" data-preset="fallen_angels" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #00ffbb;">NEON</span>
-                            <span class="preset-name">Fallen Angels 90s Cine</span>
+                    <!-- 4. Fine Art Selenio -->
+                    <button type="button" class="preset-card" data-preset="fine_art_selenio" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #100f14, #272130, #736980, #f2f0f7);">
+                            <span class="swatch-cat">FINE ART</span>
+                            <span class="swatch-num">04</span>
                         </div>
-                        <p class="preset-desc">Inspirado en Wong Kar-wai: neones nocturnos verdosos y celuloide forzado.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">Verde Neón -16</span>
-                            <span class="ptag">Cont +32</span>
-                            <span class="ptag">Ambiente +18</span>
-                            <span class="ptag">Grano 40</span>
-                        </div>
-                    </button>
-
-                    <!-- 8. Polaroid 600 -->
-                    <button type="button" class="preset-card" data-preset="polaroid_600" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #ff7744;">POLAROID</span>
-                            <span class="preset-name">Polaroid 600 Instant Film</span>
-                        </div>
-                        <p class="preset-desc">Química instantánea nostálgica: colores cálidos ricos, altas luces suaves y fade lechoso.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">Instantáneo</span>
-                            <span class="ptag">Fade +28</span>
-                            <span class="ptag">Calidez +22</span>
-                            <span class="ptag">Grano 30</span>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Plata & Selenio</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">B&N de galería en baritado</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Selenio</span>
+                                <span class="ptool">Marco Blanco</span>
+                            </div>
                         </div>
                     </button>
 
-                    <!-- 9. Dreamy Glow -->
-                    <button type="button" class="preset-card" data-preset="dreamy_glow" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #dda0dd;">DREAMY</span>
-                            <span class="preset-name">Dreamy Glow (Efecto Orton)</span>
+                    <!-- 5. Game Boy 1989 -->
+                    <button type="button" class="preset-card" data-preset="gameboy_1989" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #0f380f, #306230, #8bac0f, #9bbc0f);">
+                            <span class="swatch-cat">8-BIT</span>
+                            <span class="swatch-num">05</span>
                         </div>
-                        <p class="preset-desc">Efecto Orton etéreo: luces resplandecientes difusas (bloom), contraste suave y calidez.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">Orton Bloom</span>
-                            <span class="ptag">Ambiente +30</span>
-                            <span class="ptag">Calidez +14</span>
-                            <span class="ptag">Grano 15</span>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Game Boy 1989</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">LCD 4 tonos & matriz Bayer</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Bayer 4x4</span>
+                                <span class="ptool">Marco LCD</span>
+                            </div>
                         </div>
                     </button>
 
-                    <!-- 10. Hong Kong Neo-Noir -->
-                    <button type="button" class="preset-card" data-preset="neo_noir" role="radio" aria-checked="false" disabled>
-                        <div class="preset-card-head">
-                            <span class="preset-badge" style="--badge-c: #ff4444;">NOIR</span>
-                            <span class="preset-name">Hong Kong Neo-Noir</span>
+                    <!-- 6. CGA Cyberpunk -->
+                    <button type="button" class="preset-card" data-preset="cyber_cga_80s" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #000000 20%, #00ffff 50%, #ff55ff 80%, #ffffff 100%);">
+                            <span class="swatch-cat">CYBER</span>
+                            <span class="swatch-num">06</span>
                         </div>
-                        <p class="preset-desc">Claroscuro cinematográfico agresivo: sombras impenetrables y luces de tungsteno.</p>
-                        <div class="preset-tags">
-                            <span class="ptag">Deep Shadows</span>
-                            <span class="ptag">Cont +38</span>
-                            <span class="ptag">Blancos +20</span>
-                            <span class="ptag">Grano 25</span>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">CGA Cyberpunk</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Difusión Floyd & neón 1981</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Floyd Dither</span>
+                                <span class="ptool">Borde Cyber</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- 7. Teal & Orange -->
+                    <button type="button" class="preset-card" data-preset="moody_teal_orange" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #04181f, #093b45, #cf6d17, #ffa938);">
+                            <span class="swatch-cat">CINE</span>
+                            <span class="swatch-num">07</span>
+                        </div>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Teal & Orange</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Color grading blockbuster</span>
+                            <div class="preset-tools">
+                                <span class="ptool">HSL Cine</span>
+                                <span class="ptool">Fade Negros</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- 8. Fallen Angels -->
+                    <button type="button" class="preset-card" data-preset="fallen_angels_90s" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #01140e, #053322, #00d280, #e6c800);">
+                            <span class="swatch-cat">NOIR 90S</span>
+                            <span class="swatch-num">08</span>
+                        </div>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Fallen Angels</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Verde neón & celuloide forzado</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Tinte Neón</span>
+                                <span class="ptool">Marco Película</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- 9. Y2K Flash -->
+                    <button type="button" class="preset-card" data-preset="y2k_digicam_flash" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #181818, #555555, #f5f5f5, #99aaff);">
+                            <span class="swatch-cat">Y2K</span>
+                            <span class="swatch-num">09</span>
+                        </div>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Y2K Flash</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Luz frontal & nitidez 2000s</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Flash Directo</span>
+                                <span class="ptool">Nitidez +45</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- 10. Orton Bloom -->
+                    <button type="button" class="preset-card" data-preset="dreamy_orton_bloom" role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch" style="background: linear-gradient(135deg, #241129, #59254f, #be73a6, #fff0fa);">
+                            <span class="swatch-cat">FANTASÍA</span>
+                            <span class="swatch-num">10</span>
+                        </div>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Orton Bloom</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Resplandor etéreo & instantáneo</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Bloom Orton</span>
+                                <span class="ptool">Marco Polaroid</span>
+                            </div>
                         </div>
                     </button>
                 </div>
 
                 <div class="edit-actions">
-                    <button class="glass-control" id="botonResetPresets" type="button" disabled>Quitar estilo</button>
-                    <button class="glass-control" id="botonAplicarPreset" type="button" disabled>Aplicar</button>
+                    <button class="glass-control" id="botonAplicarPreset" type="button" disabled>Aplicar estilo</button>
                 </div>
             </section>
             <!--edicion-->

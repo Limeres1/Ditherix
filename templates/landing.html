@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ditherix: difusion y grano analogo</title>
+    <title>Ditherix - Inicio</title>
     <meta name="description"
         content="Editor fotografico monocromo con difusion Floyd-Steinberg, tramado Bayer, inyeccion de grano analogico y exportacion sin perdida.">
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon/icon.jpeg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Cinzel:wght@400;600&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Cinzel:wght@400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
 </head>
@@ -93,14 +94,13 @@
             </div>
 
             <div class="tools-grid">
-                <!-- Herramienta 01: Insertar imagen -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
                     <span class="tc-corner tc-bl" aria-hidden="true">└</span>
                     <span class="tc-corner tc-br" aria-hidden="true">┘</span>
                     <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Imagen-1.png') }}" alt="Carga de imagen"
+                        <img src="{{ url_for('static', filename='images/Insertarimagen.png') }}" alt="Carga de imagen"
                             class="tool-img" loading="lazy" width="600" height="340">
                         <div class="tool-visual-meta">
                             <span class="tool-tag">Importacion</span>
@@ -114,7 +114,6 @@
                     </div>
                 </article>
 
-                <!-- Herramienta 02: Recortar la imagen -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
@@ -135,7 +134,6 @@
                     </div>
                 </article>
 
-                <!-- Herramienta 03: Descarga de imagen -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
@@ -156,14 +154,13 @@
                     </div>
                 </article>
 
-                <!-- Herramienta 04: Ajustes de edicion -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
                     <span class="tc-corner tc-bl" aria-hidden="true">└</span>
                     <span class="tc-corner tc-br" aria-hidden="true">┘</span>
                     <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/tesla.png') }}" alt="Ajustes de edicion"
+                        <img src="{{ url_for('static', filename='images/Exposicion.png') }}" alt="Ajustes de edicion"
                             class="tool-img" loading="lazy" width="600" height="340">
                         <div class="tool-visual-meta">
                             <span class="tool-tag">Luminancia</span>
@@ -177,7 +174,6 @@
                     </div>
                 </article>
 
-                <!-- Herramienta 05: Ajustes de detalle -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
@@ -198,14 +194,13 @@
                     </div>
                 </article>
 
-                <!-- Herramienta 06: Dithering -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
                     <span class="tc-corner tc-bl" aria-hidden="true">└</span>
                     <span class="tc-corner tc-br" aria-hidden="true">┘</span>
                     <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Imagen-1.png') }}" alt="Motor de Dithering"
+                        <img src="{{ url_for('static', filename='images/Dithering.png') }}" alt="Motor de Dithering"
                             class="tool-img" loading="lazy" width="600" height="340">
                         <div class="tool-visual-meta">
                             <span class="tool-tag">Difusion</span>
@@ -219,7 +214,6 @@
                     </div>
                 </article>
 
-                <!-- Herramienta 07: Flip horizontal y vertical -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
@@ -240,14 +234,13 @@
                     </div>
                 </article>
 
-                <!-- Herramienta 08: Marcos -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
                     <span class="tc-corner tc-bl" aria-hidden="true">└</span>
                     <span class="tc-corner tc-br" aria-hidden="true">┘</span>
                     <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/tesla.png') }}" alt="Marcos y bordes"
+                        <img src="{{ url_for('static', filename='images/Marcos.png') }}" alt="Marcos y bordes"
                             class="tool-img" loading="lazy" width="600" height="340">
                         <div class="tool-visual-meta">
                             <span class="tool-tag">Bordes</span>
@@ -261,15 +254,14 @@
                     </div>
                 </article>
 
-                <!-- Herramienta 09: Ajustes preestablecidos -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
                     <span class="tc-corner tc-bl" aria-hidden="true">└</span>
                     <span class="tc-corner tc-br" aria-hidden="true">┘</span>
                     <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Imagen-1.png') }}" alt="Ajustes preestablecidos"
-                            class="tool-img" loading="lazy" width="600" height="340">
+                        <img src="{{ url_for('static', filename='images/Preestablecidos.png') }}"
+                            alt="Ajustes preestablecidos" class="tool-img" loading="lazy" width="600" height="340">
                         <div class="tool-visual-meta">
                             <span class="tool-tag">Presets</span>
                             <span class="tool-index num">[ 09 ]</span>
@@ -282,14 +274,13 @@
                     </div>
                 </article>
 
-                <!-- Herramienta 10: Balance de temperatura y color -->
                 <article class="tool-card">
                     <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
                     <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
                     <span class="tc-corner tc-bl" aria-hidden="true">└</span>
                     <span class="tc-corner tc-br" aria-hidden="true">┘</span>
                     <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Imagen-2.png') }}" alt="Balance de color"
+                        <img src="{{ url_for('static', filename='images/Color.png') }}" alt="Balance de color"
                             class="tool-img" loading="lazy" width="600" height="340">
                         <div class="tool-visual-meta">
                             <span class="tool-tag">Temperatura</span>

@@ -102,14 +102,34 @@ def ejecutar_pipeline(
     preset_activo: str = "ninguno",
     preset_intensidad: float = 100.0,
 ):
+    # 1. Determinar el marco final: si no hay marco manual explícito, hereda el del preset activo
+    estilo_marco_final = marco_estilo
+    color_marco_final = marco_color
+    grosor_marco_final = marco_grosor
+
+    if (not estilo_marco_final or estilo_marco_final == "ninguno") and preset_activo and preset_activo != "ninguno":
+        preset_def = PRESETS_DISPONIBLES.get(preset_activo)
+        if preset_def and preset_def.marco_estilo != "ninguno":
+            estilo_marco_final = preset_def.marco_estilo
+            color_marco_final = preset_def.marco_color
+            grosor_marco_final = preset_def.marco_grosor
+
+    # 2. Ajustes manuales tonales base
     resultado = procesar_ajustes(imagen_base, factores)
 
+    # 3. Aplicación del preset estilístico (sin el marco todavía, para procesar la foto pura)
     if preset_activo and preset_activo != "ninguno":
-        siguiente = procesar_preset(resultado, preset_activo, preset_intensidad)
+        siguiente = procesar_preset(
+            resultado,
+            preset_activo,
+            preset_intensidad,
+            aplicar_marco_preset=False,
+        )
         if resultado is not imagen_base and resultado is not siguiente:
             resultado.close()
         resultado = siguiente
 
+    # 4. Color, B&N y Detalle
     siguiente = procesar_color(resultado, temperatura, tinte, mezcla_color)
     if resultado is not imagen_base and resultado is not siguiente:
         resultado.close()
@@ -132,6 +152,7 @@ def ejecutar_pipeline(
         resultado.close()
     resultado = siguiente
 
+    # 5. Dithering retro manual si está activo (si no, el preset ya aplicó su dither si correspondía)
     if dither_algoritmo and dither_algoritmo != "ninguno":
         siguiente = aplicar_dithering(
             resultado,
@@ -144,8 +165,9 @@ def ejecutar_pipeline(
             resultado.close()
         resultado = siguiente
 
-    if marco_estilo and marco_estilo != "ninguno":
-        siguiente = aplicar_marco(resultado, marco_estilo, marco_color, marco_grosor)
+    # 6. Marco decorativo final limpio (del preset o del selector manual)
+    if estilo_marco_final and estilo_marco_final != "ninguno":
+        siguiente = aplicar_marco(resultado, estilo_marco_final, color_marco_final, grosor_marco_final)
         if resultado is not imagen_base and resultado is not siguiente:
             resultado.close()
         resultado = siguiente
@@ -1245,30 +1267,24 @@ def aplicar_byn_ruta(imagen_id: str):
 
 @app.get("/presets")
 def listar_presets():
+    from presets import _PRESETS_BASE
     return jsonify(
         ok=True,
         presets=[
             {
                 "id": p.id,
                 "nombre": p.nombre,
-                "badge": p.badge,
-                "badge_color": p.badge_color,
-                "descripcion": p.descripcion,
-                "tags": list(p.tags),
-                "valores": {
-                    "brillo": p.brillo,
-                    "contraste": p.contraste,
-                    "saturacion": p.saturacion,
-                    "ambiente": p.ambiente,
-                    "iluminaciones": p.iluminaciones,
-                    "sombras": p.sombras,
-                    "calidez": p.calidez,
-                    "blancos": p.blancos,
-                    "negros": p.negros,
-                    "grano": p.grano,
-                },
+                "subtitulo": p.subtitulo,
+                "categoria": p.categoria,
+                "color_acento": p.color_acento,
+                "icon": p.icon,
+                "swatch_gradient": p.swatch_gradient,
+                "herramientas": list(p.herramientas),
+                "marco_estilo": p.marco_estilo,
+                "dither_algoritmo": p.dither_algoritmo,
+                "byn_activo": p.byn_activo,
             }
-            for p in PRESETS_DISPONIBLES.values()
+            for p in _PRESETS_BASE.values()
         ],
     )
 
