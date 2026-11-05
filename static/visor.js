@@ -83,6 +83,10 @@ visor.addEventListener("dblclick", () => {
     }
 });
 
+const btnTogglePresets = document.getElementById("btn-toggle-presets");
+const btnClosePresets = document.getElementById("btn-close-presets");
+const presetsMenu = document.getElementById("presets-menu");
+
 const btnToggleEdit = document.getElementById("btn-toggle-edit");
 const btnCloseEdit = document.getElementById("btn-close-edit");
 const editMenu = document.getElementById("edit-menu");
@@ -107,8 +111,27 @@ const btnToggleMarcos = document.getElementById("btn-toggle-marcos");
 const btnCloseMarcos = document.getElementById("btn-close-marcos");
 const marcosMenu = document.getElementById("marcos-menu");
 
+function setPresetsMenuOpen(open) {
+    if (open) {
+        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
+        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
+        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
+        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
+        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
+        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
+    }
+    if (presetsMenu && btnTogglePresets) {
+        presetsMenu.classList.toggle("hidden", !open);
+        presetsMenu.setAttribute("aria-hidden", String(!open));
+        btnTogglePresets.setAttribute("aria-expanded", String(open));
+        btnTogglePresets.classList.toggle("active", open);
+    }
+}
+window.setPresetsMenuOpen = setPresetsMenuOpen;
+
 function setEditMenuOpen(open) {
     if (open) {
+        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
         if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
@@ -125,6 +148,7 @@ function setEditMenuOpen(open) {
 
 function setDetalleMenuOpen(open) {
     if (open) {
+        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
         if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
@@ -141,6 +165,7 @@ function setDetalleMenuOpen(open) {
 
 function setDitherMenuOpen(open) {
     if (open) {
+        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
@@ -157,6 +182,7 @@ function setDitherMenuOpen(open) {
 
 function setColorMenuOpen(open) {
     if (open) {
+        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
@@ -174,6 +200,7 @@ window.setColorMenuOpen = setColorMenuOpen;
 
 function setBynMenuOpen(open) {
     if (open) {
+        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
@@ -191,6 +218,7 @@ window.setBynMenuOpen = setBynMenuOpen;
 
 function setMarcosMenuOpen(open) {
     if (open) {
+        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
@@ -205,6 +233,21 @@ function setMarcosMenuOpen(open) {
     }
 }
 window.setMarcosMenuOpen = setMarcosMenuOpen;
+
+if (btnTogglePresets) {
+    btnTogglePresets.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setPresetsMenuOpen(presetsMenu.classList.contains("hidden"));
+    });
+}
+
+if (btnClosePresets) {
+    btnClosePresets.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setPresetsMenuOpen(false);
+        btnTogglePresets.focus();
+    });
+}
 
 if (btnToggleEdit) {
     btnToggleEdit.addEventListener("click", (e) => {
@@ -296,13 +339,16 @@ if (btnCloseMarcos) {
     });
 }
 
-[editMenu, detalleMenu, ditherMenu, colorMenu, bynMenu, marcosMenu].forEach((menu) => {
+[presetsMenu, editMenu, detalleMenu, ditherMenu, colorMenu, bynMenu, marcosMenu].forEach((menu) => {
     if (menu) {
         menu.addEventListener("click", (e) => e.stopPropagation());
     }
 });
 
 document.addEventListener("click", (event) => {
+    if (presetsMenu && !presetsMenu.classList.contains("hidden") && !presetsMenu.contains(event.target) && !btnTogglePresets.contains(event.target)) {
+        setPresetsMenuOpen(false);
+    }
     if (editMenu && !editMenu.classList.contains("hidden") && !editMenu.contains(event.target) && !btnToggleEdit.contains(event.target)) {
         setEditMenuOpen(false);
     }
@@ -325,6 +371,10 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
+        if (presetsMenu && !presetsMenu.classList.contains("hidden")) {
+            setPresetsMenuOpen(false);
+            btnTogglePresets.focus();
+        }
         if (editMenu && !editMenu.classList.contains("hidden")) {
             setEditMenuOpen(false);
             btnToggleEdit.focus();

@@ -20,6 +20,7 @@ from dithering import aplicar_dithering
 from color_mixer import COLORES_CANALES, procesar_color
 from marcos import ESTILOS_MARCO, aplicar_marco
 from byn import FILTROS_BYN, VIRADOS_BYN, procesar_byn
+from presets import PRESETS_DISPONIBLES, procesar_preset
 
 MAX_ARCHIVO_BYTES = 25 * 1024 * 1024
 MARGEN_MULTIPART_BYTES = 64 * 1024
@@ -57,6 +58,8 @@ class ImagenGuardada:
     byn_canales: dict[str, float] = field(default_factory=dict)
     byn_virado: str = "ninguno"
     byn_virado_intensidad: float = 70.0
+    preset_activo: str = "ninguno"
+    preset_intensidad: float = 100.0
 
 
 AJUSTES_DEFECTO: dict[str, float] = {
@@ -96,8 +99,16 @@ def ejecutar_pipeline(
     byn_canales: dict[str, float] | None = None,
     byn_virado: str = "ninguno",
     byn_virado_intensidad: float = 70.0,
+    preset_activo: str = "ninguno",
+    preset_intensidad: float = 100.0,
 ):
     resultado = procesar_ajustes(imagen_base, factores)
+
+    if preset_activo and preset_activo != "ninguno":
+        siguiente = procesar_preset(resultado, preset_activo, preset_intensidad)
+        if resultado is not imagen_base and resultado is not siguiente:
+            resultado.close()
+        resultado = siguiente
 
     siguiente = procesar_color(resultado, temperatura, tinte, mezcla_color)
     if resultado is not imagen_base and resultado is not siguiente:
@@ -280,6 +291,8 @@ def aplicar_ajustes_a_imagen(imagen_id: str, nuevos_valores: dict[str, float]):
             byn_canales=imagen_guardada.byn_canales,
             byn_virado=imagen_guardada.byn_virado,
             byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=imagen_guardada.preset_activo,
+            preset_intensidad=imagen_guardada.preset_intensidad,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -557,6 +570,8 @@ def restablecer_recorte(imagen_id: str):
             byn_canales=imagen_guardada.byn_canales,
             byn_virado=imagen_guardada.byn_virado,
             byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=imagen_guardada.preset_activo,
+            preset_intensidad=imagen_guardada.preset_intensidad,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -645,6 +660,12 @@ def voltear(imagen_id: str, direccion: str):
                 marco_estilo=imagen_guardada.marco_estilo,
                 marco_color=imagen_guardada.marco_color,
                 marco_grosor=imagen_guardada.marco_grosor,
+                byn_activo=imagen_guardada.byn_activo,
+                byn_canales=imagen_guardada.byn_canales,
+                byn_virado=imagen_guardada.byn_virado,
+                byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+                preset_activo=imagen_guardada.preset_activo,
+                preset_intensidad=imagen_guardada.preset_intensidad,
             )
         else:
             nueva_proc = funcion_voltear(imagen_procesada)
@@ -812,6 +833,8 @@ def aplicar_dithering_ruta(imagen_id: str):
             byn_canales=imagen_guardada.byn_canales,
             byn_virado=imagen_guardada.byn_virado,
             byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=imagen_guardada.preset_activo,
+            preset_intensidad=imagen_guardada.preset_intensidad,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -932,6 +955,8 @@ def aplicar_color(imagen_id: str):
             byn_canales=imagen_guardada.byn_canales,
             byn_virado=imagen_guardada.byn_virado,
             byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=imagen_guardada.preset_activo,
+            preset_intensidad=imagen_guardada.preset_intensidad,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -953,6 +978,8 @@ def aplicar_color(imagen_id: str):
             byn_canales=imagen_guardada.byn_canales,
             byn_virado=imagen_guardada.byn_virado,
             byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=imagen_guardada.preset_activo,
+            preset_intensidad=imagen_guardada.preset_intensidad,
         )
 
         with imagenes_lock:
@@ -980,6 +1007,8 @@ def aplicar_color(imagen_id: str):
             byn_canales=imagen_guardada.byn_canales,
             byn_virado=imagen_guardada.byn_virado,
             byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=imagen_guardada.preset_activo,
+            preset_intensidad=imagen_guardada.preset_intensidad,
         )
     except ErrorImagen as error:
         return respuesta_error(error.codigo, error.mensaje, error.status)
@@ -1038,6 +1067,12 @@ def aplicar_marco_ruta(imagen_id: str):
             marco_estilo=estilo,
             marco_color=color,
             marco_grosor=grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=imagen_guardada.preset_activo,
+            preset_intensidad=imagen_guardada.preset_intensidad,
         )
 
         procesada = guardar_procesada_sin_perdida(resultado)
@@ -1052,6 +1087,12 @@ def aplicar_marco_ruta(imagen_id: str):
             marco_estilo=estilo,
             marco_color=color,
             marco_grosor=grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=imagen_guardada.preset_activo,
+            preset_intensidad=imagen_guardada.preset_intensidad,
         )
 
         with imagenes_lock:
@@ -1072,6 +1113,12 @@ def aplicar_marco_ruta(imagen_id: str):
             marco_estilo=estilo,
             marco_color=color,
             marco_grosor=grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=imagen_guardada.preset_activo,
+            preset_intensidad=imagen_guardada.preset_intensidad,
         )
     except ErrorImagen as error:
         return respuesta_error(error.codigo, error.mensaje, error.status)
@@ -1187,6 +1234,127 @@ def aplicar_byn_ruta(imagen_id: str):
         return respuesta_error(
             "ERROR_INTERNO",
             "No se pudieron aplicar los ajustes de blanco y negro.",
+            500,
+        )
+    finally:
+        if resultado is not None and resultado is not imagen:
+            resultado.close()
+        if imagen is not None:
+            imagen.close()
+
+
+@app.get("/presets")
+def listar_presets():
+    return jsonify(
+        ok=True,
+        presets=[
+            {
+                "id": p.id,
+                "nombre": p.nombre,
+                "badge": p.badge,
+                "badge_color": p.badge_color,
+                "descripcion": p.descripcion,
+                "tags": list(p.tags),
+                "valores": {
+                    "brillo": p.brillo,
+                    "contraste": p.contraste,
+                    "saturacion": p.saturacion,
+                    "ambiente": p.ambiente,
+                    "iluminaciones": p.iluminaciones,
+                    "sombras": p.sombras,
+                    "calidez": p.calidez,
+                    "blancos": p.blancos,
+                    "negros": p.negros,
+                    "grano": p.grano,
+                },
+            }
+            for p in PRESETS_DISPONIBLES.values()
+        ],
+    )
+
+
+@app.post("/imagen/<imagen_id>/preset")
+def aplicar_preset_ruta(imagen_id: str):
+    datos = request.get_json(silent=True) or {}
+    preset_id = str(datos.get("preset", "ninguno")).strip().lower()
+    try:
+        intensidad = float(datos.get("intensidad", 100.0))
+        intensidad = max(0.0, min(100.0, intensidad))
+    except (ValueError, TypeError):
+        intensidad = 100.0
+
+    if preset_id != "ninguno" and preset_id not in PRESETS_DISPONIBLES:
+        return respuesta_error("PRESET_INVALIDO", f"El estilo '{preset_id}' no es válido.", 400)
+
+    with imagenes_lock:
+        imagen_guardada = imagenes_guardadas.get(imagen_id)
+
+    if imagen_guardada is None:
+        return respuesta_error("IMAGEN_NO_ENCONTRADA", "La imagen ya no está disponible.", 404)
+
+    factores = calcular_factores(imagen_guardada.ajustes)
+
+    imagen = None
+    resultado = None
+    try:
+        imagen = abrir_imagen(imagen_guardada.original)
+        resultado = ejecutar_pipeline(
+            imagen,
+            factores,
+            imagen_guardada.dither_algoritmo,
+            imagen_guardada.dither_paleta,
+            imagen_guardada.dither_pixel,
+            imagen_guardada.dither_intensidad,
+            temperatura=imagen_guardada.temperatura,
+            tinte=imagen_guardada.tinte,
+            mezcla_color=imagen_guardada.mezcla_color,
+            marco_estilo=imagen_guardada.marco_estilo,
+            marco_color=imagen_guardada.marco_color,
+            marco_grosor=imagen_guardada.marco_grosor,
+            byn_activo=imagen_guardada.byn_activo,
+            byn_canales=imagen_guardada.byn_canales,
+            byn_virado=imagen_guardada.byn_virado,
+            byn_virado_intensidad=imagen_guardada.byn_virado_intensidad,
+            preset_activo=preset_id,
+            preset_intensidad=intensidad,
+        )
+
+        procesada = guardar_procesada_sin_perdida(resultado)
+        vista, ancho_vista, alto_vista = generar_vista(resultado)
+
+        imagen_actualizada = replace(
+            imagen_guardada,
+            procesada=procesada,
+            vista=vista,
+            ancho_vista=ancho_vista,
+            alto_vista=alto_vista,
+            preset_activo=preset_id,
+            preset_intensidad=intensidad,
+        )
+
+        with imagenes_lock:
+            if imagenes_guardadas.get(imagen_id) is not imagen_guardada:
+                return respuesta_error(
+                    "IMAGEN_MODIFICADA",
+                    "La imagen cambió durante el procesamiento. Inténtalo de nuevo.",
+                    409,
+                )
+            imagenes_guardadas[imagen_id] = imagen_actualizada
+
+        return jsonify(
+            ok=True,
+            id=imagen_id,
+            url=url_for("ver_imagen", imagen_id=imagen_id, v=uuid.uuid4().hex),
+            preset=preset_id,
+            intensidad=intensidad,
+        )
+    except ErrorImagen as error:
+        return respuesta_error(error.codigo, error.mensaje, error.status)
+    except Exception:
+        app.logger.exception("Error al aplicar el estilo a la imagen.")
+        return respuesta_error(
+            "ERROR_INTERNO",
+            "No se pudo aplicar el estilo a la imagen.",
             500,
         )
     finally:

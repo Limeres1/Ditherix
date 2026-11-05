@@ -14,7 +14,7 @@
     <main class="visor" id="visor">
         <div class="menu-flotante" id="menuImagen">
             <nav class="glass-bar top-bar" aria-label="Menú principal">
-                <div class="bar-items">
+                <div class="bar-items bar-items-left">
                     <a href="/" class="glass-control" title="Volver al Portal"
                         style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
@@ -22,18 +22,72 @@
                             <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" />
                         </svg>
                     </a>
-                    <button class="glass-control" id="botonExportar" type="button" disabled>
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    <button class="glass-control" id="botonExportar" type="button" disabled title="Exportar imagen">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"
                             fill="#e3e3e3">
                             <path
                                 d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
                         </svg>
                     </button>
-                    <button class="glass-control" id="botonCargar" type="button" aria-controls="imageInput">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    <button class="glass-control" id="botonCargar" type="button" aria-controls="imageInput" title="Cargar imagen">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"
                             fill="#e3e3e3">
                             <path
                                 d="M440-200h80v-167l64 64 56-57-160-160-160 160 57 56 63-63v167ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="bar-items bar-items-right">
+                    <div class="crop-popover-container">
+                        <button id="btn-iniciar-recorte" class="glass-control" type="button" title="Recorte" disabled
+                            aria-expanded="false" aria-controls="crop-menu">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                                fill="#e3e3e3">
+                                <path
+                                    d="M760-120 480-400l-94 94q8 15 11 32t3 34q0 66-47 113T240-80q-66 0-113-47T80-240q0-66 47-113t113-47q17 0 34 3t32 11l94-94-94-94q-15 8-32 11t-34 3q-66 0-113-47T80-720q0-66 47-113t113-47q66 0 113 47t47 113q0 17-3 34t-11 32l494 494v40H760ZM600-520l-80-80 240-240h120v40L600-520ZM296.5-663.5Q320-687 320-720t-23.5-56.5Q273-800 240-800t-56.5 23.5Q160-753 160-720t23.5 56.5Q207-640 240-640t56.5-23.5ZM494-466q6-6 6-14t-6-14q-6-6-14-6t-14 6q-6 6-6 14t6 14q6 6 14 6t14-6ZM296.5-183.5Q320-207 320-240t-23.5-56.5Q273-320 240-320t-56.5 23.5Q160-273 160-240t23.5 56.5Q207-160 240-160t56.5-23.5Z" />
+                            </svg>
+                        </button>
+                        <div id="crop-menu" class="crop-menu hidden" aria-label="Opciones de recorte">
+                            <button id="btn-confirmar-recorte" class="glass-control crop-action-btn" type="button"
+                                disabled title="Aplicar recorte">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
+                                    width="16px" fill="currentColor">
+                                    <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                </svg>
+                                <span>Aplicar</span>
+                            </button>
+                            <button id="btn-cancelar-recorte" class="glass-control crop-action-btn" type="button"
+                                disabled title="Cancelar recorte">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
+                                    width="16px" fill="currentColor">
+                                    <path
+                                        d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                                </svg>
+                                <span>Cancelar</span>
+                            </button>
+                            <button id="btn-restablecer-recorte" class="glass-control crop-action-btn" type="button"
+                                disabled title="Restablecer tamaño original">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
+                                    width="16px" fill="currentColor">
+                                    <path
+                                        d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
+                                </svg>
+                                <span>Restablecer</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="glass-control" id="botonVoltearHorizontal" type="button" disabled title="Voltear horizontal">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                            fill="#e3e3e3">
+                            <path
+                                d="M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z" />
+                        </svg>
+                    </button>
+                    <button class="glass-control" id="botonVoltearVertical" type="button" disabled title="Voltear vertical">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                            fill="#e3e3e3">
+                            <path
+                                d="M320-440v-287L217-624l-57-56 200-200 200 200-57 56-103-103v287h-80ZM600-80 400-280l57-56 103 103v-287h80v287l103-103 57 56L600-80Z" />
                         </svg>
                     </button>
                 </div>
@@ -42,6 +96,14 @@
 
             <nav class="glass-bar bottom-bar" aria-label="Herramientas de imagen">
                 <div class="bar-items">
+                    <button class="glass-control" id="btn-toggle-presets" type="button" aria-controls="presets-menu"
+                        aria-expanded="false" title="Estilos y Presets Preestablecidos">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                            fill="currentColor">
+                            <path
+                                d="m380-400 280-280-80-80-280 280 80 80Zm-200 80h80l240-240-80-80-240 240v80Zm360-360 80 80 80-80-80-80-80 80ZM240-160h140l380-380q17-17 17-40t-17-40l-60-60q-17-17-40-17t-40 17L240-300v140Zm460-460-80-80 80 80ZM160-80q-33 0-56.5-23.5T80-160v-140q0-21 8-40t23-35l470-470q30-30 70-30t70 30l60 60q30 30 30 70t-30 70L310-95q-16 15-35 23t-40 8H160Z" />
+                        </svg>
+                    </button>
                     <button class="glass-control" id="btn-toggle-edit" type="button" aria-controls="edit-menu"
                         aria-expanded="false" title="Ajustes de edición">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
@@ -90,58 +152,179 @@
                                 d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm80-80h400v-400H280v400Zm-80 80v-560 560Z" />
                         </svg>
                     </button>
-                    <div class="crop-popover-container">
-                        <button id="btn-iniciar-recorte" class="glass-control" type="button" title="Recorte" disabled
-                            aria-expanded="false" aria-controls="crop-menu">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                                fill="#e3e3e3">
-                                <path
-                                    d="M760-120 480-400l-94 94q8 15 11 32t3 34q0 66-47 113T240-80q-66 0-113-47T80-240q0-66 47-113t113-47q17 0 34 3t32 11l94-94-94-94q-15 8-32 11t-34 3q-66 0-113-47T80-720q0-66 47-113t113-47q66 0 113 47t47 113q0 17-3 34t-11 32l494 494v40H760ZM600-520l-80-80 240-240h120v40L600-520ZM296.5-663.5Q320-687 320-720t-23.5-56.5Q273-800 240-800t-56.5 23.5Q160-753 160-720t23.5 56.5Q207-640 240-640t56.5-23.5ZM494-466q6-6 6-14t-6-14q-6-6-14-6t-14 6q-6 6-6 14t6 14q6 6 14 6t14-6ZM296.5-183.5Q320-207 320-240t-23.5-56.5Q273-320 240-320t-56.5 23.5Q160-273 160-240t23.5 56.5Q207-160 240-160t56.5-23.5Z" />
-                            </svg>
-                        </button>
-                        <div id="crop-menu" class="crop-menu hidden" aria-label="Opciones de recorte">
-                            <button id="btn-confirmar-recorte" class="glass-control crop-action-btn" type="button"
-                                disabled title="Aplicar recorte">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
-                                    width="16px" fill="currentColor">
-                                    <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
-                                </svg>
-                                <span>Aplicar</span>
-                            </button>
-                            <button id="btn-cancelar-recorte" class="glass-control crop-action-btn" type="button"
-                                disabled title="Cancelar recorte">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
-                                    width="16px" fill="currentColor">
-                                    <path
-                                        d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
-                                </svg>
-                                <span>Cancelar</span>
-                            </button>
-                            <button id="btn-restablecer-recorte" class="glass-control crop-action-btn" type="button"
-                                disabled title="Restablecer tamaño original">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
-                                    width="16px" fill="currentColor">
-                                    <path
-                                        d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
-                                </svg>
-                                <span>Restablecer tamaño</span>
-                            </button>
-                        </div>
-                    </div>
-                    <button class="glass-control" id="botonVoltearHorizontal" type="button" disabled><svg
-                            xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                            fill="#e3e3e3">
-                            <path
-                                d="M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z" />
-                        </svg></button>
-                    <button class="glass-control" id="botonVoltearVertical" type="button" disabled><svg
-                            xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                            fill="#e3e3e3">
-                            <path
-                                d="M320-440v-287L217-624l-57-56 200-200 200 200-57 56-103-103v287h-80ZM600-80 400-280l57-56 103 103v-287h80v287l103-103 57 56L600-80Z" />
-                        </svg></button>
                 </div>
             </nav>
+            <!-- Presets / Estilos Preestablecidos -->
+            <section id="presets-menu" class="edit-panel hidden" aria-label="Estilos y Presets Preestablecidos" aria-hidden="true">
+                <div class="edit-header">
+                    <h2>Estilos Preestablecidos</h2>
+                    <button class="close-btn" id="btn-close-presets" type="button" aria-label="Cerrar presets">
+                        &times;
+                    </button>
+                </div>
+
+                <div class="slider-group preset-intensity-group">
+                    <label for="presetIntensidadInput">Intensidad del estilo <output id="presetIntensidadValor" for="presetIntensidadInput">100%</output></label>
+                    <input id="presetIntensidadInput" type="range" min="0" max="100" step="5" value="100" aria-label="Intensidad del estilo" disabled>
+                </div>
+
+                <div class="presets-cards-container" id="presetsCardsContainer" role="radiogroup" aria-label="Seleccionar estilo preestablecido">
+                    <!-- 1. Moody Cinematic -->
+                    <button type="button" class="preset-card" data-preset="moody_cinematic" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #00e5ff;">CINE</span>
+                            <span class="preset-name">Moody Cinematic Teal & Dark</span>
+                        </div>
+                        <p class="preset-desc">Sombras desvanecidas, tonos oscuros fríos y contraste marcado en sujetos.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">Fade +25</span>
+                            <span class="ptag">Frío -12</span>
+                            <span class="ptag">Cont +28</span>
+                            <span class="ptag">Grano 20</span>
+                        </div>
+                    </button>
+
+                    <!-- 2. Golden Hour Vintage -->
+                    <button type="button" class="preset-card" data-preset="golden_hour" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #ffaa00;">35MM</span>
+                            <span class="preset-name">Golden Hour Vintage (35mm)</span>
+                        </div>
+                        <p class="preset-desc">Film analógico Kodak Portra en atardeceres: tonos ámbar suaves y grano visible.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">Ámbar +35</span>
+                            <span class="ptag">Negros +18</span>
+                            <span class="ptag">Sombras +25</span>
+                            <span class="ptag">Grano 45</span>
+                        </div>
+                    </button>
+
+                    <!-- 3. Cyber / Neo-Tokyo -->
+                    <button type="button" class="preset-card" data-preset="cyber_neotokyo" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #ff007f;">CYBER</span>
+                            <span class="preset-name">Cyber / Neo-Tokyo Minimal</span>
+                        </div>
+                        <p class="preset-desc">Estética nocturna de alto impacto: sombras profundas y limpias con luces vibrantes.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">Cont +40</span>
+                            <span class="ptag">Negros -35</span>
+                            <span class="ptag">Sat +22</span>
+                            <span class="ptag">Frío -20</span>
+                        </div>
+                    </button>
+
+                    <!-- 4. Editorial B&W Fine Art -->
+                    <button type="button" class="preset-card" data-preset="editorial_bw" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #e0e0e0;">B&N</span>
+                            <span class="preset-name">Editorial B&W Fine Art</span>
+                        </div>
+                        <p class="preset-desc">Monocromo de alto contraste con textura dramática para retratos y arquitectura.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">B&N Puro</span>
+                            <span class="ptag">Cont +35</span>
+                            <span class="ptag">Ambiente +25</span>
+                            <span class="ptag">Grano 35</span>
+                        </div>
+                    </button>
+
+                    <!-- 5. Y2K Flash Nostalgia -->
+                    <button type="button" class="preset-card" data-preset="y2k_flash" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #00ff66;">Y2K</span>
+                            <span class="preset-name">Y2K Flash / Nostalgia Retro</span>
+                        </div>
+                        <p class="preset-desc">Cámara compacta de los 2000: flash frontal directo, contraste punchy y grano grueso.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">Flash +30</span>
+                            <span class="ptag">Punchy +22</span>
+                            <span class="ptag">Brillo +15</span>
+                            <span class="ptag">Grano 55</span>
+                        </div>
+                    </button>
+
+                    <!-- 6. Clean Muted / Nordic Pastel -->
+                    <button type="button" class="preset-card" data-preset="clean_muted" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #88ccff;">PASTEL</span>
+                            <span class="preset-name">Clean Muted / Nordic Pastel</span>
+                        </div>
+                        <p class="preset-desc">Look nórdico minimalista: baja saturación, tonos neutros suaves y exposición luminosa.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">Muted -30</span>
+                            <span class="ptag">Suave -18</span>
+                            <span class="ptag">Brillo +12</span>
+                            <span class="ptag">Grano 10</span>
+                        </div>
+                    </button>
+
+                    <!-- 7. Fallen Angels -->
+                    <button type="button" class="preset-card" data-preset="fallen_angels" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #00ffbb;">NEON</span>
+                            <span class="preset-name">Fallen Angels 90s Cine</span>
+                        </div>
+                        <p class="preset-desc">Inspirado en Wong Kar-wai: neones nocturnos verdosos y celuloide forzado.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">Verde Neón -16</span>
+                            <span class="ptag">Cont +32</span>
+                            <span class="ptag">Ambiente +18</span>
+                            <span class="ptag">Grano 40</span>
+                        </div>
+                    </button>
+
+                    <!-- 8. Polaroid 600 -->
+                    <button type="button" class="preset-card" data-preset="polaroid_600" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #ff7744;">POLAROID</span>
+                            <span class="preset-name">Polaroid 600 Instant Film</span>
+                        </div>
+                        <p class="preset-desc">Química instantánea nostálgica: colores cálidos ricos, altas luces suaves y fade lechoso.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">Instantáneo</span>
+                            <span class="ptag">Fade +28</span>
+                            <span class="ptag">Calidez +22</span>
+                            <span class="ptag">Grano 30</span>
+                        </div>
+                    </button>
+
+                    <!-- 9. Dreamy Glow -->
+                    <button type="button" class="preset-card" data-preset="dreamy_glow" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #dda0dd;">DREAMY</span>
+                            <span class="preset-name">Dreamy Glow (Efecto Orton)</span>
+                        </div>
+                        <p class="preset-desc">Efecto Orton etéreo: luces resplandecientes difusas (bloom), contraste suave y calidez.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">Orton Bloom</span>
+                            <span class="ptag">Ambiente +30</span>
+                            <span class="ptag">Calidez +14</span>
+                            <span class="ptag">Grano 15</span>
+                        </div>
+                    </button>
+
+                    <!-- 10. Hong Kong Neo-Noir -->
+                    <button type="button" class="preset-card" data-preset="neo_noir" role="radio" aria-checked="false" disabled>
+                        <div class="preset-card-head">
+                            <span class="preset-badge" style="--badge-c: #ff4444;">NOIR</span>
+                            <span class="preset-name">Hong Kong Neo-Noir</span>
+                        </div>
+                        <p class="preset-desc">Claroscuro cinematográfico agresivo: sombras impenetrables y luces de tungsteno.</p>
+                        <div class="preset-tags">
+                            <span class="ptag">Deep Shadows</span>
+                            <span class="ptag">Cont +38</span>
+                            <span class="ptag">Blancos +20</span>
+                            <span class="ptag">Grano 25</span>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="edit-actions">
+                    <button class="glass-control" id="botonResetPresets" type="button" disabled>Quitar estilo</button>
+                    <button class="glass-control" id="botonAplicarPreset" type="button" disabled>Aplicar</button>
+                </div>
+            </section>
             <!--edicion-->
             <section id="edit-menu" class="edit-panel hidden" aria-label="Ajustes de edición" aria-hidden="true">
                 <div class="edit-header">

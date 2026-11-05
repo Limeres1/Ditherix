@@ -81,6 +81,18 @@ function crearEstadoMarcoDefecto() {
 
 let estadoMarco = crearEstadoMarcoDefecto();
 
+const presetIntensidadInput = document.getElementById("presetIntensidadInput");
+const presetIntensidadValor = document.getElementById("presetIntensidadValor");
+const presetsCardsContainer = document.getElementById("presetsCardsContainer");
+const botonResetPresets = document.getElementById("botonResetPresets");
+const botonAplicarPreset = document.getElementById("botonAplicarPreset");
+const presetCards = document.querySelectorAll(".preset-card");
+
+let estadoPreset = {
+    id: "ninguno",
+    intensidad: 100,
+};
+
 const bynActivoInput = document.getElementById("bynActivoInput");
 const bynControlsWrap = document.getElementById("bynControlsWrap");
 const bynFiltroPreset = document.getElementById("bynFiltroPreset");
@@ -273,6 +285,11 @@ function actualizarControlesEdicion() {
         bynControlsWrap.classList.toggle("byn-disabled", bynInternosDeshabilitados);
     }
 
+    if (presetIntensidadInput) presetIntensidadInput.disabled = deshabilitadosPorRecorte;
+    if (botonResetPresets) botonResetPresets.disabled = deshabilitadosPorRecorte;
+    if (botonAplicarPreset) botonAplicarPreset.disabled = deshabilitadosPorRecorte;
+    presetCards.forEach((c) => (c.disabled = deshabilitadosPorRecorte));
+
     btnIniciarRecorte.disabled = deshabilitados;
     botonVoltearHorizontal.disabled = deshabilitadosPorRecorte;
     botonVoltearVertical.disabled = deshabilitadosPorRecorte;
@@ -303,6 +320,7 @@ function establecerModoRecorte(activar) {
     }
 
     if (activar) {
+        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
         if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
         if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
         if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
@@ -469,6 +487,8 @@ async function procesarArchivoSubida(archivo) {
     if (typeof actualizarOpcionesMarcoUI === "function") actualizarOpcionesMarcoUI();
     estadoByn = crearEstadoBynDefecto();
     if (typeof sincronizarTodosLosControlesByn === "function") sincronizarTodosLosControlesByn();
+    estadoPreset = { id: "ninguno", intensidad: 100 };
+    if (typeof sincronizarControlesPresetUI === "function") sincronizarControlesPresetUI();
     actualizarControlesEdicion();
 
     if (controladorCarga) {
@@ -1629,5 +1649,124 @@ if (botonResetByn) {
         estadoByn = crearEstadoBynDefecto();
         sincronizarTodosLosControlesByn();
         aplicarByn();
+    });
+}
+
+function sincronizarControlesPresetUI() {
+    if (presetIntensidadInput) {
+        presetIntensidadInput.value = String(estadoPreset.intensidad ?? 100);
+    }
+    if (presetIntensidadValor) {
+        presetIntensidadValor.value = `${estadoPreset.intensidad ?? 100}%`;
+    }
+    presetCards.forEach((card) => {
+        const id = card.dataset.preset;
+        const activo = id === estadoPreset.id;
+        card.classList.toggle("active", activo);
+        card.setAttribute("aria-checked", String(activo));
+    });
+}
+
+presetCards.forEach((card) => {
+    card.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        const id = card.dataset.preset;
+        if (!id) return;
+        if (estadoPreset.id === id) {
+            estadoPreset.id = "ninguno";
+        } else {
+            estadoPreset.id = id;
+        }
+        sincronizarControlesPresetUI();
+        aplicarPreset();
+    });
+});
+
+if (presetIntensidadInput) {
+    presetIntensidadInput.addEventListener("input", () => {
+        estadoPreset.intensidad = Number(presetIntensidadInput.value);
+        if (presetIntensidadValor) {
+            presetIntensidadValor.value = `${presetIntensidadInput.value}%`;
+        }
+    });
+
+    presetIntensidadInput.addEventListener("change", () => {
+        if (estadoPreset.id !== "ninguno" && imagenActual && !procesandoAccion && !modoRecorte) {
+            aplicarPreset();
+        }
+    });
+}
+
+async function aplicarPreset() {
+    if (!imagenActual || procesandoAccion || modoRecorte) {
+        return;
+    }
+
+    const numeroSolicitud = ++solicitudActual;
+    const imagenId = imagenActual;
+    procesandoAccion = true;
+    actualizarControlesEdicion();
+    indicadorCarga.textContent = "Aplicando estilo fotográfico…";
+    indicadorCarga.classList.remove("oculto");
+
+    try {
+        const respuesta = await fetch(`/imagen/${imagenId}/preset`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                preset: estadoPreset.id,
+                intensidad: estadoPreset.intensidad,
+            }),
+        });
+        const resultado = await respuesta.json();
+
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!respuesta.ok || !resultado.ok) {
+            mostrarMensaje(resultado.mensaje || "No se pudo aplicar el estilo.");
+            return;
+        }
+
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (!vistaCargada) {
+            mostrarMensaje("No se pudo mostrar la imagen con el estilo aplicado.");
+            return;
+        }
+
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+    } catch (error) {
+        if (numeroSolicitud !== solicitudActual) {
+            return;
+        }
+        if (error instanceof SyntaxError) {
+            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+        } else {
+            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        }
+    } finally {
+        if (numeroSolicitud === solicitudActual) {
+            procesandoAccion = false;
+            actualizarControlesEdicion();
+            indicadorCarga.classList.add("oculto");
+            indicadorCarga.textContent = "Procesando imagen…";
+        }
+    }
+}
+
+if (botonAplicarPreset) {
+    botonAplicarPreset.addEventListener("click", () => aplicarPreset());
+}
+
+if (botonResetPresets) {
+    botonResetPresets.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        estadoPreset.id = "ninguno";
+        sincronizarControlesPresetUI();
+        aplicarPreset();
     });
 }
