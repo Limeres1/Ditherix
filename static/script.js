@@ -42,6 +42,13 @@ const contenedorVisor = document.getElementById("visor");
 const escenarioImagen = document.getElementById("escenario");
 const botonVoltearHorizontal = document.getElementById("botonVoltearHorizontal");
 const botonVoltearVertical = document.getElementById("botonVoltearVertical");
+const botonComparar = document.getElementById("botonComparar");
+const splitOverlay = document.getElementById("splitOverlay");
+const splitPreviewOriginal = document.getElementById("splitPreviewOriginal");
+const splitDivider = document.getElementById("splitDivider");
+const splitBadgesHud = document.getElementById("splitBadgesHud");
+const btnSplitQuickOrig = document.getElementById("btnSplitQuickOrig");
+const btnSplitQuickProc = document.getElementById("btnSplitQuickProc");
 const tabBtnBalance = document.getElementById("tab-btn-balance");
 const tabBtnMezcla = document.getElementById("tab-btn-mezcla");
 const colorViewBalance = document.getElementById("color-view-balance");
@@ -297,6 +304,9 @@ function actualizarControlesEdicion() {
     if (botonExportar) {
         botonExportar.disabled = !imagenActual || Boolean(controladorCarga) || procesandoAccion;
     }
+    if (botonComparar) {
+        botonComparar.disabled = deshabilitadosPorRecorte;
+    }
     btnConfirmarRecorte.disabled = !modoRecorte || !obtenerCoordenadasRecorte() || procesandoAccion;
     btnCancelarRecorte.disabled = !modoRecorte || procesandoAccion;
     if (btnRestablecerRecorte) {
@@ -305,6 +315,9 @@ function actualizarControlesEdicion() {
 }
 
 function establecerModoRecorte(activar) {
+    if (activar && typeof establecerModoComparar === "function" && modoComparar) {
+        establecerModoComparar(false);
+    }
     modoRecorte = activar;
     puntoInicioRecorte = null;
     puntoFinRecorte = null;
@@ -456,6 +469,9 @@ async function procesarArchivoSubida(archivo) {
     const numeroSolicitud = ++solicitudActual;
     procesandoAccion = false;
     establecerModoRecorte(false);
+    if (typeof establecerModoComparar === "function") {
+        establecerModoComparar(false);
+    }
     imagenActual = null;
     imagenFueRecortada = false;
     brilloInput.value = "0";
@@ -715,6 +731,9 @@ async function aplicarAjustes(nombreAjuste) {
         mostrarMensaje("");
 
         preview.classList.remove("oculto");
+        if (typeof actualizarVistaComparador === "function") {
+            actualizarVistaComparador();
+        }
     } catch (error) {
         if (numeroSolicitud !== solicitudActual) {
             return;
@@ -801,6 +820,9 @@ async function aplicarDetalle() {
         mostrarMensaje("");
 
         preview.classList.remove("oculto");
+        if (typeof actualizarVistaComparador === "function") {
+            actualizarVistaComparador();
+        }
     } catch (error) {
         if (numeroSolicitud !== solicitudActual) {
             return;
@@ -1249,6 +1271,9 @@ btnConfirmarRecorte.addEventListener("click", async () => {
         }
         mostrarMensaje("");
         establecerModoRecorte(false);
+        if (typeof actualizarVistaComparador === "function") {
+            actualizarVistaComparador();
+        }
     } catch (error) {
         if (numeroSolicitud !== solicitudActual) {
             return;
@@ -1307,6 +1332,9 @@ if (btnRestablecerRecorte) {
             }
             mostrarMensaje("");
             establecerModoRecorte(false);
+            if (typeof actualizarVistaComparador === "function") {
+                actualizarVistaComparador();
+            }
         } catch (error) {
             if (numeroSolicitud !== solicitudActual) return;
             mostrarMensaje("No se pudo conectar con el servidor.");
@@ -1355,6 +1383,9 @@ async function voltearImagen(direccion) {
         mostrarMensaje("");
 
         preview.classList.remove("oculto");
+        if (typeof actualizarVistaComparador === "function") {
+            actualizarVistaComparador();
+        }
     } catch (error) {
         mostrarMensaje("No se pudo conectar con el servidor.");
     } finally {
@@ -1770,3 +1801,150 @@ if (botonResetPresets) {
         aplicarPreset();
     });
 }
+
+// ==========================================================================
+// Comparador Interactivo Split Antes / Después
+// ==========================================================================
+
+let modoComparar = false;
+let splitPos = 50;
+let splitArrastrando = false;
+
+function fijarPosicionSplit(pct) {
+    splitPos = Math.max(1, Math.min(99, pct));
+    if (splitOverlay) {
+        splitOverlay.style.setProperty("--split-pos", `${splitPos}%`);
+    }
+    if (splitDivider) {
+        splitDivider.setAttribute("aria-valuenow", Math.round(splitPos).toString());
+    }
+}
+
+function actualizarVistaComparador() {
+    if (!modoComparar || !imagenActual) return;
+    if (splitPreviewOriginal) {
+        splitPreviewOriginal.src = `/original/${imagenActual}?t=${Date.now()}`;
+    }
+}
+
+function establecerModoComparar(activar) {
+    if (!imagenActual && activar) return;
+    if (modoRecorte && activar) return;
+
+    modoComparar = Boolean(activar);
+    if (botonComparar) {
+        botonComparar.classList.toggle("active", modoComparar);
+        botonComparar.setAttribute("aria-pressed", String(modoComparar));
+    }
+    if (splitOverlay) {
+        splitOverlay.classList.toggle("oculto", !modoComparar);
+        splitOverlay.setAttribute("aria-hidden", String(!modoComparar));
+    }
+    if (splitBadgesHud) {
+        splitBadgesHud.classList.toggle("oculto", !modoComparar);
+        splitBadgesHud.setAttribute("aria-hidden", String(!modoComparar));
+    }
+
+    if (modoComparar) {
+        actualizarVistaComparador();
+        fijarPosicionSplit(50);
+    }
+}
+
+function actualizarPosicionSplitDesdePointer(clientX) {
+    if (!escenarioImagen) return;
+    const transformacion = getComputedStyle(escenarioImagen).transform;
+    const matriz = transformacion === "none"
+        ? { a: 1, e: 0 }
+        : new DOMMatrixReadOnly(transformacion);
+    if (matriz.a === 0) return;
+
+    const localX = (clientX - matriz.e) / matriz.a;
+    const clientWidth = escenarioImagen.clientWidth || window.innerWidth;
+    const pct = (localX / clientWidth) * 100;
+    fijarPosicionSplit(pct);
+}
+
+if (botonComparar) {
+    botonComparar.addEventListener("click", () => {
+        establecerModoComparar(!modoComparar);
+    });
+}
+
+if (splitDivider) {
+    splitDivider.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        e.stopPropagation();
+        splitArrastrando = true;
+        splitDivider.setPointerCapture(e.pointerId);
+        splitDivider.classList.add("dragging");
+        actualizarPosicionSplitDesdePointer(e.clientX);
+    });
+
+    splitDivider.addEventListener("pointermove", (e) => {
+        if (!splitArrastrando) return;
+        e.stopPropagation();
+        actualizarPosicionSplitDesdePointer(e.clientX);
+    });
+
+    function soltarArrastreSplit(e) {
+        if (!splitArrastrando) return;
+        splitArrastrando = false;
+        splitDivider.classList.remove("dragging");
+        try {
+            splitDivider.releasePointerCapture(e.pointerId);
+        } catch (_) {}
+    }
+
+    splitDivider.addEventListener("pointerup", soltarArrastreSplit);
+    splitDivider.addEventListener("pointercancel", soltarArrastreSplit);
+
+    splitDivider.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        fijarPosicionSplit(50);
+    });
+
+    splitDivider.addEventListener("keydown", (e) => {
+        const paso = e.shiftKey ? 10 : 2;
+        if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+            e.preventDefault();
+            fijarPosicionSplit(splitPos - paso);
+        } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+            e.preventDefault();
+            fijarPosicionSplit(splitPos + paso);
+        } else if (e.key === "Home") {
+            e.preventDefault();
+            fijarPosicionSplit(1);
+        } else if (e.key === "End") {
+            e.preventDefault();
+            fijarPosicionSplit(99);
+        }
+    });
+}
+
+if (btnSplitQuickOrig) {
+    btnSplitQuickOrig.addEventListener("click", (e) => {
+        e.stopPropagation();
+        fijarPosicionSplit(90);
+    });
+}
+
+if (btnSplitQuickProc) {
+    btnSplitQuickProc.addEventListener("click", (e) => {
+        e.stopPropagation();
+        fijarPosicionSplit(10);
+    });
+}
+
+document.addEventListener("keydown", (e) => {
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "select") return;
+
+    if (e.key === "c" || e.key === "C" || e.key === "\\") {
+        if (imagenActual && !modoRecorte && !procesandoAccion) {
+            e.preventDefault();
+            establecerModoComparar(!modoComparar);
+        }
+    }
+});
+

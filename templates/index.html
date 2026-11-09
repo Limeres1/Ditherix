@@ -29,12 +29,22 @@
                                 d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
                         </svg>
                     </button>
-                    <button class="glass-control" id="botonCargar" type="button" aria-controls="imageInput" title="Cargar imagen">
+                    <button class="glass-control" id="botonCargar" type="button" aria-controls="imageInput"
+                        title="Cargar imagen">
                         <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"
                             fill="#e3e3e3">
                             <path
                                 d="M440-200h80v-167l64 64 56-57-160-160-160 160 57 56 63-63v167ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z" />
                         </svg>
+                    </button>
+                    <button class="glass-control" id="botonComparar" type="button" disabled
+                        title="Comparar Antes / Después [C]" aria-pressed="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                            fill="currentColor">
+                            <path
+                                d="M440-160v-640h80v640h-80ZM200-280v-400l120 200-120 200Zm560 0-120-200 120-200v400Z" />
+                        </svg>
+                        <span class="btn-text-desktop">Comparar</span>
                     </button>
                 </div>
                 <div class="bar-items bar-items-right">
@@ -76,14 +86,16 @@
                             </button>
                         </div>
                     </div>
-                    <button class="glass-control" id="botonVoltearHorizontal" type="button" disabled title="Voltear horizontal">
+                    <button class="glass-control" id="botonVoltearHorizontal" type="button" disabled
+                        title="Voltear horizontal">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
                             fill="#e3e3e3">
                             <path
                                 d="M280-160 80-360l200-200 56 57-103 103h287v80H233l103 103-56 57Zm400-240-56-57 103-103H440v-80h287L624-743l56-57 200 200-200 200Z" />
                         </svg>
                     </button>
-                    <button class="glass-control" id="botonVoltearVertical" type="button" disabled title="Voltear vertical">
+                    <button class="glass-control" id="botonVoltearVertical" type="button" disabled
+                        title="Voltear vertical">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
                             fill="#e3e3e3">
                             <path
@@ -154,8 +166,22 @@
                     </button>
                 </div>
             </nav>
-            <!-- Presets / Estilos de Autor -->
-            <section id="presets-menu" class="edit-panel hidden presets-panel" aria-label="Estilos y Presets de Autor" aria-hidden="true">
+
+            <div id="splitBadgesHud" class="split-badges-hud oculto" aria-hidden="true">
+                <button type="button" class="split-badge-btn split-badge--orig" id="btnSplitQuickOrig"
+                    title="Deslizar a 90% (ver original)">
+                    <span class="split-badge-dot">■</span>
+                    <span>ORIGINAL</span>
+                </button>
+                <button type="button" class="split-badge-btn split-badge--proc" id="btnSplitQuickProc"
+                    title="Deslizar a 10% (ver procesado)">
+                    <span class="split-badge-dot">■</span>
+                    <span>PROCESADO</span>
+                </button>
+            </div>
+
+            <section id="presets-menu" class="edit-panel hidden presets-panel" aria-label="Estilos y Presets de Autor"
+                aria-hidden="true">
                 <div class="edit-header">
                     <div>
                         <h2>Presets de Autor</h2>
@@ -172,17 +198,21 @@
                             <label for="presetIntensidadInput">Intensidad</label>
                             <output id="presetIntensidadValor" for="presetIntensidadInput">100%</output>
                         </div>
-                        <input id="presetIntensidadInput" type="range" min="0" max="100" step="5" value="100" aria-label="Intensidad del estilo" disabled>
+                        <input id="presetIntensidadInput" type="range" min="0" max="100" step="5" value="100"
+                            aria-label="Intensidad del estilo" disabled>
                     </div>
-                    <button type="button" class="preset-reset-pill" id="botonResetPresets" title="Quitar cualquier estilo activo" disabled>
+                    <button type="button" class="preset-reset-pill" id="botonResetPresets"
+                        title="Quitar cualquier estilo activo" disabled>
                         <span class="pill-dot">&times;</span> Quitar estilo
                     </button>
                 </div>
 
-                <div class="presets-cards-container" id="presetsCardsContainer" role="radiogroup" aria-label="Seleccionar estilo preestablecido">
-                    <!-- 1. Polaroid 600 -->
-                    <button type="button" class="preset-card" data-preset="polaroid_vintage" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #fce4b8, #e07a42, #422013);">
+                <div class="presets-cards-container" id="presetsCardsContainer" role="radiogroup"
+                    aria-label="Seleccionar estilo preestablecido">
+                    <button type="button" class="preset-card" data-preset="polaroid_vintage" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #fce4b8, #e07a42, #422013);">
                             <span class="swatch-cat">INSTANT</span>
                             <span class="swatch-num">01</span>
                         </div>
@@ -199,9 +229,10 @@
                         </div>
                     </button>
 
-                    <!-- 2. Portra 35mm -->
-                    <button type="button" class="preset-card" data-preset="kodak_portra_35mm" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #111111, #3a200a, #d48228, #f5d061);">
+                    <button type="button" class="preset-card" data-preset="kodak_portra_35mm" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #111111, #3a200a, #d48228, #f5d061);">
                             <span class="swatch-cat">35MM</span>
                             <span class="swatch-num">02</span>
                         </div>
@@ -218,9 +249,10 @@
                         </div>
                     </button>
 
-                    <!-- 3. Cianotipia 1842 -->
-                    <button type="button" class="preset-card" data-preset="cianotipia_1842" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #041021, #0a2f54, #1b6ca8, #72efdd);">
+                    <button type="button" class="preset-card" data-preset="cianotipia_1842" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #041021, #0a2f54, #1b6ca8, #72efdd);">
                             <span class="swatch-cat">QUÍMICA</span>
                             <span class="swatch-num">03</span>
                         </div>
@@ -237,9 +269,10 @@
                         </div>
                     </button>
 
-                    <!-- 4. Fine Art Selenio -->
-                    <button type="button" class="preset-card" data-preset="fine_art_selenio" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #100f14, #272130, #736980, #f2f0f7);">
+                    <button type="button" class="preset-card" data-preset="fine_art_selenio" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #100f14, #272130, #736980, #f2f0f7);">
                             <span class="swatch-cat">FINE ART</span>
                             <span class="swatch-num">04</span>
                         </div>
@@ -256,9 +289,10 @@
                         </div>
                     </button>
 
-                    <!-- 5. Game Boy 1989 -->
-                    <button type="button" class="preset-card" data-preset="gameboy_1989" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #0f380f, #306230, #8bac0f, #9bbc0f);">
+                    <button type="button" class="preset-card" data-preset="gameboy_1989" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #0f380f, #306230, #8bac0f, #9bbc0f);">
                             <span class="swatch-cat">8-BIT</span>
                             <span class="swatch-num">05</span>
                         </div>
@@ -275,9 +309,10 @@
                         </div>
                     </button>
 
-                    <!-- 6. CGA Cyberpunk -->
-                    <button type="button" class="preset-card" data-preset="cyber_cga_80s" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #000000 20%, #00ffff 50%, #ff55ff 80%, #ffffff 100%);">
+                    <button type="button" class="preset-card" data-preset="cyber_cga_80s" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #000000 20%, #00ffff 50%, #ff55ff 80%, #ffffff 100%);">
                             <span class="swatch-cat">CYBER</span>
                             <span class="swatch-num">06</span>
                         </div>
@@ -294,9 +329,10 @@
                         </div>
                     </button>
 
-                    <!-- 7. Teal & Orange -->
-                    <button type="button" class="preset-card" data-preset="moody_teal_orange" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #04181f, #093b45, #cf6d17, #ffa938);">
+                    <button type="button" class="preset-card" data-preset="moody_teal_orange" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #04181f, #093b45, #cf6d17, #ffa938);">
                             <span class="swatch-cat">CINE</span>
                             <span class="swatch-num">07</span>
                         </div>
@@ -313,9 +349,10 @@
                         </div>
                     </button>
 
-                    <!-- 8. Fallen Angels -->
-                    <button type="button" class="preset-card" data-preset="fallen_angels_90s" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #01140e, #053322, #00d280, #e6c800);">
+                    <button type="button" class="preset-card" data-preset="fallen_angels_90s" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #01140e, #053322, #00d280, #e6c800);">
                             <span class="swatch-cat">NOIR 90S</span>
                             <span class="swatch-num">08</span>
                         </div>
@@ -332,9 +369,10 @@
                         </div>
                     </button>
 
-                    <!-- 9. Y2K Flash -->
-                    <button type="button" class="preset-card" data-preset="y2k_digicam_flash" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #181818, #555555, #f5f5f5, #99aaff);">
+                    <button type="button" class="preset-card" data-preset="y2k_digicam_flash" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #181818, #555555, #f5f5f5, #99aaff);">
                             <span class="swatch-cat">Y2K</span>
                             <span class="swatch-num">09</span>
                         </div>
@@ -351,9 +389,10 @@
                         </div>
                     </button>
 
-                    <!-- 10. Orton Bloom -->
-                    <button type="button" class="preset-card" data-preset="dreamy_orton_bloom" role="radio" aria-checked="false" disabled>
-                        <div class="preset-swatch" style="background: linear-gradient(135deg, #241129, #59254f, #be73a6, #fff0fa);">
+                    <button type="button" class="preset-card" data-preset="dreamy_orton_bloom" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #241129, #59254f, #be73a6, #fff0fa);">
                             <span class="swatch-cat">FANTASÍA</span>
                             <span class="swatch-num">10</span>
                         </div>
@@ -371,11 +410,7 @@
                     </button>
                 </div>
 
-                <div class="edit-actions">
-                    <button class="glass-control" id="botonAplicarPreset" type="button" disabled>Aplicar estilo</button>
-                </div>
             </section>
-            <!--edicion-->
             <section id="edit-menu" class="edit-panel hidden" aria-label="Ajustes de edición" aria-hidden="true">
                 <div class="edit-header">
                     <h2>Edición</h2>
@@ -408,7 +443,6 @@
                     <button class="glass-control" id="botonAplicarAjustes" type="button" disabled>Aplicar</button>
                 </div>
             </section>
-            <!--detalle-->
             <section id="detalle-menu" class="edit-panel hidden" aria-label="Ajustes de detalle" aria-hidden="true">
                 <div class="edit-header">
                     <h2>Detalle</h2>
@@ -440,7 +474,6 @@
                     <button class="glass-control" id="botonAplicarDetalle" type="button" disabled>Aplicar</button>
                 </div>
             </section>
-            <!--Dithering-->
             <section id="dither-menu" class="edit-panel hidden" aria-label="Efecto Dithering" aria-hidden="true">
                 <div class="edit-header">
                     <h2>Dithering</h2>
@@ -494,8 +527,8 @@
                     <button class="glass-control" id="botonAplicarDither" type="button" disabled>Aplicar</button>
                 </div>
             </section>
-            <!-- Balance de Color y Mezcla HSL estilo Lightroom -->
-            <section id="color-menu" class="edit-panel hidden" aria-label="Ajustes de color y Mezcla HSL" aria-hidden="true">
+            <section id="color-menu" class="edit-panel hidden" aria-label="Ajustes de color y Mezcla HSL"
+                aria-hidden="true">
                 <div class="edit-header">
                     <h2>Color</h2>
                     <button class="close-btn" id="btn-close-color" type="button" aria-label="Cerrar color">
@@ -508,12 +541,13 @@
                     <button type="button" class="color-tab-btn" id="tab-btn-mezcla">Mezcla HSL</button>
                 </div>
 
-                <!-- Sección 1: Balance de temperatura y tinte -->
                 <div id="color-view-balance" class="color-subview">
                     <div class="slider-group">
-                        <label for="temperaturaInput">Temperatura <output id="temperaturaValor" for="temperaturaInput">0</output></label>
+                        <label for="temperaturaInput">Temperatura <output id="temperaturaValor"
+                                for="temperaturaInput">0</output></label>
                         <div class="range-gradient-wrap track-temperatura">
-                            <input id="temperaturaInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Temperatura de color" disabled>
+                            <input id="temperaturaInput" type="range" min="-100" max="100" step="1" value="0"
+                                aria-label="Temperatura de color" disabled>
                         </div>
                         <div class="color-range-hints">
                             <span class="hint-cold">Azul (Frío)</span>
@@ -524,7 +558,8 @@
                     <div class="slider-group">
                         <label for="tinteInput">Tinte <output id="tinteValor" for="tinteInput">0</output></label>
                         <div class="range-gradient-wrap track-tinte">
-                            <input id="tinteInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Tinte de color" disabled>
+                            <input id="tinteInput" type="range" min="-100" max="100" step="1" value="0"
+                                aria-label="Tinte de color" disabled>
                         </div>
                         <div class="color-range-hints">
                             <span class="hint-green">Verde</span>
@@ -533,17 +568,24 @@
                     </div>
                 </div>
 
-                <!-- Sección 2: Mezcla HSL de 8 colores -->
                 <div id="color-view-mezcla" class="color-subview hidden">
                     <div class="color-swatches-selector" role="radiogroup" aria-label="Canal de color">
-                        <button type="button" class="color-swatch-circle active" data-color="rojo" title="Rojo" style="--swatch-hue: #ff3b30;"></button>
-                        <button type="button" class="color-swatch-circle" data-color="naranja" title="Naranja" style="--swatch-hue: #ff9500;"></button>
-                        <button type="button" class="color-swatch-circle" data-color="amarillo" title="Amarillo" style="--swatch-hue: #ffcc00;"></button>
-                        <button type="button" class="color-swatch-circle" data-color="verde" title="Verde" style="--swatch-hue: #34c759;"></button>
-                        <button type="button" class="color-swatch-circle" data-color="cyan" title="Cyan" style="--swatch-hue: #32ade6;"></button>
-                        <button type="button" class="color-swatch-circle" data-color="azul" title="Azul" style="--swatch-hue: #007aff;"></button>
-                        <button type="button" class="color-swatch-circle" data-color="violeta" title="Violeta" style="--swatch-hue: #af52de;"></button>
-                        <button type="button" class="color-swatch-circle" data-color="rosa" title="Rosa" style="--swatch-hue: #ff2d55;"></button>
+                        <button type="button" class="color-swatch-circle active" data-color="rojo" title="Rojo"
+                            style="--swatch-hue: #ff3b30;"></button>
+                        <button type="button" class="color-swatch-circle" data-color="naranja" title="Naranja"
+                            style="--swatch-hue: #ff9500;"></button>
+                        <button type="button" class="color-swatch-circle" data-color="amarillo" title="Amarillo"
+                            style="--swatch-hue: #ffcc00;"></button>
+                        <button type="button" class="color-swatch-circle" data-color="verde" title="Verde"
+                            style="--swatch-hue: #34c759;"></button>
+                        <button type="button" class="color-swatch-circle" data-color="cyan" title="Cyan"
+                            style="--swatch-hue: #32ade6;"></button>
+                        <button type="button" class="color-swatch-circle" data-color="azul" title="Azul"
+                            style="--swatch-hue: #007aff;"></button>
+                        <button type="button" class="color-swatch-circle" data-color="violeta" title="Violeta"
+                            style="--swatch-hue: #af52de;"></button>
+                        <button type="button" class="color-swatch-circle" data-color="rosa" title="Rosa"
+                            style="--swatch-hue: #ff2d55;"></button>
                     </div>
 
                     <div class="color-active-header">
@@ -553,17 +595,22 @@
 
                     <div class="slider-group">
                         <label for="hslTonoInput">Tono <output id="hslTonoValor" for="hslTonoInput">0</output></label>
-                        <input id="hslTonoInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Tono del canal de color" disabled>
+                        <input id="hslTonoInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Tono del canal de color" disabled>
                     </div>
 
                     <div class="slider-group">
-                        <label for="hslSatInput">Saturación <output id="hslSatValor" for="hslSatInput">0%</output></label>
-                        <input id="hslSatInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Saturación del canal de color" disabled>
+                        <label for="hslSatInput">Saturación <output id="hslSatValor"
+                                for="hslSatInput">0%</output></label>
+                        <input id="hslSatInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Saturación del canal de color" disabled>
                     </div>
 
                     <div class="slider-group">
-                        <label for="hslLumInput">Luminancia <output id="hslLumValor" for="hslLumInput">0%</output></label>
-                        <input id="hslLumInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Luminancia del canal de color" disabled>
+                        <label for="hslLumInput">Luminancia <output id="hslLumValor"
+                                for="hslLumInput">0%</output></label>
+                        <input id="hslLumInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Luminancia del canal de color" disabled>
                     </div>
                 </div>
 
@@ -572,7 +619,6 @@
                     <button class="glass-control" id="botonAplicarColor" type="button" disabled>Aplicar</button>
                 </div>
             </section>
-            <!-- Blanco y Negro / Mezclador de Canales -->
             <section id="byn-menu" class="edit-panel hidden" aria-label="Ajustes de Blanco y Negro" aria-hidden="true">
                 <div class="edit-header">
                     <h2>Blanco y Negro</h2>
@@ -606,51 +652,67 @@
                     <span class="byn-section-title">Mezclador de Canales</span>
 
                     <div class="slider-group">
-                        <label for="bynRojoInput"><span class="chan-dot" style="background: #ff3b30; box-shadow: 0 0 6px #ff3b30;"></span>Rojo</label>
+                        <label for="bynRojoInput"><span class="chan-dot"
+                                style="background: #ff3b30; box-shadow: 0 0 6px #ff3b30;"></span>Rojo</label>
                         <output id="bynRojoValor" for="bynRojoInput">0</output>
-                        <input id="bynRojoInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Rojo en B&N" disabled>
+                        <input id="bynRojoInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Canal Rojo en B&N" disabled>
                     </div>
 
                     <div class="slider-group">
-                        <label for="bynNaranjaInput"><span class="chan-dot" style="background: #ff9500; box-shadow: 0 0 6px #ff9500;"></span>Naranja</label>
+                        <label for="bynNaranjaInput"><span class="chan-dot"
+                                style="background: #ff9500; box-shadow: 0 0 6px #ff9500;"></span>Naranja</label>
                         <output id="bynNaranjaValor" for="bynNaranjaInput">0</output>
-                        <input id="bynNaranjaInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Naranja en B&N" disabled>
+                        <input id="bynNaranjaInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Canal Naranja en B&N" disabled>
                     </div>
 
                     <div class="slider-group">
-                        <label for="bynAmarilloInput"><span class="chan-dot" style="background: #ffcc00; box-shadow: 0 0 6px #ffcc00;"></span>Amarillo</label>
+                        <label for="bynAmarilloInput"><span class="chan-dot"
+                                style="background: #ffcc00; box-shadow: 0 0 6px #ffcc00;"></span>Amarillo</label>
                         <output id="bynAmarilloValor" for="bynAmarilloInput">0</output>
-                        <input id="bynAmarilloInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Amarillo en B&N" disabled>
+                        <input id="bynAmarilloInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Canal Amarillo en B&N" disabled>
                     </div>
 
                     <div class="slider-group">
-                        <label for="bynVerdeInput"><span class="chan-dot" style="background: #34c759; box-shadow: 0 0 6px #34c759;"></span>Verde</label>
+                        <label for="bynVerdeInput"><span class="chan-dot"
+                                style="background: #34c759; box-shadow: 0 0 6px #34c759;"></span>Verde</label>
                         <output id="bynVerdeValor" for="bynVerdeInput">0</output>
-                        <input id="bynVerdeInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Verde en B&N" disabled>
+                        <input id="bynVerdeInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Canal Verde en B&N" disabled>
                     </div>
 
                     <div class="slider-group">
-                        <label for="bynCyanInput"><span class="chan-dot" style="background: #32ade6; box-shadow: 0 0 6px #32ade6;"></span>Cyan</label>
+                        <label for="bynCyanInput"><span class="chan-dot"
+                                style="background: #32ade6; box-shadow: 0 0 6px #32ade6;"></span>Cyan</label>
                         <output id="bynCyanValor" for="bynCyanInput">0</output>
-                        <input id="bynCyanInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Cyan en B&N" disabled>
+                        <input id="bynCyanInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Canal Cyan en B&N" disabled>
                     </div>
 
                     <div class="slider-group">
-                        <label for="bynAzulInput"><span class="chan-dot" style="background: #007aff; box-shadow: 0 0 6px #007aff;"></span>Azul</label>
+                        <label for="bynAzulInput"><span class="chan-dot"
+                                style="background: #007aff; box-shadow: 0 0 6px #007aff;"></span>Azul</label>
                         <output id="bynAzulValor" for="bynAzulInput">0</output>
-                        <input id="bynAzulInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Azul en B&N" disabled>
+                        <input id="bynAzulInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Canal Azul en B&N" disabled>
                     </div>
 
                     <div class="slider-group">
-                        <label for="bynVioletaInput"><span class="chan-dot" style="background: #af52de; box-shadow: 0 0 6px #af52de;"></span>Violeta</label>
+                        <label for="bynVioletaInput"><span class="chan-dot"
+                                style="background: #af52de; box-shadow: 0 0 6px #af52de;"></span>Violeta</label>
                         <output id="bynVioletaValor" for="bynVioletaInput">0</output>
-                        <input id="bynVioletaInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Violeta en B&N" disabled>
+                        <input id="bynVioletaInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Canal Violeta en B&N" disabled>
                     </div>
 
                     <div class="slider-group">
-                        <label for="bynRosaInput"><span class="chan-dot" style="background: #ff2d55; box-shadow: 0 0 6px #ff2d55;"></span>Rosa</label>
+                        <label for="bynRosaInput"><span class="chan-dot"
+                                style="background: #ff2d55; box-shadow: 0 0 6px #ff2d55;"></span>Rosa</label>
                         <output id="bynRosaValor" for="bynRosaInput">0</output>
-                        <input id="bynRosaInput" type="range" min="-100" max="100" step="1" value="0" aria-label="Canal Rosa en B&N" disabled>
+                        <input id="bynRosaInput" type="range" min="-100" max="100" step="1" value="0"
+                            aria-label="Canal Rosa en B&N" disabled>
                     </div>
 
                     <span class="byn-section-title">Virado de Laboratorio</span>
@@ -669,7 +731,8 @@
                     <div class="slider-group" id="bynViradoIntensidadGroup">
                         <label for="bynViradoIntensidadInput">Intensidad del virado</label>
                         <output id="bynViradoIntensidadValor" for="bynViradoIntensidadInput">70%</output>
-                        <input id="bynViradoIntensidadInput" type="range" min="0" max="100" step="1" value="70" aria-label="Intensidad del virado" disabled>
+                        <input id="bynViradoIntensidadInput" type="range" min="0" max="100" step="1" value="70"
+                            aria-label="Intensidad del virado" disabled>
                     </div>
                 </div>
 
@@ -678,7 +741,6 @@
                     <button class="glass-control" id="botonAplicarByn" type="button" disabled>Aplicar</button>
                 </div>
             </section>
-            <!-- Marcos Decorativos -->
             <section id="marcos-menu" class="edit-panel hidden" aria-label="Marcos decorativos" aria-hidden="true">
                 <div class="edit-header">
                     <h2>Marcos</h2>
@@ -698,24 +760,29 @@
                     </select>
                 </div>
 
-                <!-- Opciones específicas de Marco Liso -->
                 <div id="opcionesMarcoLiso" class="marco-liso-options hidden">
                     <div class="color-picker-group">
                         <label for="marcoColorInput">Color del marco</label>
                         <div class="marco-color-row">
                             <input id="marcoColorInput" type="color" value="#ffffff" class="glass-color-input" disabled>
                             <div class="marco-color-presets">
-                                <button type="button" class="preset-color-dot active" data-color="#ffffff" title="Blanco" style="background: #ffffff;"></button>
-                                <button type="button" class="preset-color-dot" data-color="#000000" title="Negro" style="background: #000000; border: 1px solid #444;"></button>
-                                <button type="button" class="preset-color-dot" data-color="#f5e6c8" title="Crema" style="background: #f5e6c8;"></button>
-                                <button type="button" class="preset-color-dot" data-color="#00ff66" title="Cyber Verde" style="background: #00ff66;"></button>
-                                <button type="button" class="preset-color-dot" data-color="#ff007f" title="Neón Rosa" style="background: #ff007f;"></button>
+                                <button type="button" class="preset-color-dot active" data-color="#ffffff"
+                                    title="Blanco" style="background: #ffffff;"></button>
+                                <button type="button" class="preset-color-dot" data-color="#000000" title="Negro"
+                                    style="background: #000000; border: 1px solid #444;"></button>
+                                <button type="button" class="preset-color-dot" data-color="#f5e6c8" title="Crema"
+                                    style="background: #f5e6c8;"></button>
+                                <button type="button" class="preset-color-dot" data-color="#00ff66" title="Cyber Verde"
+                                    style="background: #00ff66;"></button>
+                                <button type="button" class="preset-color-dot" data-color="#ff007f" title="Neón Rosa"
+                                    style="background: #ff007f;"></button>
                             </div>
                         </div>
                     </div>
 
                     <div class="slider-group">
-                        <label for="marcoGrosorInput">Grosor <output id="marcoGrosorValor" for="marcoGrosorInput">24 px</output></label>
+                        <label for="marcoGrosorInput">Grosor <output id="marcoGrosorValor" for="marcoGrosorInput">24
+                                px</output></label>
                         <input id="marcoGrosorInput" type="range" min="4" max="100" step="2" value="24"
                             aria-label="Grosor del marco" disabled>
                     </div>
@@ -759,6 +826,21 @@
         </div>
         <div class="escenario" id="escenario">
             <img id="preview" class="preview oculto" alt="Vista previa de la imagen procesada" draggable="false">
+
+            <div id="splitOverlay" class="split-overlay oculto" aria-hidden="true" style="--split-pos: 50%;">
+                <img id="splitPreviewOriginal" class="split-preview-orig" alt="Fotografía original sin procesar"
+                    draggable="false">
+                <div class="split-divider" id="splitDivider" role="slider" tabindex="0" aria-valuenow="50"
+                    aria-valuemin="0" aria-valuemax="100" aria-label="Deslizar para comparar antes y después">
+                    <div class="split-hairline"></div>
+                    <div class="split-handle">
+                        <span class="split-handle-arrow">◄</span>
+                        <span class="split-handle-core">■</span>
+                        <span class="split-handle-arrow">►</span>
+                    </div>
+                </div>
+            </div>
+
             <div id="cropOverlay" class="crop-overlay oculto" aria-label="Área de selección del recorte">
                 <div id="cropSelection" class="crop-selection oculto"></div>
             </div>

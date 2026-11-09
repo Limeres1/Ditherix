@@ -42,6 +42,7 @@ class ImagenGuardada:
     alto_inicial: int
     ancho_vista: int
     alto_vista: int
+    vista_original: bytes = b""
     ajustes: dict[str, float] = field(default_factory=dict)
     fue_recortada: bool = False
     dither_algoritmo: str = "ninguno"
@@ -236,6 +237,7 @@ def subir_imagen():
             fue_recortada=False,
             ancho_vista=ancho_vista,
             alto_vista=alto_vista,
+            vista_original=vista,
             ajustes=dict(AJUSTES_DEFECTO),
         )
 
@@ -416,6 +418,39 @@ def ver_imagen(imagen_id: str):
     return respuesta
 
 
+@app.get("/original/<imagen_id>")
+def ver_original(imagen_id: str):
+    with imagenes_lock:
+        imagen = imagenes_guardadas.get(imagen_id)
+
+    if imagen is None:
+        return respuesta_error(
+            "IMAGEN_NO_ENCONTRADA",
+            "La imagen ya no está disponible. Vuelve a cargarla.",
+            404,
+        )
+
+    if imagen.vista_original:
+        respuesta = app.response_class(imagen.vista_original, mimetype="image/jpeg")
+        respuesta.headers["Cache-Control"] = "no-store"
+        return respuesta
+
+    img = None
+    try:
+        img = abrir_imagen(imagen.original)
+        vista_orig, _, _ = generar_vista(img)
+        respuesta = app.response_class(vista_orig, mimetype="image/jpeg")
+        respuesta.headers["Cache-Control"] = "no-store"
+        return respuesta
+    except Exception:
+        respuesta = app.response_class(imagen.original, mimetype="image/jpeg")
+        respuesta.headers["Cache-Control"] = "no-store"
+        return respuesta
+    finally:
+        if img is not None:
+            img.close()
+
+
 @app.errorhandler(413)
 def archivo_demasiado_grande(_error):
     _ = _error
@@ -496,12 +531,14 @@ def recortar_imagen(imagen_id: str):
         nuevo_original = guardar_procesada_sin_perdida(original_recortado)
         nueva_procesada = guardar_procesada_sin_perdida(procesada_recortada)
         vista, ancho_vista, alto_vista = generar_vista(procesada_recortada)
+        vista_original_rec, _, _ = generar_vista(original_recortado)
 
         imagen_actualizada = replace(
             imagen_guardada,
             original=nuevo_original,
             procesada=nueva_procesada,
             vista=vista,
+            vista_original=vista_original_rec,
             ancho=nuevo_ancho,
             alto=nuevo_alto,
             fue_recortada=True,
@@ -574,6 +611,7 @@ def restablecer_recorte(imagen_id: str):
     resultado = None
     try:
         imagen = abrir_imagen(imagen_guardada.original_inicial)
+        vista_original_inic, _, _ = generar_vista(imagen)
         factores = calcular_factores(imagen_guardada.ajustes)
         resultado = ejecutar_pipeline(
             imagen,
@@ -604,6 +642,7 @@ def restablecer_recorte(imagen_id: str):
             original=imagen_guardada.original_inicial,
             procesada=procesada,
             vista=vista,
+            vista_original=vista_original_inic,
             ancho=imagen_guardada.ancho_inicial,
             alto=imagen_guardada.alto_inicial,
             ancho_vista=ancho_vista,
@@ -695,11 +734,13 @@ def voltear(imagen_id: str, direccion: str):
         nueva_procesada = guardar_procesada_sin_perdida(nueva_proc)
         nuevo_inicial = guardar_procesada_sin_perdida(nueva_inic)
         vista, ancho_v, alto_v = generar_vista(nueva_proc)
+        vista_orig_vol, _, _ = generar_vista(nueva_orig)
         imagen_actualizada = replace(
             imagen_guardada,
             original=nuevo_original,
             procesada=nueva_procesada,
             vista=vista,
+            vista_original=vista_orig_vol,
             original_inicial=nuevo_inicial,
             ancho_vista=ancho_v,
             alto_vista=alto_v,

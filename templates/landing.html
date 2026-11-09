@@ -4,19 +4,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ditherix - Inicio</title>
+    <title>Ditherix - Laboratorio Fotográfico & Dithering Retro</title>
     <meta name="description"
-        content="Editor fotografico monocromo con difusion Floyd-Steinberg, tramado Bayer, inyeccion de grano analogico y exportacion sin perdida.">
+        content="Editor fotográfico monocromo con difusión Floyd-Steinberg, tramado Bayer, virados químicos, inyección de grano analógico y exportación sin pérdida.">
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon/icon.jpeg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Cinzel:wght@400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Cinzel:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
 </head>
 
 <body>
+    <aside class="cinema-loader" id="cinemaLoader" aria-label="Pantalla de carga de sistema" role="dialog"
+        aria-modal="true">
+        <div class="loader-curtain loader-curtain--top" aria-hidden="true"></div>
+        <div class="loader-curtain loader-curtain--bottom" aria-hidden="true"></div>
+
+        <div class="loader-content">
+            <div class="loader-header-meta">
+                <span class="loader-sigil"><span class="sigil-box">■</span> DITHERIX // LAB SYSTEM</span>
+                <span class="loader-coord num">[ 34.6037° S · 58.3816° W ]</span>
+            </div>
+
+            <div class="loader-counter-wrap">
+                <div class="loader-number-box">
+                    <span class="loader-number num" id="loaderNumber">000</span>
+                    <span class="loader-percent">%</span>
+                </div>
+                <div class="loader-line-track">
+                    <div class="loader-line-fill" id="loaderFill"></div>
+                </div>
+            </div>
+
+            <div class="loader-footer-meta">
+                <div class="loader-status-line">
+                    <span class="loader-bracket">[</span>
+                    <span class="loader-status-text" id="loaderStatusText">INICIALIZANDO MOTOR DITHERIX...</span>
+                    <span class="loader-bracket">]</span>
+                </div>
+                <button type="button" class="loader-skip-btn" id="loaderSkipBtn" aria-label="Omitir pantalla de carga">
+                    CLICK PARA OMITIR // ESC
+                </button>
+            </div>
+        </div>
+    </aside>
+
     <div class="screen-scanlines" aria-hidden="true"></div>
     <div class="screen-vignette" aria-hidden="true"></div>
 
@@ -31,17 +65,29 @@
 
             <div class="hud-center">
                 <div class="hud-clock-badge" id="hudClock" aria-label="Reloj de sistema">
-                    <span class="hud-bracket" aria-hidden="true">[</span><span id="hudDay" class="num">04</span><span
+                    <span class="hud-bracket" aria-hidden="true">[</span><span id="hudDay" class="num">08</span><span
                         class="hud-bracket" aria-hidden="true">]</span>
                     <span class="hud-bracket" aria-hidden="true">[</span><span id="hudMonth" class="num">11</span><span
                         class="hud-bracket" aria-hidden="true">]</span>
                     <span class="hud-bracket" aria-hidden="true">[</span><span id="hudYear" class="num">2026</span><span
                         class="hud-bracket" aria-hidden="true">]</span>
-                    <span class="hud-time num" id="hudTime">16:50:00</span>
+                    <span class="hud-time num" id="hudTime">12:00:00:00</span>
                 </div>
             </div>
 
             <div class="hud-right">
+                <button type="button" class="hud-control-pill" id="hudPaletteBtn" aria-label="Cambiar paleta cromática"
+                    title="Alternar paleta retro">
+                    <span class="hud-swatch" id="hudSwatch"></span>
+                    <span class="hud-pill-label" id="hudPaletteName">OBSIDIAN</span>
+                </button>
+
+                <button type="button" class="hud-control-pill" id="hudSoundBtn" aria-pressed="false"
+                    aria-label="Activar efectos sonoros" title="Efectos de sonido mecánicos">
+                    <span class="hud-sound-dot" id="hudSoundDot" aria-hidden="true">■</span>
+                    <span class="hud-pill-label" id="hudSoundLabel">AUDIO: OFF</span>
+                </button>
+
                 <a href="/editor" class="btn btn--primary">
                     <span>Abrir editor</span>
                 </a>
@@ -49,274 +95,533 @@
         </div>
     </header>
 
-    <section class="hero-cinematic" id="inicio">
-        <div class="hero-bg-layer"
-            style="background-image: url('{{ url_for('static', filename='images/tesla.png') }}');" aria-hidden="true">
+    <div class="h-scroll-container" id="horizontalGallery">
+        <div class="h-sticky-viewport">
+
+            <div class="h-hud-bar">
+                <div class="h-hud-left">
+                    <span class="h-hud-tag">PORTFOLIO // CAPÍTULOS</span>
+                    <span class="h-hud-index">
+                        PANEL <strong id="hActiveNum" class="num">01</strong> / <span class="num">08</span>
+                    </span>
+                </div>
+
+                <div class="h-hud-center">
+                    <nav class="h-nav-pills" id="hNavPills" aria-label="Navegación de diapositivas">
+                        <button type="button" class="h-pill active"
+                            data-slide="0"><span>01</span><small>PORTADA</small></button>
+                        <button type="button" class="h-pill"
+                            data-slide="1"><span>02</span><small>DITHERING</small></button>
+                        <button type="button" class="h-pill"
+                            data-slide="2"><span>03</span><small>COMPARADOR</small></button>
+                        <button type="button" class="h-pill"
+                            data-slide="3"><span>04</span><small>QUÍMICA</small></button>
+                        <button type="button" class="h-pill"
+                            data-slide="4"><span>05</span><small>MARCOS</small></button>
+                        <button type="button" class="h-pill"
+                            data-slide="5"><span>06</span><small>PRESETS</small></button>
+                        <button type="button" class="h-pill"
+                            data-slide="6"><span>07</span><small>ESTUDIO</small></button>
+                        <button type="button" class="h-pill" data-slide="7"><span>08</span><small>AUTOR</small></button>
+                    </nav>
+                </div>
+
+                <div class="h-hud-right">
+                    <button type="button" class="h-hud-arrow" id="hNavPrev" aria-label="Panel anterior">←</button>
+                    <button type="button" class="h-hud-arrow" id="hNavNext" aria-label="Panel siguiente">→</button>
+                </div>
+            </div>
+
+            <main class="h-track" id="hTrack">
+
+                <article class="h-slide h-slide--hero" data-index="0" id="inicio">
+                    <div class="hero-bg-layer" aria-hidden="true"></div>
+                    <div class="hero-mesh-overlay" aria-hidden="true"></div>
+
+                    <div class="hero-hud-reticle-wrap" aria-hidden="true">
+                        <div class="hud-axis-vert"></div>
+                        <div class="hud-axis-horiz"></div>
+                        <span class="hud-reticle-point rp-cross">+</span>
+                        <span class="hud-reticle-point rp-top">+</span>
+                        <span class="hud-reticle-point rp-bottom">+</span>
+                    </div>
+
+                    <div class="hero-content-wrap">
+                        <h1 class="hero-floating-title">DITHERIX</h1>
+                        <div class="hero-actions-line">
+                            <a href="/editor" class="btn btn--primary">
+                                <span>Iniciar</span>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="h-slide" data-index="1" id="dithering">
+                    <div class="slide-card">
+                        <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                        <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                        <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                        <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+
+                        <div class="slide-layout">
+                            <div class="slide-visual">
+                                <img src="{{ url_for('static', filename='images/Dithering.png') }}"
+                                    alt="Motor de Dithering de difusión y tramado Bayer" class="slide-img"
+                                    loading="lazy" width="900" height="560">
+                                <div class="slide-visual-badge">
+                                    <span class="badge-num num">[ 01 ]</span>
+                                    <span class="badge-text">DIFUSIÓN MATRICIAL</span>
+                                </div>
+                            </div>
+
+                            <div class="slide-body">
+                                <div class="slide-kicker">
+                                    <span class="kicker-cat">ALGORITMOS // RETRO 8-BIT</span>
+                                    <span class="kicker-state">CALIBRADO</span>
+                                </div>
+                                <h2 class="slide-title">Motor de Dithering & Paletas Retro</h2>
+                                <p class="slide-desc">
+                                    Transforma gradientes continuos en tramas ópticas cinéticas mediante difusión de
+                                    error ponderada o matrices ordenadas Bayer.
+                                </p>
+
+                                <ul class="slide-specs-list">
+                                    <li><span class="spec-bullet">■</span> Difusión Floyd-Steinberg y Atkinson de alta
+                                        fidelidad</li>
+                                    <li><span class="spec-bullet">■</span> Tramado Bayer 4×4 y 8×8 para textura de
+                                        fósforo y CRT</li>
+                                    <li><span class="spec-bullet">■</span> 8 paletas: GameBoy 1989, Cyber Noir, Sepia
+                                        Vintage y Matrix Terminal</li>
+                                </ul>
+
+                                <div class="slide-meta-strip">
+                                    <div class="meta-item">
+                                        <span class="m-label">LATENCIA:</span>
+                                        <span class="m-val num">&lt; 14 ms</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">PROCESO:</span>
+                                        <span class="m-val">16-BIT FLOAT</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">ESTADO:</span>
+                                        <span class="m-val text-green">DISPONIBLE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="h-slide" data-index="2" id="comparador">
+                    <div class="slide-card slide-card--comparator">
+                        <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                        <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                        <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                        <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+
+                        <div class="slide-layout slide-layout--comparator">
+                            <div class="split-viewport" id="splitViewport" data-split="50">
+
+                                <div class="split-layer split-layer--before">
+                                    <img src="{{ url_for('static', filename='images/Imagen-1.png') }}"
+                                        alt="Fotografía original en color sin procesar" class="split-img"
+                                        id="splitImgBefore" draggable="false" loading="lazy">
+                                    <div class="split-layer-badge split-layer-badge--before">
+                                        <span class="badge-dot">■</span>
+                                        <span>ORIGINAL // RAW COLOR</span>
+                                    </div>
+                                </div>
+
+                                <div class="split-layer split-layer--after" id="splitLayerAfter">
+                                    <canvas class="split-canvas" id="splitCanvas"
+                                        aria-label="Fotografía procesada con motor de Dithering"></canvas>
+                                    <img src="{{ url_for('static', filename='images/Imagen-1.png') }}"
+                                        alt="Fotografía procesada Ditherix fallback"
+                                        class="split-img split-img--fallback" id="splitImgFallback" draggable="false">
+                                    <div class="split-layer-badge split-layer-badge--after">
+                                        <span class="badge-dot">■</span>
+                                        <span id="splitActiveModeText">DITHERIX // FLOYD-STEINBERG</span>
+                                    </div>
+                                </div>
+
+                                <div class="split-divider" id="splitDivider">
+                                    <div class="split-hairline"></div>
+                                    <div class="split-handle" id="splitHandle" role="slider" aria-valuenow="50"
+                                        aria-valuemin="0" aria-valuemax="100"
+                                        aria-label="Deslizar para comparar antes y después">
+                                        <span class="handle-arrow">◄</span>
+                                        <span class="handle-dot">■</span>
+                                        <span class="handle-arrow">►</span>
+                                    </div>
+                                </div>
+
+                                <div class="split-help-cue">
+                                    <span>ARRASTRA LA LÍNEA PARA COMPARAR</span>
+                                </div>
+                            </div>
+
+                            <div class="slide-body slide-body--comparator">
+                                <div>
+                                    <div class="slide-kicker">
+                                        <span class="kicker-cat">SPLIT SLIDER // INTERACTIVO</span>
+                                        <span class="kicker-state">EN VIVO</span>
+                                    </div>
+                                    <h2 class="slide-title">Comparador Antes / Después</h2>
+                                    <p class="slide-desc">
+                                        Arrastra la línea divisoria para contrastar el negativo digital original frente
+                                        a la matriz de difusión de error en haluro de plata y tramado retro.
+                                    </p>
+                                </div>
+
+                                <div class="comparator-controls-box">
+                                    <span class="cc-label">SELECCIONAR ALGORITMO EN VIVO:</span>
+                                    <div class="comparator-buttons-grid">
+                                        <button type="button" class="split-mode-btn active" data-mode="floyd">
+                                            <span class="smb-indicator">■</span>
+                                            <span class="smb-text">Floyd-Steinberg</span>
+                                        </button>
+                                        <button type="button" class="split-mode-btn" data-mode="atkinson">
+                                            <span class="smb-indicator">■</span>
+                                            <span class="smb-text">Atkinson 1984</span>
+                                        </button>
+                                        <button type="button" class="split-mode-btn" data-mode="bayer">
+                                            <span class="smb-indicator">■</span>
+                                            <span class="smb-text">Bayer 8×8 CRT</span>
+                                        </button>
+                                        <button type="button" class="split-mode-btn" data-mode="haluro">
+                                            <span class="smb-indicator">■</span>
+                                            <span class="smb-text">Haluro de Plata 1930</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="slide-meta-strip">
+                                    <div class="meta-item">
+                                        <span class="m-label">LATENCIA:</span>
+                                        <span class="m-val num" id="splitLatencyVal">&lt; 12 ms</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">ESTADO:</span>
+                                        <span class="m-val text-green">TIEMPO REAL</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">BUFFER:</span>
+                                        <span class="m-val num">16-BIT FLOAT</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="h-slide" data-index="3" id="quimica">
+                    <div class="slide-card">
+                        <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                        <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                        <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                        <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+
+                        <div class="slide-layout">
+                            <div class="slide-visual">
+                                <img src="{{ url_for('static', filename='images/Color.png') }}"
+                                    alt="Laboratorio químico de virados y curvas de luminancia" class="slide-img"
+                                    loading="lazy" width="900" height="560">
+                                <div class="slide-visual-badge">
+                                    <span class="badge-num num">[ 03 ]</span>
+                                    <span class="badge-text">REVELADO QUÍMICO</span>
+                                </div>
+                            </div>
+
+                            <div class="slide-body">
+                                <div class="slide-kicker">
+                                    <span class="kicker-cat">LUMINANCIA // HALURO DE PLATA</span>
+                                    <span class="kicker-state">CALIBRADO</span>
+                                </div>
+                                <h2 class="slide-title">Monocromo ByN & Virados Clásicos</h2>
+                                <p class="slide-desc">
+                                    Control espectral de luminancia basado en el estándar Rec. 709 y emulación de baños
+                                    químicos históricos sobre papel baritado.
+                                </p>
+
+                                <ul class="slide-specs-list">
+                                    <li><span class="spec-bullet">■</span> Virados: Cianotipia 1842, Selenio profundo,
+                                        Platino y Sepia cálido</li>
+                                    <li><span class="spec-bullet">■</span> Curvas de contraste dinámico profundo con
+                                        conservación de negros</li>
+                                    <li><span class="spec-bullet">■</span> Mezclador HSL de 8 canales para aislar
+                                        cielos, sombras y pieles</li>
+                                </ul>
+
+                                <div class="slide-meta-strip">
+                                    <div class="meta-item">
+                                        <span class="m-label">MODELO:</span>
+                                        <span class="m-val">CIE 1931 / OKLCH</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">CANALES:</span>
+                                        <span class="m-val num">8 ESPECTROS</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">ESTADO:</span>
+                                        <span class="m-val text-green">DISPONIBLE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="h-slide" data-index="4" id="marcos">
+                    <div class="slide-card">
+                        <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                        <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                        <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                        <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+
+                        <div class="slide-layout">
+                            <div class="slide-visual">
+                                <img src="{{ url_for('static', filename='images/Marcos.png') }}"
+                                    alt="Marcos Polaroid, 35mm y biseles de tubo catódico" class="slide-img"
+                                    loading="lazy" width="900" height="560">
+                                <div class="slide-visual-badge">
+                                    <span class="badge-num num">[ 04 ]</span>
+                                    <span class="badge-text">ENCUADRE ANALÓGICO</span>
+                                </div>
+                            </div>
+
+                            <div class="slide-body">
+                                <div class="slide-kicker">
+                                    <span class="kicker-cat">DELIMITACIÓN // EMULSIÓN 35MM</span>
+                                    <span class="kicker-state">CALIBRADO</span>
+                                </div>
+                                <h2 class="slide-title">Marcos Analógicos & Bisel CRT</h2>
+                                <p class="slide-desc">
+                                    Bordes decorativos renderizados píxel a píxel para rematar la pieza con la crudeza
+                                    del celuloide o el fulgor catódico.
+                                </p>
+
+                                <ul class="slide-specs-list">
+                                    <li><span class="spec-bullet">■</span> Polaroid 600 con desgaste químico, sangrado y
+                                        pátina de tiempo</li>
+                                    <li><span class="spec-bullet">■</span> Película 35mm con perforaciones laterales
+                                        (sprocket holes) auténticas</li>
+                                    <li><span class="spec-bullet">■</span> Curvatura de monitor de tubo catódico fósforo
+                                        blanco y bisel Y2K</li>
+                                </ul>
+
+                                <div class="slide-meta-strip">
+                                    <div class="meta-item">
+                                        <span class="m-label">TEXTURAS:</span>
+                                        <span class="m-val">ALTA RESOLUCIÓN</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">ENLACE:</span>
+                                        <span class="m-val">PROPORCIONAL</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">ESTADO:</span>
+                                        <span class="m-val text-green">DISPONIBLE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="h-slide" data-index="5" id="presets">
+                    <div class="slide-card">
+                        <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                        <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                        <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                        <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+
+                        <div class="slide-layout">
+                            <div class="slide-visual">
+                                <img src="{{ url_for('static', filename='images/Preestablecidos.png') }}"
+                                    alt="10 Presets cinematográficos de autor sin emojis" class="slide-img"
+                                    loading="lazy" width="900" height="560">
+                                <div class="slide-visual-badge">
+                                    <span class="badge-num num">[ 05 ]</span>
+                                    <span class="badge-text">RECETAS DE AUTOR</span>
+                                </div>
+                            </div>
+
+                            <div class="slide-body">
+                                <div class="slide-kicker">
+                                    <span class="kicker-cat">PRESETS // 1-CLICK WORKFLOW</span>
+                                    <span class="kicker-state">10 PERFILES</span>
+                                </div>
+                                <h2 class="slide-title">10 Presets Cinematográficos</h2>
+                                <p class="slide-desc">
+                                    Configuraciones tonales complejas listas para aplicar con un solo toque, combinando
+                                    curvas S, tramado, grano analógico y virados.
+                                </p>
+
+                                <ul class="slide-specs-list">
+                                    <li><span class="spec-bullet">■</span> Cyber Noir, Daguerrotipo 1839, Microfilm 1970
+                                        y Matrix Terminal</li>
+                                    <li><span class="spec-bullet">■</span> Grano procedural de 35mm con distribución
+                                        Gaussiana orgánica</li>
+                                    <li><span class="spec-bullet">■</span> Máscara de enfoque de alta frecuencia sin
+                                        halos desagradables</li>
+                                </ul>
+
+                                <div class="slide-meta-strip">
+                                    <div class="meta-item">
+                                        <span class="m-label">RECETAS:</span>
+                                        <span class="m-val num">10 DISPONIBLES</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">APLICACIÓN:</span>
+                                        <span class="m-val">NO DESTRUCTIVA</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">ESTADO:</span>
+                                        <span class="m-val text-green">DISPONIBLE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="h-slide h-slide--cta" data-index="6" id="estudio">
+                    <div class="slide-card slide-card--cta">
+                        <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                        <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                        <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                        <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+
+                        <div class="cta-inner">
+                            <div class="cta-sigil" aria-hidden="true">◈</div>
+                            <span class="cta-tag">[ COMIENZA A REVELAR ]</span>
+                            <h2 class="cta-title">Tu Fotografía, Reinterpretada en Ditherix</h2>
+                            <p class="cta-subtitle">
+                                Sin registros obligatorios, sin marcas de agua y sin subir tus imágenes a nubes
+                                externas. Todo se procesa con máxima fidelidad en tu propio flujo de trabajo.
+                            </p>
+
+                            <div class="cta-actions">
+                                <a href="/editor" class="btn btn--primary cta-btn-launch">
+                                    <span>Entrar al editor</span>
+                                </a>
+                            </div>
+
+                            <div class="cta-features-row">
+                                <div class="cf-item">
+                                    <span class="cf-icon">■</span>
+                                    <span class="cf-text">Exportación PNG Master sin compresión</span>
+                                </div>
+                                <div class="cf-item">
+                                    <span class="cf-icon">■</span>
+                                    <span class="cf-text">Hasta 25 MB por negativo</span>
+                                </div>
+                                <div class="cf-item">
+                                    <span class="cf-icon">■</span>
+                                    <span class="cf-text">Código libre</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="h-slide" data-index="7" id="autor">
+                    <div class="slide-card">
+                        <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
+                        <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
+                        <span class="tc-corner tc-bl" aria-hidden="true">└</span>
+                        <span class="tc-corner tc-br" aria-hidden="true">┘</span>
+
+                        <div class="slide-layout">
+                            <div class="slide-visual">
+                                <img src="{{ url_for('static', filename='images/yo.jpeg') }}"
+                                    alt="Registro visual de autor - Ditherix" class="slide-img" loading="lazy"
+                                    width="900" height="560">
+                                <div class="slide-visual-badge">
+                                    <span class="badge-num num">[ 07 ]</span>
+                                    <span class="badge-text">AUTOR // CRÉDITOS</span>
+                                </div>
+                            </div>
+
+                            <div class="slide-body slide-body--author">
+                                <div class="author-header-group">
+                                    <div class="slide-kicker">
+                                        <span class="kicker-cat">AUTOR // DESARROLLO &amp; DISEÑO</span>
+                                        <span class="kicker-state">JOAQUÍN LIMERES</span>
+                                    </div>
+                                    <h2 class="slide-title">Joaquín Limeres</h2>
+                                    <p class="slide-desc">
+                                        Creador y desarrollador de Ditherix. Proyecto enfocado en la reinterpretación de
+                                        negativos digitales a través de difusión de error, matrices Bayer, inyección de
+                                        grano y laboratorio de virados químicos analógicos.
+                                    </p>
+                                </div>
+
+                                <div class="author-links-grid">
+                                    <a href="https://github.com/Limeres1" target="_blank" rel="noopener noreferrer"
+                                        class="author-link-card">
+                                        <div class="alc-left">
+                                            <span class="alc-badge">PERFIL DE GITHUB</span>
+                                            <span class="alc-val">github.com/Limeres1</span>
+                                        </div>
+                                        <span class="alc-arrow-box" aria-hidden="true">↗</span>
+                                    </a>
+
+                                    <a href="https://github.com/Limeres1/Ditherix" target="_blank"
+                                        rel="noopener noreferrer" class="author-link-card">
+                                        <div class="alc-left">
+                                            <span class="alc-badge">REPOSITORIO DEL PROYECTO</span>
+                                            <span class="alc-val">github.com/Limeres1/Ditherix</span>
+                                        </div>
+                                        <span class="alc-arrow-box" aria-hidden="true">↗</span>
+                                    </a>
+
+                                    <a href="mailto:limeresjoaquin@gmail.com" class="author-link-card">
+                                        <div class="alc-left">
+                                            <span class="alc-badge">CORREO ELECTRÓNICO</span>
+                                            <span class="alc-val">limeresjoaquin@gmail.com</span>
+                                        </div>
+                                        <span class="alc-arrow-box" aria-hidden="true">✉</span>
+                                    </a>
+                                </div>
+
+                                <div class="slide-meta-strip">
+                                    <div class="meta-item">
+                                        <span class="m-label">ROL:</span>
+                                        <span class="m-val">AUTOR / CREADOR</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">LICENCIA:</span>
+                                        <span class="m-val">OPEN SOURCE</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="m-label">ESTADO:</span>
+                                        <span class="m-val text-green">ACTIVO</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+            </main>
+
+            <div class="h-progress-bar-wrap" aria-hidden="true">
+                <div class="h-progress-bar-fill" id="hProgressBar"></div>
+            </div>
+
         </div>
+    </div>
 
-        <div class="hero-mesh-overlay" aria-hidden="true"></div>
-
-        <div class="hero-hud-reticle-wrap" aria-hidden="true">
-            <div class="hud-axis-vert"></div>
-            <div class="hud-axis-horiz"></div>
-            <span class="hud-reticle-point rp-cross">+</span>
-            <span class="hud-reticle-point rp-top">+</span>
-            <span class="hud-reticle-point rp-bottom">+</span>
-        </div>
-
-        <div class="hero-container">
-            <h1 class="hero-floating-title">DITHERIX</h1>
-        </div>
-
-        <a href="#herramientas" class="hero-scroll-cue" aria-label="Desplazar a herramientas">
-            <span class="cue-label">Explorar</span>
-            <span class="cue-arrow" aria-hidden="true">↓</span>
-        </a>
-    </section>
-
-    <section class="soundwave-divider" aria-label="Visualizador de frecuencia">
+    <section class="soundwave-divider" aria-label="Visualizador de frecuencia matricial">
         <div class="soundwave-header">
             <span class="sw-label">Matriz de frecuencia 44.1 kHz (buffer activo)</span>
             <span class="sw-sigil" aria-hidden="true">▲ ◈ ▼</span>
-            <span class="sw-status">Senal calibrada</span>
+            <span class="sw-status">Señal calibrada</span>
         </div>
         <div class="soundwave-canvas-wrap">
             <canvas id="waveformCanvas" width="1200" height="64" aria-hidden="true"></canvas>
-        </div>
-    </section>
-
-    <main class="tools-section" id="herramientas">
-        <div class="container">
-            <div class="section-head-wrap">
-                <h2 class="section-title">Herramientas del estudio</h2>
-                <p class="section-desc">Modulo integral de procesamiento matricial y calibracion analoga para negativos
-                    digitales.</p>
-            </div>
-
-            <div class="tools-grid">
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Insertarimagen.png') }}" alt="Carga de imagen"
-                            class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Importacion</span>
-                            <span class="tool-index num">[ 01 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Insertar imagen</h3>
-                        <p class="tool-desc">Carga archivos locales en formatos JPEG, PNG y WebP directamente en memoria
-                            mediante seleccion o arrastre interactivo.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Imagen-2.png') }}" alt="Recorte de imagen"
-                            class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Encuadre</span>
-                            <span class="tool-index num">[ 02 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Recorte milimetrico</h3>
-                        <p class="tool-desc">Define el encuadre con relacion de aspecto libre o proporciones fijas sobre
-                            el visor panoramico sin degradar el lienzo.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Imagen-3.png') }}" alt="Descarga de imagen"
-                            class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Exportacion</span>
-                            <span class="tool-index num">[ 03 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Descarga sin perdida</h3>
-                        <p class="tool-desc">Exporta composiciones de hasta 25 MB en PNG o JPEG con resolucion completa
-                            y sin compresion destructiva ni marcas de agua.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Exposicion.png') }}" alt="Ajustes de edicion"
-                            class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Luminancia</span>
-                            <span class="tool-index num">[ 04 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Ajustes de exposicion</h3>
-                        <p class="tool-desc">Controla exposicion, brillo de luminancia y curvas de contraste dinamico
-                            profundo para acentuar blancos y sombras puras.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Imagen-3.png') }}" alt="Ajustes de detalle"
-                            class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Textura</span>
-                            <span class="tool-index num">[ 05 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Ajustes de detalle</h3>
-                        <p class="tool-desc">Modula la densidad de grano analogico de pelicula de 35mm, mascara de
-                            enfoque de alta frecuencia y desenfoque optico.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Dithering.png') }}" alt="Motor de Dithering"
-                            class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Difusion</span>
-                            <span class="tool-index num">[ 06 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Motor de Dithering</h3>
-                        <p class="tool-desc">Aplica difusion de error Floyd-Steinberg, matrices Bayer 4×4 y 8×8, tramado
-                            Atkinson y ocho paletas retro calibradas.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Imagen-2.png') }}" alt="Volteo y giro"
-                            class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Geometria</span>
-                            <span class="tool-index num">[ 07 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Transformacion y giro</h3>
-                        <p class="tool-desc">Volteo en espejo
-                            horizontal y vertical sin perdida de pixeles.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Marcos.png') }}" alt="Marcos y bordes"
-                            class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Bordes</span>
-                            <span class="tool-index num">[ 08 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Marcos y delimitacion</h3>
-                        <p class="tool-desc">Incorpora contornos retro, bordes de tubo catodico y biseles de inspiracion
-                            Y2K para rematar la composicion final.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Preestablecidos.png') }}"
-                            alt="Ajustes preestablecidos" class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Presets</span>
-                            <span class="tool-index num">[ 09 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Ajustes preestablecidos</h3>
-                        <p class="tool-desc">Aplica configuraciones tonales inmediatas inspiradas en consolas clasicas,
-                            estetica cyberpunk y monitores monocromo.</p>
-                    </div>
-                </article>
-
-                <article class="tool-card">
-                    <span class="tc-corner tc-tl" aria-hidden="true">┌</span>
-                    <span class="tc-corner tc-tr" aria-hidden="true">┐</span>
-                    <span class="tc-corner tc-bl" aria-hidden="true">└</span>
-                    <span class="tc-corner tc-br" aria-hidden="true">┘</span>
-                    <div class="tool-visual">
-                        <img src="{{ url_for('static', filename='images/Color.png') }}" alt="Balance de color"
-                            class="tool-img" loading="lazy" width="600" height="340">
-                        <div class="tool-visual-meta">
-                            <span class="tool-tag">Temperatura</span>
-                            <span class="tool-index num">[ 10 ]</span>
-                        </div>
-                    </div>
-                    <div class="tool-body">
-                        <h3 class="tool-title">Balance de color</h3>
-                        <p class="tool-desc">Ajusta la calidez cromatica, modula la temperatura de blancos y personaliza
-                            la saturacion tonal en cada canal.</p>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </main>
-
-    <section class="bottom-action-section" id="acerca">
-        <div class="container bottom-action-inner">
-            <div class="cyber-sigil-icon" aria-hidden="true">
-                <span>◈</span>
-            </div>
-            <h2 class="bottom-action-title">Transforma tu fotografia en Ditherix</h2>
-            <p class="bottom-action-subtitle">
-                Sin registros obligatorios ni marcas de agua. Carga tu imagen y explora la estetica analogica al
-                instante.
-            </p>
-
-            <div class="bottom-pill-wrap">
-                <a href="/editor" class="btn btn--primary bottom-pill-btn">
-                    <span class="btn-text">Ingresar a Ditherix</span>
-                </a>
-            </div>
-
-            <div class="cyber-glyphs-line" aria-hidden="true">
-                <span>▲</span> <span>◈</span> <span>▼</span>
-            </div>
         </div>
     </section>
 
@@ -324,7 +629,7 @@
         <div class="container footer-inner">
             <div class="footer-left">
                 <span class="footer-logo">Ditherix</span>
-                <span class="footer-sub">Laboratorio de composicion y dithering fotografico</span>
+                <span class="footer-sub">Laboratorio de composición y dithering fotográfico</span>
             </div>
             <div class="footer-center">
                 <span class="footer-coords num">Coordenadas: 34.6037° S, 58.3816° W</span>
@@ -335,7 +640,8 @@
         </div>
         <div class="footer-bottom-bar">
             <div class="container footer-bottom-inner">
-                <span class="num">© 2026 Ditherix. Codigo abierto.</span>
+                <span class="num">© 2026 Ditherix. Código abierto.</span>
+                <span class="num">Estética Edoardo Smerilli & Darkroom Core.</span>
             </div>
         </div>
     </footer>
