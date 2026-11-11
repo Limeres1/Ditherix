@@ -6,11 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon/icon.jpeg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Cinzel:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Ditherix</title>
 </head>
 
 <body>
+    <div class="editor-curtain" id="editorCurtain" aria-hidden="true">
+        <div class="editor-curtain-panel editor-curtain-panel--top"></div>
+        <div class="editor-curtain-panel editor-curtain-panel--bottom"></div>
+    </div>
     <main class="visor" id="visor">
         <div class="menu-flotante" id="menuImagen">
             <nav class="glass-bar top-bar" aria-label="Menú principal">
@@ -21,7 +30,6 @@
                             <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" />
                         </svg>
                     </a>
-                    <div class="bar-divider" aria-hidden="true"></div>
                     <button class="glass-control" id="botonExportar" type="button" disabled title="Exportar imagen">
                         <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"
                             fill="#e3e3e3">
@@ -37,7 +45,6 @@
                                 d="M440-200h80v-167l64 64 56-57-160-160-160 160 57 56 63-63v167ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z" />
                         </svg>
                     </button>
-                    <div class="bar-divider" aria-hidden="true"></div>
                     <button class="glass-control" id="botonComparar" type="button" disabled
                         title="Comparar Antes / Después [C]" aria-pressed="false">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
@@ -108,7 +115,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bar-divider" aria-hidden="true"></div>
                     <button class="glass-control" id="botonRotar90" type="button" disabled
                         title="Rotar 90° a la derecha">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
@@ -995,6 +1001,17 @@
         <p id="cargando" class="oculto" role="status" aria-live="polite">
             Procesando imagen…
         </p>
+        <div class="editor-empty-grid" aria-hidden="true">
+            <div class="editor-mesh-overlay"></div>
+            <div class="editor-hud-reticle">
+                <div class="editor-reticle-axis editor-reticle-axis--v"></div>
+                <div class="editor-reticle-axis editor-reticle-axis--h"></div>
+                <span class="editor-reticle-marker editor-reticle-marker--tl">+</span>
+                <span class="editor-reticle-marker editor-reticle-marker--tr">+</span>
+                <span class="editor-reticle-marker editor-reticle-marker--bl">+</span>
+                <span class="editor-reticle-marker editor-reticle-marker--br">+</span>
+            </div>
+        </div>
         <div class="drop-zone" id="dropZone" role="button" tabindex="0"
             aria-label="Cargar imagen mediante arrastrar y soltar o clic">
             <div class="drop-zone-icon" aria-hidden="true">

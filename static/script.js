@@ -415,6 +415,9 @@ function mostrarMensaje(texto) {
 function actualizarEstadoDropZone() {
     if (!dropZone) return;
     const hayImagen = Boolean(imagenActual) || (preview && preview.src && !preview.classList.contains("oculto"));
+    if (contenedorVisor) {
+        contenedorVisor.classList.toggle("tiene-imagen", Boolean(hayImagen));
+    }
     if (hayImagen) {
         dropZone.classList.add("oculto");
         dropZone.style.setProperty("display", "none", "important");
@@ -592,8 +595,6 @@ function establecerModoRecorte(activar) {
         if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
         if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
         if (typeof setOpticaMenuOpen === "function") setOpticaMenuOpen(false);
-        indicadorCarga.textContent = "Arrastra sobre la imagen para seleccionar el recorte.";
-        indicadorCarga.classList.remove("oculto");
         if (proporcionRecorte !== null) {
             aplicarCajaRecortePorProporcion(proporcionRecorte);
         }
@@ -2812,4 +2813,46 @@ document.addEventListener("keydown", (e) => {
         }
     }
 });
+
+/**
+ * Anima la apertura vertical de dos cortinas negras al ingresar al editor.
+ */
+function iniciarCortinaAperturaEditor() {
+    const cortina = document.getElementById("editorCurtain");
+    if (!cortina) return;
+
+    const reducirMovimiento = window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducirMovimiento) {
+        cortina.style.display = "none";
+        return;
+    }
+
+    let ocultada = false;
+    function ocultarCortina() {
+        if (ocultada) return;
+        ocultada = true;
+        cortina.style.display = "none";
+    }
+
+    const panelSuperior = cortina.querySelector(".editor-curtain-panel--top");
+    if (panelSuperior) {
+        panelSuperior.addEventListener("transitionend", (e) => {
+            if (e.propertyName === "transform") {
+                ocultarCortina();
+            }
+        });
+    }
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                cortina.classList.add("is-complete");
+                setTimeout(ocultarCortina, 850);
+            }, 80);
+        });
+    });
+}
+
+iniciarCortinaAperturaEditor();
 
