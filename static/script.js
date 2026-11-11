@@ -13,6 +13,17 @@ const contrasteInput = document.getElementById("contrasteInput");
 const contrasteValor = document.getElementById("contrasteValor");
 const saturacionInput = document.getElementById("saturacionInput");
 const saturacionValor = document.getElementById("saturacionValor");
+const altasLucesInput = document.getElementById("altasLucesInput");
+const altasLucesValor = document.getElementById("altasLucesValor");
+const sombrasInput = document.getElementById("sombrasInput");
+const sombrasValor = document.getElementById("sombrasValor");
+const fadeInput = document.getElementById("fadeInput");
+const fadeValor = document.getElementById("fadeValor");
+const vinetaInput = document.getElementById("vinetaInput");
+const vinetaValor = document.getElementById("vinetaValor");
+const histogramCanvas = document.getElementById("histogramCanvas");
+const histogramWrap = document.getElementById("histogramWrap");
+const histogramModeBadge = document.getElementById("histogramModeBadge");
 const botonAplicarAjustes = document.getElementById("botonAplicarAjustes");
 const botonResetAjustes = document.getElementById("botonResetAjustes");
 const desenfoqueInput = document.getElementById("desenfoqueInput");
@@ -25,21 +36,40 @@ const botonAplicarDetalle = document.getElementById("botonAplicarDetalle");
 const botonResetDetalle = document.getElementById("botonResetDetalle");
 const ditherAlgoritmo = document.getElementById("ditherAlgoritmo");
 const ditherPaleta = document.getElementById("ditherPaleta");
+const opcionesDuotono = document.getElementById("opcionesDuotono");
+const duotonoOscuroInput = document.getElementById("duotonoOscuroInput");
+const duotonoClaroInput = document.getElementById("duotonoClaroInput");
+const duotonoSwatchBtns = document.querySelectorAll(".duotono-swatch-btn");
+const ditherUmbralInput = document.getElementById("ditherUmbralInput");
+const ditherUmbralValor = document.getElementById("ditherUmbralValor");
 const ditherIntensidadInput = document.getElementById("ditherIntensidadInput");
 const ditherIntensidadValor = document.getElementById("ditherIntensidadValor");
 const ditherPixelInput = document.getElementById("ditherPixelInput");
 const ditherPixelValor = document.getElementById("ditherPixelValor");
+const ditherPixelPerfectInput = document.getElementById("ditherPixelPerfectInput");
 const botonAplicarDither = document.getElementById("botonAplicarDither");
 const botonResetDither = document.getElementById("botonResetDither");
+const halacionInput = document.getElementById("halacionInput");
+const halacionValor = document.getElementById("halacionValor");
+const aberracionInput = document.getElementById("aberracionInput");
+const aberracionValor = document.getElementById("aberracionValor");
+const scanlinesInput = document.getElementById("scanlinesInput");
+const scanlinesValor = document.getElementById("scanlinesValor");
+const botonResetOptica = document.getElementById("botonResetOptica");
 const btnIniciarRecorte = document.getElementById("btn-iniciar-recorte");
 const cropMenu = document.getElementById("crop-menu");
 const btnConfirmarRecorte = document.getElementById("btn-confirmar-recorte");
 const btnCancelarRecorte = document.getElementById("btn-cancelar-recorte");
 const btnRestablecerRecorte = document.getElementById("btn-restablecer-recorte");
+const cropRatioBtns = document.querySelectorAll(".crop-ratio-btn");
+const anguloEnderezarInput = document.getElementById("anguloEnderezarInput");
+const anguloEnderezarValor = document.getElementById("anguloEnderezarValor");
+const btnResetAngulo = document.getElementById("btn-reset-angulo");
 const cropOverlay = document.getElementById("cropOverlay");
 const cropSelection = document.getElementById("cropSelection");
 const contenedorVisor = document.getElementById("visor");
 const escenarioImagen = document.getElementById("escenario");
+const botonRotar90 = document.getElementById("botonRotar90");
 const botonVoltearHorizontal = document.getElementById("botonVoltearHorizontal");
 const botonVoltearVertical = document.getElementById("botonVoltearVertical");
 const botonComparar = document.getElementById("botonComparar");
@@ -203,11 +233,179 @@ let solicitudActual = 0;
 let controladorCarga = null;
 let cancelarVistaPendiente = null;
 let modoRecorte = false;
+let proporcionRecorte = null;
 let procesandoAccion = false;
 let puntoInicioRecorte = null;
 let puntoFinRecorte = null;
 let punteroRecorte = null;
 let imagenFueRecortada = false;
+let pixelPerfectOverride = null;
+let modoHistogramaRGB = false;
+const histAnalizerCanvas = document.createElement("canvas");
+
+function esDitherVisualActivo() {
+    const algoActivo = Boolean(ditherAlgoritmo && ditherAlgoritmo.value && ditherAlgoritmo.value !== "ninguno");
+    const cardActiva = estadoPreset.id && estadoPreset.id !== "ninguno"
+        ? document.querySelector(`.preset-card[data-preset="${estadoPreset.id}"]`)
+        : null;
+    const presetConDither = Boolean(cardActiva && cardActiva.dataset.dither === "true");
+    return algoActivo || presetConDither;
+}
+
+function actualizarPixelPerfectUI() {
+    const activo = pixelPerfectOverride !== null ? pixelPerfectOverride : esDitherVisualActivo();
+    if (preview) {
+        preview.classList.toggle("pixelated", activo);
+    }
+    if (ditherPixelPerfectInput) {
+        ditherPixelPerfectInput.checked = activo;
+    }
+}
+
+function actualizarDuotonoUI() {
+    if (!opcionesDuotono || !ditherPaleta) return;
+    opcionesDuotono.classList.toggle("oculto", ditherPaleta.value !== "duotono");
+}
+
+function mostrarAnguloGrados(valor) {
+    const n = Number(valor) || 0;
+    return `${n > 0 ? "+" : ""}${n.toFixed(1)}°`;
+}
+
+function parsearProporcion(clave) {
+    if (!clave || clave === "free") return null;
+    const partes = clave.split(":");
+    if (partes.length !== 2) return null;
+    const w = Number(partes[0]);
+    const h = Number(partes[1]);
+    return w > 0 && h > 0 ? w / h : null;
+}
+
+function actualizarHistograma() {
+    if (!histogramCanvas) return;
+    const hCtx = histogramCanvas.getContext("2d");
+    if (!hCtx) return;
+
+    const cw = histogramCanvas.width;
+    const ch = histogramCanvas.height;
+    hCtx.clearRect(0, 0, cw, ch);
+
+    // Rejilla tonal sutil (25%, 50%, 75%)
+    hCtx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    hCtx.lineWidth = 1;
+    for (let i = 1; i <= 3; i++) {
+        const gx = Math.round((cw * i) / 4) + 0.5;
+        hCtx.beginPath();
+        hCtx.moveTo(gx, 0);
+        hCtx.lineTo(gx, ch);
+        hCtx.stroke();
+    }
+
+    if (!preview || preview.classList.contains("oculto") || !preview.naturalWidth || !preview.naturalHeight) {
+        return;
+    }
+
+    try {
+        const escalaAnal = Math.min(1, 150 / Math.max(preview.naturalWidth, preview.naturalHeight));
+        const sw = Math.max(1, Math.round(preview.naturalWidth * escalaAnal));
+        const sh = Math.max(1, Math.round(preview.naturalHeight * escalaAnal));
+        histAnalizerCanvas.width = sw;
+        histAnalizerCanvas.height = sh;
+        const aCtx = histAnalizerCanvas.getContext("2d", { willReadFrequently: true });
+        if (!aCtx) return;
+        aCtx.drawImage(preview, 0, 0, sw, sh);
+        const datos = aCtx.getImageData(0, 0, sw, sh).data;
+
+        const binsL = new Uint32Array(256);
+        const binsR = new Uint32Array(256);
+        const binsG = new Uint32Array(256);
+        const binsB = new Uint32Array(256);
+
+        for (let i = 0; i < datos.length; i += 4) {
+            const r = datos[i];
+            const g = datos[i + 1];
+            const b = datos[i + 2];
+            const luma = Math.min(255, Math.round(0.299 * r + 0.587 * g + 0.114 * b));
+            binsL[luma]++;
+            binsR[r]++;
+            binsG[g]++;
+            binsB[b]++;
+        }
+
+        const suavizar = (src) => {
+            const out = new Float32Array(256);
+            let maxVal = 1;
+            for (let i = 0; i < 256; i++) {
+                const a = src[Math.max(0, i - 1)];
+                const b = src[i];
+                const c = src[Math.min(255, i + 1)];
+                out[i] = (a + b * 2 + c) * 0.25;
+                if (i > 2 && i < 253 && out[i] > maxVal) maxVal = out[i];
+            }
+            const techo = Math.max(maxVal, out[0] * 0.45, out[255] * 0.45, 1);
+            for (let i = 0; i < 256; i++) {
+                out[i] = Math.min(1, out[i] / techo);
+            }
+            return out;
+        };
+
+        const trazarCurva = (norm, fillStyle, strokeStyle) => {
+            hCtx.beginPath();
+            hCtx.moveTo(0, ch);
+            for (let i = 0; i < 256; i++) {
+                const px = (i / 255) * cw;
+                const py = ch - norm[i] * (ch - 4);
+                hCtx.lineTo(px, py);
+            }
+            hCtx.lineTo(cw, ch);
+            hCtx.closePath();
+            if (fillStyle) {
+                hCtx.fillStyle = fillStyle;
+                hCtx.fill();
+            }
+            if (strokeStyle) {
+                hCtx.strokeStyle = strokeStyle;
+                hCtx.lineWidth = 1.15;
+                hCtx.stroke();
+            }
+        };
+
+        if (modoHistogramaRGB) {
+            hCtx.save();
+            hCtx.globalCompositeOperation = "screen";
+            trazarCurva(suavizar(binsR), "rgba(255, 78, 88, 0.36)", "rgba(255, 110, 120, 0.78)");
+            trazarCurva(suavizar(binsG), "rgba(75, 228, 128, 0.36)", "rgba(110, 245, 155, 0.78)");
+            trazarCurva(suavizar(binsB), "rgba(78, 168, 255, 0.36)", "rgba(110, 195, 255, 0.78)");
+            hCtx.restore();
+            trazarCurva(suavizar(binsL), null, "rgba(255, 255, 255, 0.45)");
+        } else {
+            trazarCurva(suavizar(binsL), "rgba(255, 255, 255, 0.22)", "#ffffff");
+        }
+    } catch (_) {
+        // Silenciar si la imagen aún no está lista
+    }
+}
+
+if (preview) {
+    preview.addEventListener("load", actualizarHistograma);
+}
+
+if (histogramWrap) {
+    const alternarModoHistograma = () => {
+        modoHistogramaRGB = !modoHistogramaRGB;
+        if (histogramModeBadge) {
+            histogramModeBadge.textContent = modoHistogramaRGB ? "RGB" : "LUMA";
+        }
+        actualizarHistograma();
+    };
+    histogramWrap.addEventListener("click", alternarModoHistograma);
+    histogramWrap.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            alternarModoHistograma();
+        }
+    });
+}
 
 function mostrarMensaje(texto) {
     mensaje.textContent = texto;
@@ -224,6 +422,12 @@ function actualizarEstadoDropZone() {
         dropZone.classList.remove("oculto");
         dropZone.style.removeProperty("display");
     }
+    if (typeof window.setZoomHudVisible === "function") {
+        window.setZoomHudVisible(Boolean(hayImagen));
+    }
+    if (!hayImagen) {
+        actualizarHistograma();
+    }
 }
 
 function mostrarValorSlider(valor) {
@@ -236,49 +440,92 @@ function mostrarValorEntero(valor) {
     return `${numero > 0 ? "+" : ""}${numero}`;
 }
 
+const timersTiempoReal = {};
+const enProgresoTiempoReal = {};
+const pendientesTiempoReal = {};
+
+function programarTiempoReal(canal, fnAplicar, delay = 75, permitirEnRecorte = false) {
+    if (!imagenActual || (modoRecorte && !permitirEnRecorte)) return;
+    clearTimeout(timersTiempoReal[canal]);
+    timersTiempoReal[canal] = setTimeout(async () => {
+        if (enProgresoTiempoReal[canal]) {
+            pendientesTiempoReal[canal] = fnAplicar;
+            return;
+        }
+        enProgresoTiempoReal[canal] = true;
+        try {
+            await fnAplicar({ esTiempoReal: true });
+        } catch (e) {
+            console.error(`Error en tiempo real (${canal}):`, e);
+        } finally {
+            enProgresoTiempoReal[canal] = false;
+            if (pendientesTiempoReal[canal]) {
+                const siguienteFn = pendientesTiempoReal[canal];
+                pendientesTiempoReal[canal] = null;
+                programarTiempoReal(canal, siguienteFn, 20, permitirEnRecorte);
+            }
+        }
+    }, delay);
+}
+
 function actualizarControlesEdicion() {
     const deshabilitados = !imagenActual || Boolean(controladorCarga) || procesandoAccion;
     const deshabilitadosPorRecorte = deshabilitados || modoRecorte;
+    const slidersDeshabilitados = !imagenActual || Boolean(controladorCarga) || modoRecorte;
 
-    brilloInput.disabled = deshabilitadosPorRecorte;
-    contrasteInput.disabled = deshabilitadosPorRecorte;
-    saturacionInput.disabled = deshabilitadosPorRecorte;
-    botonAplicarAjustes.disabled = deshabilitadosPorRecorte;
+    brilloInput.disabled = slidersDeshabilitados;
+    contrasteInput.disabled = slidersDeshabilitados;
+    saturacionInput.disabled = slidersDeshabilitados;
+    if (altasLucesInput) altasLucesInput.disabled = slidersDeshabilitados;
+    if (sombrasInput) sombrasInput.disabled = slidersDeshabilitados;
+    if (fadeInput) fadeInput.disabled = slidersDeshabilitados;
+    if (vinetaInput) vinetaInput.disabled = slidersDeshabilitados;
+    if (botonAplicarAjustes) botonAplicarAjustes.disabled = deshabilitadosPorRecorte;
     if (botonResetAjustes) botonResetAjustes.disabled = deshabilitadosPorRecorte;
 
-    if (desenfoqueInput) desenfoqueInput.disabled = deshabilitadosPorRecorte;
-    if (nitidezInput) nitidezInput.disabled = deshabilitadosPorRecorte;
-    if (granoInput) granoInput.disabled = deshabilitadosPorRecorte;
+    if (desenfoqueInput) desenfoqueInput.disabled = slidersDeshabilitados;
+    if (nitidezInput) nitidezInput.disabled = slidersDeshabilitados;
+    if (granoInput) granoInput.disabled = slidersDeshabilitados;
     if (botonAplicarDetalle) botonAplicarDetalle.disabled = deshabilitadosPorRecorte;
     if (botonResetDetalle) botonResetDetalle.disabled = deshabilitadosPorRecorte;
 
-    if (ditherAlgoritmo) ditherAlgoritmo.disabled = deshabilitadosPorRecorte;
-    if (ditherPaleta) ditherPaleta.disabled = deshabilitadosPorRecorte;
-    if (ditherIntensidadInput) ditherIntensidadInput.disabled = deshabilitadosPorRecorte;
-    if (ditherPixelInput) ditherPixelInput.disabled = deshabilitadosPorRecorte;
+    if (ditherAlgoritmo) ditherAlgoritmo.disabled = slidersDeshabilitados;
+    if (ditherPaleta) ditherPaleta.disabled = slidersDeshabilitados;
+    if (duotonoOscuroInput) duotonoOscuroInput.disabled = slidersDeshabilitados;
+    if (duotonoClaroInput) duotonoClaroInput.disabled = slidersDeshabilitados;
+    duotonoSwatchBtns.forEach((b) => { b.disabled = slidersDeshabilitados; });
+    if (ditherUmbralInput) ditherUmbralInput.disabled = slidersDeshabilitados;
+    if (ditherIntensidadInput) ditherIntensidadInput.disabled = slidersDeshabilitados;
+    if (ditherPixelInput) ditherPixelInput.disabled = slidersDeshabilitados;
+    if (ditherPixelPerfectInput) ditherPixelPerfectInput.disabled = slidersDeshabilitados;
     if (botonAplicarDither) botonAplicarDither.disabled = deshabilitadosPorRecorte;
     if (botonResetDither) botonResetDither.disabled = deshabilitadosPorRecorte;
 
-    if (temperaturaInput) temperaturaInput.disabled = deshabilitadosPorRecorte;
-    if (tinteInput) tinteInput.disabled = deshabilitadosPorRecorte;
-    if (hslTonoInput) hslTonoInput.disabled = deshabilitadosPorRecorte;
-    if (hslSatInput) hslSatInput.disabled = deshabilitadosPorRecorte;
-    if (hslLumInput) hslLumInput.disabled = deshabilitadosPorRecorte;
+    if (halacionInput) halacionInput.disabled = slidersDeshabilitados;
+    if (aberracionInput) aberracionInput.disabled = slidersDeshabilitados;
+    if (scanlinesInput) scanlinesInput.disabled = slidersDeshabilitados;
+    if (botonResetOptica) botonResetOptica.disabled = deshabilitadosPorRecorte;
+
+    if (temperaturaInput) temperaturaInput.disabled = slidersDeshabilitados;
+    if (tinteInput) tinteInput.disabled = slidersDeshabilitados;
+    if (hslTonoInput) hslTonoInput.disabled = slidersDeshabilitados;
+    if (hslSatInput) hslSatInput.disabled = slidersDeshabilitados;
+    if (hslLumInput) hslLumInput.disabled = slidersDeshabilitados;
     if (botonResetColor) botonResetColor.disabled = deshabilitadosPorRecorte;
     if (botonAplicarColor) botonAplicarColor.disabled = deshabilitadosPorRecorte;
-    swatchButtons.forEach(btn => btn.disabled = deshabilitadosPorRecorte);
-    if (tabBtnBalance) tabBtnBalance.disabled = deshabilitadosPorRecorte;
-    if (tabBtnMezcla) tabBtnMezcla.disabled = deshabilitadosPorRecorte;
+    swatchButtons.forEach(btn => btn.disabled = slidersDeshabilitados);
+    if (tabBtnBalance) tabBtnBalance.disabled = slidersDeshabilitados;
+    if (tabBtnMezcla) tabBtnMezcla.disabled = slidersDeshabilitados;
 
-    if (marcoEstiloSelect) marcoEstiloSelect.disabled = deshabilitadosPorRecorte;
-    if (marcoColorInput) marcoColorInput.disabled = deshabilitadosPorRecorte;
-    if (marcoGrosorInput) marcoGrosorInput.disabled = deshabilitadosPorRecorte;
+    if (marcoEstiloSelect) marcoEstiloSelect.disabled = slidersDeshabilitados;
+    if (marcoColorInput) marcoColorInput.disabled = slidersDeshabilitados;
+    if (marcoGrosorInput) marcoGrosorInput.disabled = slidersDeshabilitados;
     if (botonResetMarco) botonResetMarco.disabled = deshabilitadosPorRecorte;
     if (botonAplicarMarco) botonAplicarMarco.disabled = deshabilitadosPorRecorte;
-    presetColorDots.forEach(dot => dot.disabled = deshabilitadosPorRecorte);
+    presetColorDots.forEach(dot => dot.disabled = slidersDeshabilitados);
 
-    if (bynActivoInput) bynActivoInput.disabled = deshabilitadosPorRecorte;
-    const bynInternosDeshabilitados = deshabilitadosPorRecorte || !estadoByn.activo;
+    if (bynActivoInput) bynActivoInput.disabled = slidersDeshabilitados;
+    const bynInternosDeshabilitados = slidersDeshabilitados || !estadoByn.activo;
     if (bynFiltroPreset) bynFiltroPreset.disabled = bynInternosDeshabilitados;
     Object.keys(CANALES_BYN_INPUTS).forEach(canal => {
         const inp = CANALES_BYN_INPUTS[canal].input;
@@ -292,12 +539,16 @@ function actualizarControlesEdicion() {
         bynControlsWrap.classList.toggle("byn-disabled", bynInternosDeshabilitados);
     }
 
-    if (presetIntensidadInput) presetIntensidadInput.disabled = deshabilitadosPorRecorte;
+    if (presetIntensidadInput) presetIntensidadInput.disabled = slidersDeshabilitados;
     if (botonResetPresets) botonResetPresets.disabled = deshabilitadosPorRecorte;
     if (botonAplicarPreset) botonAplicarPreset.disabled = deshabilitadosPorRecorte;
-    presetCards.forEach((c) => (c.disabled = deshabilitadosPorRecorte));
+    presetCards.forEach((c) => (c.disabled = slidersDeshabilitados));
 
     btnIniciarRecorte.disabled = deshabilitados;
+    if (anguloEnderezarInput) anguloEnderezarInput.disabled = deshabilitados;
+    if (btnResetAngulo) btnResetAngulo.disabled = deshabilitados;
+    cropRatioBtns.forEach((b) => { b.disabled = deshabilitados; });
+    if (botonRotar90) botonRotar90.disabled = deshabilitadosPorRecorte;
     botonVoltearHorizontal.disabled = deshabilitadosPorRecorte;
     botonVoltearVertical.disabled = deshabilitadosPorRecorte;
 
@@ -340,14 +591,43 @@ function establecerModoRecorte(activar) {
         if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
         if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
         if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
+        if (typeof setOpticaMenuOpen === "function") setOpticaMenuOpen(false);
         indicadorCarga.textContent = "Arrastra sobre la imagen para seleccionar el recorte.";
         indicadorCarga.classList.remove("oculto");
+        if (proporcionRecorte !== null) {
+            aplicarCajaRecortePorProporcion(proporcionRecorte);
+        }
     } else if (!procesandoAccion && !controladorCarga) {
         indicadorCarga.classList.add("oculto");
         indicadorCarga.textContent = "Procesando imagen…";
     }
 
     actualizarControlesEdicion();
+}
+
+function obtenerRectImagenRenderizada() {
+    if (!preview || !preview.naturalWidth || !preview.naturalHeight) {
+        return null;
+    }
+    const anchoVista = escenarioImagen.clientWidth;
+    const altoVista = escenarioImagen.clientHeight;
+    const estilo = getComputedStyle(preview);
+    const padLeft = parseFloat(estilo.paddingLeft) || 0;
+    const padRight = parseFloat(estilo.paddingRight) || 0;
+    const padTop = parseFloat(estilo.paddingTop) || 0;
+    const padBottom = parseFloat(estilo.paddingBottom) || 0;
+
+    const anchoContenido = Math.max(1, anchoVista - padLeft - padRight);
+    const altoContenido = Math.max(1, altoVista - padTop - padBottom);
+    const esCover = estilo.objectFit === "cover";
+    const escalaImagen = esCover
+        ? Math.max(anchoContenido / preview.naturalWidth, altoContenido / preview.naturalHeight)
+        : Math.min(anchoContenido / preview.naturalWidth, altoContenido / preview.naturalHeight);
+    const anchoRenderizado = preview.naturalWidth * escalaImagen;
+    const altoRenderizado = preview.naturalHeight * escalaImagen;
+    const left = padLeft + (anchoContenido - anchoRenderizado) / 2;
+    const top = padTop + (altoContenido - altoRenderizado) / 2;
+    return { left, top, width: anchoRenderizado, height: altoRenderizado, escalaImagen };
 }
 
 function puntoLocalDesdeEvento(evento) {
@@ -359,57 +639,81 @@ function puntoLocalDesdeEvento(evento) {
         return null;
     }
 
-    return {
-        x: Math.max(0, Math.min(escenarioImagen.clientWidth, (evento.clientX - matriz.e) / matriz.a)),
-        y: Math.max(0, Math.min(escenarioImagen.clientHeight, (evento.clientY - matriz.f) / matriz.d)),
-    };
+    let lx = Math.max(0, Math.min(escenarioImagen.clientWidth, (evento.clientX - matriz.e) / matriz.a));
+    let ly = Math.max(0, Math.min(escenarioImagen.clientHeight, (evento.clientY - matriz.f) / matriz.d));
+    const rect = obtenerRectImagenRenderizada();
+    if (rect) {
+        lx = Math.max(rect.left, Math.min(rect.left + rect.width, lx));
+        ly = Math.max(rect.top, Math.min(rect.top + rect.height, ly));
+    }
+    return { x: lx, y: ly };
+}
+
+function aplicarCajaRecortePorProporcion(ratio) {
+    const rect = obtenerRectImagenRenderizada();
+    if (!rect || !ratio) return;
+    let boxW = rect.width * 0.86;
+    let boxH = boxW / ratio;
+    if (boxH > rect.height * 0.86) {
+        boxH = rect.height * 0.86;
+        boxW = boxH * ratio;
+    }
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    puntoInicioRecorte = { x: cx - boxW / 2, y: cy - boxH / 2 };
+    actualizarSeleccionRecorte({ x: cx + boxW / 2, y: cy + boxH / 2 });
 }
 
 function actualizarSeleccionRecorte(punto) {
-    puntoFinRecorte = punto;
-    const izquierda = Math.min(puntoInicioRecorte.x, punto.x);
-    const arriba = Math.min(puntoInicioRecorte.y, punto.y);
+    let fin = punto;
+    if (proporcionRecorte && puntoInicioRecorte) {
+        const rect = obtenerRectImagenRenderizada();
+        const maxLeft = rect ? rect.left : 0;
+        const maxTop = rect ? rect.top : 0;
+        const maxRight = rect ? rect.left + rect.width : escenarioImagen.clientWidth;
+        const maxBottom = rect ? rect.top + rect.height : escenarioImagen.clientHeight;
+
+        const sx = punto.x >= puntoInicioRecorte.x ? 1 : -1;
+        const sy = punto.y >= puntoInicioRecorte.y ? 1 : -1;
+        const maxW = sx > 0 ? maxRight - puntoInicioRecorte.x : puntoInicioRecorte.x - maxLeft;
+        const maxH = sy > 0 ? maxBottom - puntoInicioRecorte.y : puntoInicioRecorte.y - maxTop;
+
+        let boxW = Math.min(maxW, Math.max(Math.abs(punto.x - puntoInicioRecorte.x), Math.abs(punto.y - puntoInicioRecorte.y) * proporcionRecorte));
+        if (boxW / proporcionRecorte > maxH) {
+            boxW = maxH * proporcionRecorte;
+        }
+        const boxH = boxW / proporcionRecorte;
+        fin = {
+            x: puntoInicioRecorte.x + sx * boxW,
+            y: puntoInicioRecorte.y + sy * boxH,
+        };
+    }
+
+    puntoFinRecorte = fin;
+    const izquierda = Math.min(puntoInicioRecorte.x, fin.x);
+    const arriba = Math.min(puntoInicioRecorte.y, fin.y);
     cropSelection.style.left = `${izquierda}px`;
     cropSelection.style.top = `${arriba}px`;
-    cropSelection.style.width = `${Math.abs(punto.x - puntoInicioRecorte.x)}px`;
-    cropSelection.style.height = `${Math.abs(punto.y - puntoInicioRecorte.y)}px`;
+    cropSelection.style.width = `${Math.abs(fin.x - puntoInicioRecorte.x)}px`;
+    cropSelection.style.height = `${Math.abs(fin.y - puntoInicioRecorte.y)}px`;
     cropSelection.classList.remove("oculto");
     actualizarControlesEdicion();
 }
 
 function obtenerCoordenadasRecorte() {
-    if (!puntoInicioRecorte || !puntoFinRecorte || !preview.naturalWidth || !preview.naturalHeight) {
+    if (!puntoInicioRecorte || !puntoFinRecorte) {
         return null;
     }
-
-    const anchoVista = escenarioImagen.clientWidth;
-    const altoVista = escenarioImagen.clientHeight;
-
-    const estilo = getComputedStyle(preview);
-    const padLeft = parseFloat(estilo.paddingLeft) || 0;
-    const padRight = parseFloat(estilo.paddingRight) || 0;
-    const padTop = parseFloat(estilo.paddingTop) || 0;
-    const padBottom = parseFloat(estilo.paddingBottom) || 0;
-
-    const anchoContenido = Math.max(1, anchoVista - padLeft - padRight);
-    const altoContenido = Math.max(1, altoVista - padTop - padBottom);
-
-    const esCover = estilo.objectFit === "cover";
-    const escalaImagen = esCover
-        ? Math.max(anchoContenido / preview.naturalWidth, altoContenido / preview.naturalHeight)
-        : Math.min(anchoContenido / preview.naturalWidth, altoContenido / preview.naturalHeight);
-    const anchoRenderizado = preview.naturalWidth * escalaImagen;
-    const altoRenderizado = preview.naturalHeight * escalaImagen;
-    const desplazamientoX = padLeft + (anchoContenido - anchoRenderizado) / 2;
-    const desplazamientoY = padTop + (altoContenido - altoRenderizado) / 2;
+    const rect = obtenerRectImagenRenderizada();
+    if (!rect) return null;
 
     const aPixelX = (x) => Math.max(
         0,
-        Math.min(preview.naturalWidth, (x - desplazamientoX) / anchoRenderizado * preview.naturalWidth),
+        Math.min(preview.naturalWidth, (x - rect.left) / rect.width * preview.naturalWidth),
     );
     const aPixelY = (y) => Math.max(
         0,
-        Math.min(preview.naturalHeight, (y - desplazamientoY) / altoRenderizado * preview.naturalHeight),
+        Math.min(preview.naturalHeight, (y - rect.top) / rect.height * preview.naturalHeight),
     );
 
     const x1 = aPixelX(Math.min(puntoInicioRecorte.x, puntoFinRecorte.x));
@@ -480,6 +784,14 @@ async function procesarArchivoSubida(archivo) {
     contrasteValor.value = "0%";
     saturacionInput.value = "0";
     saturacionValor.value = "0%";
+    if (altasLucesInput) altasLucesInput.value = "0";
+    if (altasLucesValor) altasLucesValor.value = "0%";
+    if (sombrasInput) sombrasInput.value = "0";
+    if (sombrasValor) sombrasValor.value = "0%";
+    if (fadeInput) fadeInput.value = "0";
+    if (fadeValor) fadeValor.value = "0%";
+    if (vinetaInput) vinetaInput.value = "0";
+    if (vinetaValor) vinetaValor.value = "0%";
     if (desenfoqueInput) desenfoqueInput.value = "0";
     if (desenfoqueValor) desenfoqueValor.value = "0%";
     if (nitidezInput) nitidezInput.value = "0";
@@ -488,10 +800,27 @@ async function procesarArchivoSubida(archivo) {
     if (granoValor) granoValor.value = "0%";
     if (ditherAlgoritmo) ditherAlgoritmo.value = "ninguno";
     if (ditherPaleta) ditherPaleta.value = "bn";
+    if (duotonoOscuroInput) duotonoOscuroInput.value = "#0a0a10";
+    if (duotonoClaroInput) duotonoClaroInput.value = "#f2f2ea";
+    if (ditherUmbralInput) ditherUmbralInput.value = "0";
+    if (ditherUmbralValor) ditherUmbralValor.value = "0";
     if (ditherIntensidadInput) ditherIntensidadInput.value = "100";
     if (ditherIntensidadValor) ditherIntensidadValor.value = "100%";
     if (ditherPixelInput) ditherPixelInput.value = "1";
     if (ditherPixelValor) ditherPixelValor.value = "1 px";
+    pixelPerfectOverride = null;
+    actualizarDuotonoUI();
+    actualizarPixelPerfectUI();
+    if (halacionInput) halacionInput.value = "0";
+    if (halacionValor) halacionValor.value = "0%";
+    if (aberracionInput) aberracionInput.value = "0";
+    if (aberracionValor) aberracionValor.value = "0%";
+    if (scanlinesInput) scanlinesInput.value = "0";
+    if (scanlinesValor) scanlinesValor.value = "0%";
+    if (anguloEnderezarInput) anguloEnderezarInput.value = "0";
+    if (anguloEnderezarValor) anguloEnderezarValor.value = "0.0°";
+    proporcionRecorte = null;
+    cropRatioBtns.forEach((b) => b.classList.toggle("active", b.dataset.ratio === "free"));
     estadoColor = crearEstadoColorDefecto();
     canalColorActivo = "rojo";
     sincronizarTodosLosControlesColor();
@@ -670,14 +999,31 @@ actualizarEstadoDropZone();
 
 brilloInput.addEventListener("input", () => {
     brilloValor.value = mostrarValorSlider(brilloInput.value);
+    programarTiempoReal("ajustes", aplicarAjustes);
 });
 
 contrasteInput.addEventListener("input", () => {
     contrasteValor.value = mostrarValorSlider(contrasteInput.value);
+    programarTiempoReal("ajustes", aplicarAjustes);
 });
 
 saturacionInput.addEventListener("input", () => {
     saturacionValor.value = mostrarValorSlider(saturacionInput.value);
+    programarTiempoReal("ajustes", aplicarAjustes);
+});
+
+[
+    [altasLucesInput, altasLucesValor],
+    [sombrasInput, sombrasValor],
+    [fadeInput, fadeValor],
+    [vinetaInput, vinetaValor],
+].forEach(([inp, out]) => {
+    if (inp && out) {
+        inp.addEventListener("input", () => {
+            out.value = mostrarValorSlider(inp.value);
+            programarTiempoReal("ajustes", aplicarAjustes);
+        });
+    }
 });
 
 function obtenerTodosLosAjustes() {
@@ -685,23 +1031,30 @@ function obtenerTodosLosAjustes() {
         brillo: Number(brilloInput ? brilloInput.value : 0),
         contraste: Number(contrasteInput ? contrasteInput.value : 0),
         saturacion: Number(saturacionInput ? saturacionInput.value : 0),
+        altas_luces: Number(altasLucesInput ? altasLucesInput.value : 0),
+        sombras: Number(sombrasInput ? sombrasInput.value : 0),
+        fade: Number(fadeInput ? fadeInput.value : 0),
+        vineta: Number(vinetaInput ? vinetaInput.value : 0),
         desenfoque: Number(desenfoqueInput ? desenfoqueInput.value : 0),
         nitidez: Number(nitidezInput ? nitidezInput.value : 0),
         grano: Number(granoInput ? granoInput.value : 0),
     };
 }
 
-async function aplicarAjustes(nombreAjuste) {
-    if (!imagenActual || procesandoAccion || modoRecorte) {
+async function aplicarAjustes(opciones = {}) {
+    const esTiempoReal = Boolean(opciones && opciones.esTiempoReal);
+    if (!imagenActual || (!esTiempoReal && procesandoAccion) || modoRecorte) {
         return;
     }
 
     const numeroSolicitud = ++solicitudActual;
     const imagenId = imagenActual;
-    procesandoAccion = true;
-    actualizarControlesEdicion();
-    indicadorCarga.textContent = `Aplicando ajustes...`;
-    indicadorCarga.classList.remove("oculto");
+    if (!esTiempoReal) {
+        procesandoAccion = true;
+        actualizarControlesEdicion();
+        indicadorCarga.textContent = `Aplicando ajustes...`;
+        indicadorCarga.classList.remove("oculto");
+    }
 
     try {
         const respuesta = await fetch(`/imagen/${imagenId}/ajustes`, {
@@ -715,7 +1068,9 @@ async function aplicarAjustes(nombreAjuste) {
             return;
         }
         if (!respuesta.ok || !resultado.ok) {
-            mostrarMensaje(resultado.mensaje || "No se pudieron aplicar los ajustes.");
+            if (!esTiempoReal) {
+                mostrarMensaje(resultado.mensaje || "No se pudieron aplicar los ajustes.");
+            }
             return;
         }
 
@@ -724,7 +1079,9 @@ async function aplicarAjustes(nombreAjuste) {
             return;
         }
         if (!vistaCargada) {
-            mostrarMensaje("No se pudo mostrar la imagen con los ajustes aplicados.");
+            if (!esTiempoReal) {
+                mostrarMensaje("No se pudo mostrar la imagen con los ajustes aplicados.");
+            }
             return;
         }
 
@@ -738,13 +1095,15 @@ async function aplicarAjustes(nombreAjuste) {
         if (numeroSolicitud !== solicitudActual) {
             return;
         }
-        if (error instanceof SyntaxError) {
-            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
-        } else {
-            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        if (!esTiempoReal) {
+            if (error instanceof SyntaxError) {
+                mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+            } else {
+                mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+            }
         }
     } finally {
-        if (numeroSolicitud === solicitudActual) {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
             procesandoAccion = false;
             actualizarControlesEdicion();
             indicadorCarga.classList.add("oculto");
@@ -753,7 +1112,9 @@ async function aplicarAjustes(nombreAjuste) {
     }
 }
 
-botonAplicarAjustes.addEventListener("click", () => aplicarAjustes());
+if (botonAplicarAjustes) {
+    botonAplicarAjustes.addEventListener("click", () => aplicarAjustes());
+}
 
 if (botonResetAjustes) {
     botonResetAjustes.addEventListener("click", () => {
@@ -764,6 +1125,14 @@ if (botonResetAjustes) {
         contrasteValor.value = "0%";
         saturacionInput.value = "0";
         saturacionValor.value = "0%";
+        if (altasLucesInput) altasLucesInput.value = "0";
+        if (altasLucesValor) altasLucesValor.value = "0%";
+        if (sombrasInput) sombrasInput.value = "0";
+        if (sombrasValor) sombrasValor.value = "0%";
+        if (fadeInput) fadeInput.value = "0";
+        if (fadeValor) fadeValor.value = "0%";
+        if (vinetaInput) vinetaInput.value = "0";
+        if (vinetaValor) vinetaValor.value = "0%";
         aplicarAjustes();
     });
 }
@@ -771,26 +1140,31 @@ if (botonResetAjustes) {
 if (desenfoqueInput && desenfoqueValor) {
     desenfoqueInput.addEventListener("input", () => {
         desenfoqueValor.value = mostrarValorSlider(desenfoqueInput.value);
+        programarTiempoReal("detalle", aplicarDetalle);
     });
 }
 
 if (nitidezInput && nitidezValor) {
     nitidezInput.addEventListener("input", () => {
         nitidezValor.value = mostrarValorSlider(nitidezInput.value);
+        programarTiempoReal("detalle", aplicarDetalle);
     });
 }
 
-async function aplicarDetalle() {
-    if (!imagenActual || procesandoAccion || modoRecorte) {
+async function aplicarDetalle(opciones = {}) {
+    const esTiempoReal = Boolean(opciones && opciones.esTiempoReal);
+    if (!imagenActual || (!esTiempoReal && procesandoAccion) || modoRecorte) {
         return;
     }
 
     const numeroSolicitud = ++solicitudActual;
     const imagenId = imagenActual;
-    procesandoAccion = true;
-    actualizarControlesEdicion();
-    indicadorCarga.textContent = "Aplicando detalle…";
-    indicadorCarga.classList.remove("oculto");
+    if (!esTiempoReal) {
+        procesandoAccion = true;
+        actualizarControlesEdicion();
+        indicadorCarga.textContent = "Aplicando detalle…";
+        indicadorCarga.classList.remove("oculto");
+    }
 
     try {
         const respuesta = await fetch(`/imagen/${imagenId}/detalle`, {
@@ -804,7 +1178,9 @@ async function aplicarDetalle() {
             return;
         }
         if (!respuesta.ok || !resultado.ok) {
-            mostrarMensaje(resultado.mensaje || "No se pudieron aplicar los ajustes de detalle.");
+            if (!esTiempoReal) {
+                mostrarMensaje(resultado.mensaje || "No se pudieron aplicar los ajustes de detalle.");
+            }
             return;
         }
 
@@ -813,7 +1189,9 @@ async function aplicarDetalle() {
             return;
         }
         if (!vistaCargada) {
-            mostrarMensaje("No se pudo mostrar la imagen con los ajustes aplicados.");
+            if (!esTiempoReal) {
+                mostrarMensaje("No se pudo mostrar la imagen con los ajustes aplicados.");
+            }
             return;
         }
 
@@ -827,13 +1205,15 @@ async function aplicarDetalle() {
         if (numeroSolicitud !== solicitudActual) {
             return;
         }
-        if (error instanceof SyntaxError) {
-            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
-        } else {
-            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        if (!esTiempoReal) {
+            if (error instanceof SyntaxError) {
+                mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+            } else {
+                mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+            }
         }
     } finally {
-        if (numeroSolicitud === solicitudActual) {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
             procesandoAccion = false;
             actualizarControlesEdicion();
             indicadorCarga.classList.add("oculto");
@@ -849,6 +1229,7 @@ if (botonAplicarDetalle) {
 if (granoInput && granoValor) {
     granoInput.addEventListener("input", () => {
         granoValor.value = `${granoInput.value}%`;
+        programarTiempoReal("detalle", aplicarDetalle);
     });
 }
 
@@ -868,17 +1249,87 @@ if (botonResetDetalle) {
 if (ditherIntensidadInput && ditherIntensidadValor) {
     ditherIntensidadInput.addEventListener("input", () => {
         ditherIntensidadValor.value = `${ditherIntensidadInput.value}%`;
+        programarTiempoReal("dither", aplicarDithering);
     });
 }
 
 if (ditherPixelInput && ditherPixelValor) {
     ditherPixelInput.addEventListener("input", () => {
         ditherPixelValor.value = `${ditherPixelInput.value} px`;
+        programarTiempoReal("dither", aplicarDithering);
     });
 }
 
-async function aplicarDithering() {
-    if (!imagenActual || procesandoAccion || modoRecorte) {
+if (ditherAlgoritmo) {
+    ditherAlgoritmo.addEventListener("change", () => {
+        pixelPerfectOverride = null;
+        actualizarPixelPerfectUI();
+        programarTiempoReal("dither", aplicarDithering, 10);
+    });
+}
+
+if (ditherPaleta) {
+    ditherPaleta.addEventListener("change", () => {
+        actualizarDuotonoUI();
+        programarTiempoReal("dither", aplicarDithering, 10);
+    });
+}
+
+if (ditherUmbralInput && ditherUmbralValor) {
+    ditherUmbralInput.addEventListener("input", () => {
+        ditherUmbralValor.value = mostrarValorEntero(ditherUmbralInput.value);
+        programarTiempoReal("dither", aplicarDithering);
+    });
+}
+
+if (duotonoOscuroInput) {
+    duotonoOscuroInput.addEventListener("input", () => {
+        if (ditherPaleta && ditherPaleta.value !== "duotono") {
+            ditherPaleta.value = "duotono";
+            actualizarDuotonoUI();
+        }
+        programarTiempoReal("dither", aplicarDithering, 40);
+    });
+}
+
+if (duotonoClaroInput) {
+    duotonoClaroInput.addEventListener("input", () => {
+        if (ditherPaleta && ditherPaleta.value !== "duotono") {
+            ditherPaleta.value = "duotono";
+            actualizarDuotonoUI();
+        }
+        programarTiempoReal("dither", aplicarDithering, 40);
+    });
+}
+
+duotonoSwatchBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        const osc = btn.dataset.oscuro || "#0a0a10";
+        const cla = btn.dataset.claro || "#f2f2ea";
+        if (duotonoOscuroInput) duotonoOscuroInput.value = osc;
+        if (duotonoClaroInput) duotonoClaroInput.value = cla;
+        if (ditherPaleta) ditherPaleta.value = "duotono";
+        if (ditherAlgoritmo && ditherAlgoritmo.value === "ninguno") {
+            ditherAlgoritmo.value = "floyd_steinberg";
+            pixelPerfectOverride = null;
+            actualizarPixelPerfectUI();
+        }
+        actualizarDuotonoUI();
+        programarTiempoReal("dither", aplicarDithering, 10);
+    });
+});
+
+if (ditherPixelPerfectInput) {
+    ditherPixelPerfectInput.addEventListener("change", () => {
+        pixelPerfectOverride = ditherPixelPerfectInput.checked;
+        actualizarPixelPerfectUI();
+    });
+}
+
+async function aplicarDithering(opciones = {}) {
+    const esTiempoReal = Boolean(opciones && opciones.esTiempoReal);
+    if (!imagenActual || (!esTiempoReal && procesandoAccion) || modoRecorte) {
         return;
     }
 
@@ -886,13 +1337,18 @@ async function aplicarDithering() {
     const pal = ditherPaleta ? ditherPaleta.value : "bn";
     const pixel = Number(ditherPixelInput ? ditherPixelInput.value : 1);
     const intensidad = Number(ditherIntensidadInput ? ditherIntensidadInput.value : 100);
+    const umbral = Number(ditherUmbralInput ? ditherUmbralInput.value : 0);
+    const duotonoOscuro = duotonoOscuroInput ? duotonoOscuroInput.value : "#0a0a10";
+    const duotonoClaro = duotonoClaroInput ? duotonoClaroInput.value : "#f2f2ea";
 
     const numeroSolicitud = ++solicitudActual;
     const imagenId = imagenActual;
-    procesandoAccion = true;
-    actualizarControlesEdicion();
-    indicadorCarga.textContent = "Aplicando dithering…";
-    indicadorCarga.classList.remove("oculto");
+    if (!esTiempoReal) {
+        procesandoAccion = true;
+        actualizarControlesEdicion();
+        indicadorCarga.textContent = "Aplicando dithering…";
+        indicadorCarga.classList.remove("oculto");
+    }
 
     try {
         const respuesta = await fetch(`/imagen/${imagenId}/dithering`, {
@@ -903,6 +1359,9 @@ async function aplicarDithering() {
                 paleta: pal,
                 tamano_pixel: pixel,
                 intensidad: intensidad,
+                umbral: umbral,
+                duotono_oscuro: duotonoOscuro,
+                duotono_claro: duotonoClaro,
             }),
         });
         const resultado = await respuesta.json();
@@ -911,7 +1370,9 @@ async function aplicarDithering() {
             return;
         }
         if (!respuesta.ok || !resultado.ok) {
-            mostrarMensaje(resultado.mensaje || "No se pudo aplicar el efecto de dithering.");
+            if (!esTiempoReal) {
+                mostrarMensaje(resultado.mensaje || "No se pudo aplicar el efecto de dithering.");
+            }
             return;
         }
 
@@ -920,23 +1381,28 @@ async function aplicarDithering() {
             return;
         }
         if (!vistaCargada) {
-            mostrarMensaje("No se pudo mostrar la imagen con el dithering aplicado.");
+            if (!esTiempoReal) {
+                mostrarMensaje("No se pudo mostrar la imagen con el dithering aplicado.");
+            }
             return;
         }
 
         mostrarMensaje("");
         preview.classList.remove("oculto");
+        actualizarPixelPerfectUI();
     } catch (error) {
         if (numeroSolicitud !== solicitudActual) {
             return;
         }
-        if (error instanceof SyntaxError) {
-            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
-        } else {
-            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        if (!esTiempoReal) {
+            if (error instanceof SyntaxError) {
+                mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+            } else {
+                mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+            }
         }
     } finally {
-        if (numeroSolicitud === solicitudActual) {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
             procesandoAccion = false;
             actualizarControlesEdicion();
             indicadorCarga.classList.add("oculto");
@@ -954,11 +1420,98 @@ if (botonResetDither) {
         if (!imagenActual || procesandoAccion || modoRecorte) return;
         if (ditherAlgoritmo) ditherAlgoritmo.value = "ninguno";
         if (ditherPaleta) ditherPaleta.value = "bn";
+        if (duotonoOscuroInput) duotonoOscuroInput.value = "#0a0a10";
+        if (duotonoClaroInput) duotonoClaroInput.value = "#f2f2ea";
+        if (ditherUmbralInput) ditherUmbralInput.value = "0";
+        if (ditherUmbralValor) ditherUmbralValor.value = "0";
         if (ditherIntensidadInput) ditherIntensidadInput.value = "100";
         if (ditherIntensidadValor) ditherIntensidadValor.value = "100%";
         if (ditherPixelInput) ditherPixelInput.value = "1";
         if (ditherPixelValor) ditherPixelValor.value = "1 px";
+        pixelPerfectOverride = null;
+        actualizarDuotonoUI();
+        actualizarPixelPerfectUI();
         aplicarDithering();
+    });
+}
+
+[
+    [halacionInput, halacionValor],
+    [aberracionInput, aberracionValor],
+    [scanlinesInput, scanlinesValor],
+].forEach(([inp, out]) => {
+    if (inp && out) {
+        inp.addEventListener("input", () => {
+            out.value = `${inp.value}%`;
+            programarTiempoReal("optica", aplicarOptica);
+        });
+    }
+});
+
+async function aplicarOptica(opciones = {}) {
+    const esTiempoReal = Boolean(opciones && opciones.esTiempoReal);
+    if (!imagenActual || (!esTiempoReal && procesandoAccion) || modoRecorte) {
+        return;
+    }
+
+    const numeroSolicitud = ++solicitudActual;
+    const imagenId = imagenActual;
+    if (!esTiempoReal) {
+        procesandoAccion = true;
+        actualizarControlesEdicion();
+        indicadorCarga.textContent = "Procesando óptica…";
+        indicadorCarga.classList.remove("oculto");
+    }
+
+    try {
+        const respuesta = await fetch(`/imagen/${imagenId}/optica`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                halacion: Number(halacionInput ? halacionInput.value : 0),
+                aberracion: Number(aberracionInput ? aberracionInput.value : 0),
+                scanlines: Number(scanlinesInput ? scanlinesInput.value : 0),
+            }),
+        });
+        const resultado = await respuesta.json();
+        if (numeroSolicitud !== solicitudActual) return;
+        if (!respuesta.ok || !resultado.ok) {
+            if (!esTiempoReal) {
+                mostrarMensaje(resultado.mensaje || "No se pudieron aplicar los efectos ópticos.");
+            }
+            return;
+        }
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (!vistaCargada || numeroSolicitud !== solicitudActual) return;
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+        if (typeof actualizarVistaComparador === "function") {
+            actualizarVistaComparador();
+        }
+    } catch (error) {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
+            mostrarMensaje("No se pudo conectar con el servidor.");
+        }
+    } finally {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
+            procesandoAccion = false;
+            actualizarControlesEdicion();
+            indicadorCarga.classList.add("oculto");
+            indicadorCarga.textContent = "Procesando imagen…";
+        }
+    }
+}
+
+if (botonResetOptica) {
+    botonResetOptica.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion || modoRecorte) return;
+        if (halacionInput) halacionInput.value = "0";
+        if (halacionValor) halacionValor.value = "0%";
+        if (aberracionInput) aberracionInput.value = "0";
+        if (aberracionValor) aberracionValor.value = "0%";
+        if (scanlinesInput) scanlinesInput.value = "0";
+        if (scanlinesValor) scanlinesValor.value = "0%";
+        aplicarOptica();
     });
 }
 
@@ -1030,6 +1583,7 @@ if (temperaturaInput) {
     temperaturaInput.addEventListener("input", () => {
         estadoColor.temperatura = Number(temperaturaInput.value);
         if (temperaturaValor) temperaturaValor.value = mostrarValorEntero(temperaturaInput.value);
+        programarTiempoReal("color", aplicarColor);
     });
 }
 
@@ -1037,6 +1591,7 @@ if (tinteInput) {
     tinteInput.addEventListener("input", () => {
         estadoColor.tinte = Number(tinteInput.value);
         if (tinteValor) tinteValor.value = mostrarValorEntero(tinteInput.value);
+        programarTiempoReal("color", aplicarColor);
     });
 }
 
@@ -1047,6 +1602,7 @@ if (hslTonoInput) {
         }
         estadoColor.mezcla[canalColorActivo].tono = Number(hslTonoInput.value);
         if (hslTonoValor) hslTonoValor.value = mostrarValorEntero(hslTonoInput.value);
+        programarTiempoReal("color", aplicarColor);
     });
 }
 
@@ -1057,6 +1613,7 @@ if (hslSatInput) {
         }
         estadoColor.mezcla[canalColorActivo].saturacion = Number(hslSatInput.value);
         if (hslSatValor) hslSatValor.value = mostrarValorSlider(hslSatInput.value);
+        programarTiempoReal("color", aplicarColor);
     });
 }
 
@@ -1067,20 +1624,24 @@ if (hslLumInput) {
         }
         estadoColor.mezcla[canalColorActivo].luminancia = Number(hslLumInput.value);
         if (hslLumValor) hslLumValor.value = mostrarValorSlider(hslLumInput.value);
+        programarTiempoReal("color", aplicarColor);
     });
 }
 
-async function aplicarColor() {
-    if (!imagenActual || procesandoAccion || modoRecorte) {
+async function aplicarColor(opciones = {}) {
+    const esTiempoReal = Boolean(opciones && opciones.esTiempoReal);
+    if (!imagenActual || (!esTiempoReal && procesandoAccion) || modoRecorte) {
         return;
     }
 
     const numeroSolicitud = ++solicitudActual;
     const imagenId = imagenActual;
-    procesandoAccion = true;
-    actualizarControlesEdicion();
-    indicadorCarga.textContent = "Aplicando balance y mezcla de color…";
-    indicadorCarga.classList.remove("oculto");
+    if (!esTiempoReal) {
+        procesandoAccion = true;
+        actualizarControlesEdicion();
+        indicadorCarga.textContent = "Aplicando balance y mezcla de color…";
+        indicadorCarga.classList.remove("oculto");
+    }
 
     try {
         const respuesta = await fetch(`/imagen/${imagenId}/color`, {
@@ -1098,7 +1659,9 @@ async function aplicarColor() {
             return;
         }
         if (!respuesta.ok || !resultado.ok) {
-            mostrarMensaje(resultado.mensaje || "No se pudo aplicar la mezcla de color.");
+            if (!esTiempoReal) {
+                mostrarMensaje(resultado.mensaje || "No se pudo aplicar la mezcla de color.");
+            }
             return;
         }
 
@@ -1107,7 +1670,9 @@ async function aplicarColor() {
             return;
         }
         if (!vistaCargada) {
-            mostrarMensaje("No se pudo mostrar la imagen con los ajustes de color aplicados.");
+            if (!esTiempoReal) {
+                mostrarMensaje("No se pudo mostrar la imagen con los ajustes de color aplicados.");
+            }
             return;
         }
 
@@ -1117,13 +1682,15 @@ async function aplicarColor() {
         if (numeroSolicitud !== solicitudActual) {
             return;
         }
-        if (error instanceof SyntaxError) {
-            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
-        } else {
-            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        if (!esTiempoReal) {
+            if (error instanceof SyntaxError) {
+                mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+            } else {
+                mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+            }
         }
     } finally {
-        if (numeroSolicitud === solicitudActual) {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
             procesandoAccion = false;
             actualizarControlesEdicion();
             indicadorCarga.classList.add("oculto");
@@ -1156,6 +1723,89 @@ btnIniciarRecorte.addEventListener("click", () => {
 btnCancelarRecorte.addEventListener("click", () => {
     establecerModoRecorte(false);
 });
+
+cropRatioBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion) return;
+        const clave = btn.dataset.ratio || "free";
+        proporcionRecorte = parsearProporcion(clave);
+        cropRatioBtns.forEach((b) => b.classList.toggle("active", b === btn));
+        if (modoRecorte) {
+            if (proporcionRecorte !== null) {
+                aplicarCajaRecortePorProporcion(proporcionRecorte);
+            } else {
+                puntoInicioRecorte = null;
+                puntoFinRecorte = null;
+                cropSelection.classList.add("oculto");
+                actualizarControlesEdicion();
+            }
+        }
+    });
+});
+
+async function aplicarEnderezado(opciones = {}) {
+    const esTiempoReal = Boolean(opciones && opciones.esTiempoReal);
+    if (!imagenActual || (!esTiempoReal && procesandoAccion) || !anguloEnderezarInput) {
+        return;
+    }
+
+    const angulo = Number(anguloEnderezarInput.value || 0);
+    const numeroSolicitud = ++solicitudActual;
+    const imagenId = imagenActual;
+
+    try {
+        const respuesta = await fetch(`/imagen/${imagenId}/enderezar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ angulo }),
+        });
+        const resultado = await respuesta.json();
+        if (numeroSolicitud !== solicitudActual) return;
+        if (!respuesta.ok || !resultado.ok) {
+            if (!esTiempoReal) {
+                mostrarMensaje(resultado.mensaje || "No se pudo enderezar el horizonte.");
+            }
+            return;
+        }
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (!vistaCargada || numeroSolicitud !== solicitudActual) return;
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+        if (modoRecorte) {
+            if (proporcionRecorte !== null) {
+                aplicarCajaRecortePorProporcion(proporcionRecorte);
+            } else {
+                puntoInicioRecorte = null;
+                puntoFinRecorte = null;
+                cropSelection.classList.add("oculto");
+                actualizarControlesEdicion();
+            }
+        }
+        if (typeof actualizarVistaComparador === "function") {
+            actualizarVistaComparador();
+        }
+    } catch (error) {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
+            mostrarMensaje("No se pudo conectar con el servidor.");
+        }
+    }
+}
+
+if (anguloEnderezarInput && anguloEnderezarValor) {
+    anguloEnderezarInput.addEventListener("input", () => {
+        anguloEnderezarValor.value = mostrarAnguloGrados(anguloEnderezarInput.value);
+        programarTiempoReal("enderezar", aplicarEnderezado, 85, true);
+    });
+}
+
+if (btnResetAngulo && anguloEnderezarInput && anguloEnderezarValor) {
+    btnResetAngulo.addEventListener("click", () => {
+        if (!imagenActual || procesandoAccion) return;
+        anguloEnderezarInput.value = "0";
+        anguloEnderezarValor.value = "0.0°";
+        programarTiempoReal("enderezar", aplicarEnderezado, 10, true);
+    });
+}
 
 document.addEventListener("keydown", (evento) => {
     if (evento.key === "Escape" && modoRecorte && !procesandoAccion) {
@@ -1259,6 +1909,8 @@ btnConfirmarRecorte.addEventListener("click", async () => {
             return;
         }
         imagenFueRecortada = true;
+        if (anguloEnderezarInput) anguloEnderezarInput.value = "0";
+        if (anguloEnderezarValor) anguloEnderezarValor.value = "0.0°";
         actualizarControlesEdicion();
         if (false) {
             return;
@@ -1325,7 +1977,128 @@ if (btnRestablecerRecorte) {
                 return;
             }
 
-            imagenFueRecortada = false;
+            imagenFueRecortada = Boolean(resultado.fue_recortada);
+
+            if (resultado.ajustes) {
+                if (brilloInput && resultado.ajustes.brillo !== undefined) {
+                    brilloInput.value = String(resultado.ajustes.brillo);
+                    if (brilloValor) brilloValor.value = mostrarValorSlider(resultado.ajustes.brillo);
+                }
+                if (contrasteInput && resultado.ajustes.contraste !== undefined) {
+                    contrasteInput.value = String(resultado.ajustes.contraste);
+                    if (contrasteValor) contrasteValor.value = mostrarValorSlider(resultado.ajustes.contraste);
+                }
+                if (saturacionInput && resultado.ajustes.saturacion !== undefined) {
+                    saturacionInput.value = String(resultado.ajustes.saturacion);
+                    if (saturacionValor) saturacionValor.value = mostrarValorSlider(resultado.ajustes.saturacion);
+                }
+                if (altasLucesInput && resultado.ajustes.altas_luces !== undefined) {
+                    altasLucesInput.value = String(resultado.ajustes.altas_luces);
+                    if (altasLucesValor) altasLucesValor.value = mostrarValorSlider(resultado.ajustes.altas_luces);
+                }
+                if (sombrasInput && resultado.ajustes.sombras !== undefined) {
+                    sombrasInput.value = String(resultado.ajustes.sombras);
+                    if (sombrasValor) sombrasValor.value = mostrarValorSlider(resultado.ajustes.sombras);
+                }
+                if (fadeInput && resultado.ajustes.fade !== undefined) {
+                    fadeInput.value = String(resultado.ajustes.fade);
+                    if (fadeValor) fadeValor.value = mostrarValorSlider(resultado.ajustes.fade);
+                }
+                if (vinetaInput && resultado.ajustes.vineta !== undefined) {
+                    vinetaInput.value = String(resultado.ajustes.vineta);
+                    if (vinetaValor) vinetaValor.value = mostrarValorSlider(resultado.ajustes.vineta);
+                }
+                if (desenfoqueInput && resultado.ajustes.desenfoque !== undefined) {
+                    desenfoqueInput.value = String(resultado.ajustes.desenfoque);
+                    if (desenfoqueValor) desenfoqueValor.value = mostrarValorSlider(resultado.ajustes.desenfoque);
+                }
+                if (nitidezInput && resultado.ajustes.nitidez !== undefined) {
+                    nitidezInput.value = String(resultado.ajustes.nitidez);
+                    if (nitidezValor) nitidezValor.value = mostrarValorSlider(resultado.ajustes.nitidez);
+                }
+                if (granoInput && resultado.ajustes.grano !== undefined) {
+                    granoInput.value = String(resultado.ajustes.grano);
+                    if (granoValor) granoValor.value = mostrarValorSlider(resultado.ajustes.grano);
+                }
+            }
+
+            if (resultado.dither_algoritmo !== undefined && ditherAlgoritmo) {
+                ditherAlgoritmo.value = resultado.dither_algoritmo;
+            }
+            if (resultado.dither_paleta !== undefined && ditherPaleta) {
+                ditherPaleta.value = resultado.dither_paleta;
+            }
+            if (resultado.dither_duotono_oscuro !== undefined && duotonoOscuroInput) {
+                duotonoOscuroInput.value = resultado.dither_duotono_oscuro;
+            }
+            if (resultado.dither_duotono_claro !== undefined && duotonoClaroInput) {
+                duotonoClaroInput.value = resultado.dither_duotono_claro;
+            }
+            if (resultado.dither_umbral !== undefined && ditherUmbralInput) {
+                ditherUmbralInput.value = String(resultado.dither_umbral);
+                if (ditherUmbralValor) ditherUmbralValor.value = mostrarValorEntero(resultado.dither_umbral);
+            }
+            if (resultado.dither_intensidad !== undefined && ditherIntensidadInput) {
+                ditherIntensidadInput.value = String(resultado.dither_intensidad);
+                if (ditherIntensidadValor) ditherIntensidadValor.value = `${resultado.dither_intensidad}%`;
+            }
+            if (resultado.dither_pixel !== undefined && ditherPixelInput) {
+                ditherPixelInput.value = String(resultado.dither_pixel);
+                if (ditherPixelValor) ditherPixelValor.value = `${resultado.dither_pixel} px`;
+            }
+            pixelPerfectOverride = null;
+            actualizarDuotonoUI();
+
+            if (resultado.halacion !== undefined && halacionInput) {
+                halacionInput.value = String(resultado.halacion);
+                if (halacionValor) halacionValor.value = `${resultado.halacion}%`;
+            }
+            if (resultado.aberracion !== undefined && aberracionInput) {
+                aberracionInput.value = String(resultado.aberracion);
+                if (aberracionValor) aberracionValor.value = `${resultado.aberracion}%`;
+            }
+            if (resultado.scanlines !== undefined && scanlinesInput) {
+                scanlinesInput.value = String(resultado.scanlines);
+                if (scanlinesValor) scanlinesValor.value = `${resultado.scanlines}%`;
+            }
+            if (resultado.angulo !== undefined && anguloEnderezarInput) {
+                anguloEnderezarInput.value = String(resultado.angulo);
+                if (anguloEnderezarValor) anguloEnderezarValor.value = mostrarAnguloGrados(resultado.angulo);
+            }
+
+            if (resultado.temperatura !== undefined || resultado.tinte !== undefined || resultado.mezcla_color) {
+                estadoColor.temperatura = Number(resultado.temperatura ?? 0);
+                estadoColor.tinte = Number(resultado.tinte ?? 0);
+                estadoColor.mezcla = resultado.mezcla_color ? JSON.parse(JSON.stringify(resultado.mezcla_color)) : {};
+                sincronizarTodosLosControlesColor();
+            }
+
+            if (resultado.marco_estilo !== undefined) {
+                estadoMarco.estilo = resultado.marco_estilo;
+                estadoMarco.color = resultado.marco_color ?? "#ffffff";
+                estadoMarco.grosor = Number(resultado.marco_grosor ?? 24);
+                if (marcoEstiloSelect) marcoEstiloSelect.value = estadoMarco.estilo;
+                if (marcoColorInput) marcoColorInput.value = estadoMarco.color;
+                if (marcoGrosorInput) marcoGrosorInput.value = String(estadoMarco.grosor);
+                if (marcoGrosorValor) marcoGrosorValor.value = `${estadoMarco.grosor} px`;
+                if (typeof actualizarOpcionesMarcoUI === "function") actualizarOpcionesMarcoUI();
+            }
+
+            if (resultado.byn_activo !== undefined) {
+                estadoByn.activo = Boolean(resultado.byn_activo);
+                estadoByn.canales = resultado.byn_canales ? { ...resultado.byn_canales } : {};
+                estadoByn.virado = resultado.byn_virado ?? "ninguno";
+                estadoByn.virado_intensidad = Number(resultado.byn_virado_intensidad ?? 70);
+                if (typeof sincronizarTodosLosControlesByn === "function") sincronizarTodosLosControlesByn();
+            }
+
+            if (resultado.preset_activo !== undefined) {
+                estadoPreset.id = resultado.preset_activo;
+                estadoPreset.intensidad = Number(resultado.preset_intensidad ?? 100);
+                if (typeof sincronizarControlesPresetUI === "function") sincronizarControlesPresetUI();
+            }
+            actualizarPixelPerfectUI();
+
             preview.classList.remove("oculto");
             if (typeof reiniciarVista === "function") {
                 reiniciarVista();
@@ -1383,6 +2156,10 @@ async function voltearImagen(direccion) {
         mostrarMensaje("");
 
         preview.classList.remove("oculto");
+        if (resultado.angulo !== undefined && anguloEnderezarInput) {
+            anguloEnderezarInput.value = String(resultado.angulo);
+            if (anguloEnderezarValor) anguloEnderezarValor.value = mostrarAnguloGrados(resultado.angulo);
+        }
         if (typeof actualizarVistaComparador === "function") {
             actualizarVistaComparador();
         }
@@ -1396,6 +2173,51 @@ async function voltearImagen(direccion) {
             indicadorCarga.textContent = "Procesando imagen…";
         }
     }
+}
+
+async function rotarImagen90(sentido = "derecha") {
+    if (!imagenActual || procesandoAccion || modoRecorte) return;
+    const numeroSolicitud = ++solicitudActual;
+    procesandoAccion = true;
+    actualizarControlesEdicion();
+    indicadorCarga.textContent = "Rotando 90°…";
+    indicadorCarga.classList.remove("oculto");
+    try {
+        const respuesta = await fetch(`/imagen/${imagenActual}/rotar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sentido }),
+        });
+        const resultado = await respuesta.json();
+        if (numeroSolicitud !== solicitudActual) return;
+        if (!respuesta.ok || !resultado.ok) {
+            mostrarMensaje(resultado.mensaje || "No se pudo rotar la imagen.");
+            return;
+        }
+        const vistaCargada = await esperarVista(resultado.url, numeroSolicitud);
+        if (!vistaCargada || numeroSolicitud !== solicitudActual) return;
+        mostrarMensaje("");
+        preview.classList.remove("oculto");
+        if (typeof reiniciarVista === "function") {
+            reiniciarVista();
+        }
+        if (typeof actualizarVistaComparador === "function") {
+            actualizarVistaComparador();
+        }
+    } catch (error) {
+        mostrarMensaje("No se pudo conectar con el servidor.");
+    } finally {
+        if (numeroSolicitud === solicitudActual) {
+            procesandoAccion = false;
+            actualizarControlesEdicion();
+            indicadorCarga.classList.add("oculto");
+            indicadorCarga.textContent = "Procesando imagen…";
+        }
+    }
+}
+
+if (botonRotar90) {
+    botonRotar90.addEventListener("click", () => rotarImagen90("derecha"));
 }
 
 botonVoltearHorizontal.addEventListener("click", () => {
@@ -1420,6 +2242,7 @@ if (marcoEstiloSelect) {
     marcoEstiloSelect.addEventListener("change", () => {
         estadoMarco.estilo = marcoEstiloSelect.value;
         actualizarOpcionesMarcoUI();
+        programarTiempoReal("marco", aplicarMarco, 10);
     });
 }
 
@@ -1427,6 +2250,7 @@ if (marcoColorInput) {
     marcoColorInput.addEventListener("input", () => {
         estadoMarco.color = marcoColorInput.value;
         actualizarOpcionesMarcoUI();
+        programarTiempoReal("marco", aplicarMarco);
     });
 }
 
@@ -1437,6 +2261,7 @@ presetColorDots.forEach(dot => {
             estadoMarco.color = c;
             if (marcoColorInput) marcoColorInput.value = c;
             actualizarOpcionesMarcoUI();
+            programarTiempoReal("marco", aplicarMarco, 10);
         }
     });
 });
@@ -1445,20 +2270,24 @@ if (marcoGrosorInput) {
     marcoGrosorInput.addEventListener("input", () => {
         estadoMarco.grosor = Number(marcoGrosorInput.value);
         if (marcoGrosorValor) marcoGrosorValor.value = `${marcoGrosorInput.value} px`;
+        programarTiempoReal("marco", aplicarMarco);
     });
 }
 
-async function aplicarMarco() {
-    if (!imagenActual || procesandoAccion || modoRecorte) {
+async function aplicarMarco(opciones = {}) {
+    const esTiempoReal = Boolean(opciones && opciones.esTiempoReal);
+    if (!imagenActual || (!esTiempoReal && procesandoAccion) || modoRecorte) {
         return;
     }
 
     const numeroSolicitud = ++solicitudActual;
     const imagenId = imagenActual;
-    procesandoAccion = true;
-    actualizarControlesEdicion();
-    indicadorCarga.textContent = "Aplicando marco decorativo…";
-    indicadorCarga.classList.remove("oculto");
+    if (!esTiempoReal) {
+        procesandoAccion = true;
+        actualizarControlesEdicion();
+        indicadorCarga.textContent = "Aplicando marco decorativo…";
+        indicadorCarga.classList.remove("oculto");
+    }
 
     try {
         const respuesta = await fetch(`/imagen/${imagenId}/marco`, {
@@ -1476,7 +2305,9 @@ async function aplicarMarco() {
             return;
         }
         if (!respuesta.ok || !resultado.ok) {
-            mostrarMensaje(resultado.mensaje || "No se pudo aplicar el marco decorativo.");
+            if (!esTiempoReal) {
+                mostrarMensaje(resultado.mensaje || "No se pudo aplicar el marco decorativo.");
+            }
             return;
         }
 
@@ -1485,7 +2316,9 @@ async function aplicarMarco() {
             return;
         }
         if (!vistaCargada) {
-            mostrarMensaje("No se pudo mostrar la imagen con el marco aplicado.");
+            if (!esTiempoReal) {
+                mostrarMensaje("No se pudo mostrar la imagen con el marco aplicado.");
+            }
             return;
         }
 
@@ -1498,13 +2331,15 @@ async function aplicarMarco() {
         if (numeroSolicitud !== solicitudActual) {
             return;
         }
-        if (error instanceof SyntaxError) {
-            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
-        } else {
-            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        if (!esTiempoReal) {
+            if (error instanceof SyntaxError) {
+                mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+            } else {
+                mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+            }
         }
     } finally {
-        if (numeroSolicitud === solicitudActual) {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
             procesandoAccion = false;
             actualizarControlesEdicion();
             indicadorCarga.classList.add("oculto");
@@ -1558,6 +2393,7 @@ if (bynActivoInput) {
     bynActivoInput.addEventListener("change", () => {
         estadoByn.activo = bynActivoInput.checked;
         actualizarControlesEdicion();
+        programarTiempoReal("byn", aplicarByn, 10);
     });
 }
 
@@ -1571,6 +2407,7 @@ if (bynFiltroPreset) {
                 estadoByn.canales[canal] = vals[canal];
             });
             sincronizarTodosLosControlesByn();
+            programarTiempoReal("byn", aplicarByn, 10);
         }
     });
 }
@@ -1588,6 +2425,7 @@ Object.keys(CANALES_BYN_INPUTS).forEach((canal) => {
             if (bynFiltroPreset) {
                 bynFiltroPreset.value = "personalizado";
             }
+            programarTiempoReal("byn", aplicarByn);
         });
     }
 });
@@ -1595,6 +2433,7 @@ Object.keys(CANALES_BYN_INPUTS).forEach((canal) => {
 if (bynViradoSelect) {
     bynViradoSelect.addEventListener("change", () => {
         estadoByn.virado = bynViradoSelect.value;
+        programarTiempoReal("byn", aplicarByn, 10);
     });
 }
 
@@ -1604,20 +2443,24 @@ if (bynViradoIntensidadInput) {
         if (bynViradoIntensidadValor) {
             bynViradoIntensidadValor.value = `${bynViradoIntensidadInput.value}%`;
         }
+        programarTiempoReal("byn", aplicarByn);
     });
 }
 
-async function aplicarByn() {
-    if (!imagenActual || procesandoAccion || modoRecorte) {
+async function aplicarByn(opciones = {}) {
+    const esTiempoReal = Boolean(opciones && opciones.esTiempoReal);
+    if (!imagenActual || (!esTiempoReal && procesandoAccion) || modoRecorte) {
         return;
     }
 
     const numeroSolicitud = ++solicitudActual;
     const imagenId = imagenActual;
-    procesandoAccion = true;
-    actualizarControlesEdicion();
-    indicadorCarga.textContent = "Aplicando blanco y negro…";
-    indicadorCarga.classList.remove("oculto");
+    if (!esTiempoReal) {
+        procesandoAccion = true;
+        actualizarControlesEdicion();
+        indicadorCarga.textContent = "Aplicando blanco y negro…";
+        indicadorCarga.classList.remove("oculto");
+    }
 
     try {
         const respuesta = await fetch(`/imagen/${imagenId}/byn`, {
@@ -1636,7 +2479,9 @@ async function aplicarByn() {
             return;
         }
         if (!respuesta.ok || !resultado.ok) {
-            mostrarMensaje(resultado.mensaje || "No se pudieron aplicar los ajustes de blanco y negro.");
+            if (!esTiempoReal) {
+                mostrarMensaje(resultado.mensaje || "No se pudieron aplicar los ajustes de blanco y negro.");
+            }
             return;
         }
 
@@ -1645,7 +2490,9 @@ async function aplicarByn() {
             return;
         }
         if (!vistaCargada) {
-            mostrarMensaje("No se pudo mostrar la imagen en blanco y negro.");
+            if (!esTiempoReal) {
+                mostrarMensaje("No se pudo mostrar la imagen en blanco y negro.");
+            }
             return;
         }
 
@@ -1655,13 +2502,15 @@ async function aplicarByn() {
         if (numeroSolicitud !== solicitudActual) {
             return;
         }
-        if (error instanceof SyntaxError) {
-            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
-        } else {
-            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        if (!esTiempoReal) {
+            if (error instanceof SyntaxError) {
+                mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+            } else {
+                mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+            }
         }
     } finally {
-        if (numeroSolicitud === solicitudActual) {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
             procesandoAccion = false;
             actualizarControlesEdicion();
             indicadorCarga.classList.add("oculto");
@@ -1719,26 +2568,32 @@ if (presetIntensidadInput) {
         if (presetIntensidadValor) {
             presetIntensidadValor.value = `${presetIntensidadInput.value}%`;
         }
+        if (estadoPreset.id && estadoPreset.id !== "ninguno") {
+            programarTiempoReal("preset", aplicarPreset);
+        }
     });
 
     presetIntensidadInput.addEventListener("change", () => {
         if (estadoPreset.id !== "ninguno" && imagenActual && !procesandoAccion && !modoRecorte) {
-            aplicarPreset();
+            programarTiempoReal("preset", aplicarPreset, 10);
         }
     });
 }
 
-async function aplicarPreset() {
-    if (!imagenActual || procesandoAccion || modoRecorte) {
+async function aplicarPreset(opciones = {}) {
+    const esTiempoReal = Boolean(opciones && opciones.esTiempoReal);
+    if (!imagenActual || (!esTiempoReal && procesandoAccion) || modoRecorte) {
         return;
     }
 
     const numeroSolicitud = ++solicitudActual;
     const imagenId = imagenActual;
-    procesandoAccion = true;
-    actualizarControlesEdicion();
-    indicadorCarga.textContent = "Aplicando estilo fotográfico…";
-    indicadorCarga.classList.remove("oculto");
+    if (!esTiempoReal) {
+        procesandoAccion = true;
+        actualizarControlesEdicion();
+        indicadorCarga.textContent = "Aplicando estilo fotográfico…";
+        indicadorCarga.classList.remove("oculto");
+    }
 
     try {
         const respuesta = await fetch(`/imagen/${imagenId}/preset`, {
@@ -1755,7 +2610,9 @@ async function aplicarPreset() {
             return;
         }
         if (!respuesta.ok || !resultado.ok) {
-            mostrarMensaje(resultado.mensaje || "No se pudo aplicar el estilo.");
+            if (!esTiempoReal) {
+                mostrarMensaje(resultado.mensaje || "No se pudo aplicar el estilo.");
+            }
             return;
         }
 
@@ -1764,23 +2621,29 @@ async function aplicarPreset() {
             return;
         }
         if (!vistaCargada) {
-            mostrarMensaje("No se pudo mostrar la imagen con el estilo aplicado.");
+            if (!esTiempoReal) {
+                mostrarMensaje("No se pudo mostrar la imagen con el estilo aplicado.");
+            }
             return;
         }
 
         mostrarMensaje("");
         preview.classList.remove("oculto");
+        pixelPerfectOverride = null;
+        actualizarPixelPerfectUI();
     } catch (error) {
         if (numeroSolicitud !== solicitudActual) {
             return;
         }
-        if (error instanceof SyntaxError) {
-            mostrarMensaje("El servidor devolvió una respuesta inesperada.");
-        } else {
-            mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+        if (!esTiempoReal) {
+            if (error instanceof SyntaxError) {
+                mostrarMensaje("El servidor devolvió una respuesta inesperada.");
+            } else {
+                mostrarMensaje("No se pudo conectar con el servidor. Comprueba que esté iniciado e inténtalo otra vez.");
+            }
         }
     } finally {
-        if (numeroSolicitud === solicitudActual) {
+        if (!esTiempoReal && numeroSolicitud === solicitudActual) {
             procesandoAccion = false;
             actualizarControlesEdicion();
             indicadorCarga.classList.add("oculto");
@@ -1797,7 +2660,9 @@ if (botonResetPresets) {
     botonResetPresets.addEventListener("click", () => {
         if (!imagenActual || procesandoAccion || modoRecorte) return;
         estadoPreset.id = "ninguno";
+        pixelPerfectOverride = null;
         sincronizarControlesPresetUI();
+        actualizarPixelPerfectUI();
         aplicarPreset();
     });
 }

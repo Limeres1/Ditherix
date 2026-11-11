@@ -1,23 +1,26 @@
 """
 DITHERIX // MOTOR FOTOGRÁFICO DE PRESETS Y ESTILOS DE AUTOR
 Presets profesionales multicapa que orquestan el ecosistema completo de Ditherix:
-- Curvas tonales fotográficas (brillo, contraste, ambiente, luces, sombras, blancos, negros fade)
-- Balance de blancos Kelvin y mezcla de color HSL
+- Curvas tonales fotográficas y luz avanzada (altas luces, sombras, fade mate, viñeta óptica)
+- Transformación espectral Aerochrome (infrarrojo falso en NumPy)
+- Balance de blancos Kelvin y mezcla de color HSL de 8 canales
 - Blanco y negro con filtros ópticos y virados químicos (Cianotipia, Selenio, Sepia, Platino)
-- Textura analógica: desenfoque Orton bloom, nitidez de alta frecuencia y grano de 35mm
-- Dithering retro con paletas auténticas (Game Boy, CGA, etc.)
-- Marcos decorativos procedimentales (Polaroid, Polaroid quemado, Tira de 35mm, Liso)
+- Laboratorio Óptico / CRT: halación 35mm, aberración cromática radial y scanlines CRT
+- Dithering multicapa con duotono personalizado, pre-umbral, Atkinson, Floyd y Bayer
+- Marcos decorativos procedimentales (Polaroid, Polaroid gastado, Tira de 35mm, Liso)
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import numpy as np
 from PIL import Image
 
+from ajustes_imagen import aplicar_luz_avanzada
 from detalle import aplicar_grano, aplicar_desenfoque, aplicar_nitidez
 from marcos import aplicar_marco
 from dithering import aplicar_dithering
+from optica import aplicar_scanlines, procesar_optica_lente
 from byn import procesar_byn, FILTROS_BYN
 from color_mixer import procesar_color
 
@@ -41,6 +44,9 @@ class DefinicionPreset:
     calidez: float = 0.0
     blancos: float = 0.0
     negros: float = 0.0
+    fade: float = 0.0
+    vineta: float = 0.0
+    aerochrome: bool = False
     # Detalle & Textura
     grano: float = 0.0
     nitidez: float = 0.0
@@ -55,11 +61,18 @@ class DefinicionPreset:
     byn_canales: dict[str, float] | None = None
     byn_virado: str = "ninguno"
     byn_virado_intensidad: float = 0.0
+    # Laboratorio Óptico / CRT
+    halacion: float = 0.0
+    aberracion: float = 0.0
+    scanlines: float = 0.0
     # Dithering
     dither_algoritmo: str = "ninguno"
     dither_paleta: str = "bn"
     dither_pixel: int = 1
     dither_intensidad: int = 100
+    dither_umbral: int = 0
+    dither_duotono_oscuro: str = "#0a0a10"
+    dither_duotono_claro: str = "#f2f2ea"
     # Marcos
     marco_estilo: str = "ninguno"
     marco_color: str = "#ffffff"
@@ -68,235 +81,324 @@ class DefinicionPreset:
     herramientas: tuple[str, ...] = ()
 
 
+def _aplicar_aerochrome_rgb(arr: np.ndarray) -> np.ndarray:
+    """Emula película Kodak Aerochrome IR desplazando vegetación verde a carmesí."""
+    r = arr[..., 0]
+    g = arr[..., 1]
+    b = arr[..., 2]
+
+    exceso_g = np.clip((g - np.maximum(r, b) * 0.86) * 2.4, 0.0, 1.0)
+    r_nuevo = r * (1.0 - exceso_g * 0.55) + (g * 1.12 + 0.08) * exceso_g
+    g_nuevo = g * (1.0 - exceso_g * 0.72) + r * 0.18 * exceso_g
+    b_nuevo = b * (0.94 - exceso_g * 0.10) + g * 0.24 * exceso_g
+    res = np.stack([r_nuevo, g_nuevo, b_nuevo], axis=-1)
+    return np.clip(res, 0.0, 1.0)
+
+
 _PRESETS_BASE: dict[str, DefinicionPreset] = {
-    # 1. Polaroid Instant Film
-    "polaroid_vintage": DefinicionPreset(
-        id="polaroid_vintage",
-        nombre="Polaroid 600",
-        subtitulo="Marco envejecido & film ámbar",
-        categoria="INSTANT",
-        color_acento="#ff7744",
+    # 1. Cinestill 800T (Halación roja 35mm + Tira de película)
+    "cinestill_neon_800": DefinicionPreset(
+        id="cinestill_neon_800",
+        nombre="Cinestill 800T",
+        subtitulo="Tungsteno nocturno, halación 35mm & tira negativa",
+        categoria="CINE 35MM",
+        color_acento="#ff6e40",
         icon="01",
-        swatch_gradient="linear-gradient(135deg, #fce4b8, #e07a42, #422013)",
-        brillo=6.0,
-        contraste=-8.0,
-        saturacion=12.0,
-        ambiente=18.0,
-        iluminaciones=-22.0,
-        sombras=20.0,
-        calidez=28.0,
-        negros=24.0,
-        grano=35.0,
-        marco_estilo="polaroid_gastado",
-        herramientas=("Polaroid", "Calidez +28", "Grano 35"),
-    ),
-    # 2. 35mm Celluloid Film
-    "kodak_portra_35mm": DefinicionPreset(
-        id="kodak_portra_35mm",
-        nombre="Portra 35mm",
-        subtitulo="Tira de celuloide & color cálido",
-        categoria="35MM",
-        color_acento="#ffaa00",
-        icon="02",
-        swatch_gradient="linear-gradient(135deg, #111111, #3a200a, #d48228, #f5d061)",
-        brillo=4.0,
-        contraste=18.0,
-        saturacion=14.0,
-        ambiente=15.0,
-        iluminaciones=-18.0,
-        sombras=15.0,
-        calidez=22.0,
-        negros=12.0,
-        grano=45.0,
-        nitidez=25.0,
-        marco_estilo="pelicula",
-        herramientas=("Película 35mm", "Grano 45", "Nitidez +25"),
-    ),
-    # 3. Cianotipia Química 1842
-    "cianotipia_1842": DefinicionPreset(
-        id="cianotipia_1842",
-        nombre="Cianotipia 1842",
-        subtitulo="Azul de Prusia & sales férricas",
-        categoria="QUÍMICA",
-        color_acento="#00d4ff",
-        icon="03",
-        swatch_gradient="linear-gradient(135deg, #041021, #0a2f54, #1b6ca8, #72efdd)",
-        contraste=28.0,
-        ambiente=20.0,
-        blancos=15.0,
-        negros=-12.0,
-        grano=25.0,
-        byn_activo=True,
-        byn_filtro="azul",
-        byn_virado="cianotipia",
-        byn_virado_intensidad=92.0,
-        marco_estilo="liso",
-        marco_color="#071526",
-        marco_grosor=26,
-        herramientas=("Cianotipia", "Filtro Azul", "Marco Azul"),
-    ),
-    # 4. Plata & Selenio Fine Art
-    "fine_art_selenio": DefinicionPreset(
-        id="fine_art_selenio",
-        nombre="Plata & Selenio",
-        subtitulo="B&N de galería en papel baritado",
-        categoria="FINE ART",
-        color_acento="#e0e0e0",
-        icon="04",
-        swatch_gradient="linear-gradient(135deg, #100f14, #272130, #736980, #f2f0f7)",
-        contraste=38.0,
-        ambiente=25.0,
-        blancos=25.0,
-        negros=-24.0,
-        grano=28.0,
-        nitidez=30.0,
-        byn_activo=True,
-        byn_filtro="rojo",
-        byn_virado="selenio",
-        byn_virado_intensidad=82.0,
-        marco_estilo="liso",
-        marco_color="#ffffff",
-        marco_grosor=30,
-        herramientas=("Selenio", "Filtro Rojo", "Marco Galería"),
-    ),
-    # 5. Game Boy 8-Bit Matrix
-    "gameboy_1989": DefinicionPreset(
-        id="gameboy_1989",
-        nombre="Game Boy 1989",
-        subtitulo="4 tonos verde LCD & matriz Bayer",
-        categoria="8-BIT",
-        color_acento="#9bbc0f",
-        icon="05",
-        swatch_gradient="linear-gradient(135deg, #0f380f, #306230, #8bac0f, #9bbc0f)",
-        brillo=6.0,
+        swatch_gradient="linear-gradient(135deg, #07131c 0%, #103247 40%, #d9381e 78%, #ffb478 100%)",
         contraste=22.0,
-        dither_algoritmo="bayer_4",
-        dither_paleta="gameboy",
-        dither_pixel=2,
-        dither_intensidad=95,
-        marco_estilo="liso",
-        marco_color="#306230",
-        marco_grosor=18,
-        herramientas=("Dither Bayer", "Paleta Game Boy", "Marco LCD"),
-    ),
-    # 6. CGA Cyberpunk 1981
-    "cyber_cga_80s": DefinicionPreset(
-        id="cyber_cga_80s",
-        nombre="CGA Cyberpunk",
-        subtitulo="Difusión Floyd & neón 1981",
-        categoria="CYBER",
-        color_acento="#ff00aa",
-        icon="06",
-        swatch_gradient="linear-gradient(135deg, #000000 20%, #00ffff 50%, #ff55ff 80%, #ffffff 100%)",
-        contraste=32.0,
-        dither_algoritmo="floyd_steinberg",
-        dither_paleta="cga",
-        dither_pixel=1,
-        dither_intensidad=85,
-        marco_estilo="liso",
-        marco_color="#000000",
-        marco_grosor=16,
-        herramientas=("Dither Floyd", "Paleta CGA", "Borde Cyber"),
-    ),
-    # 7. Cinematic Teal & Orange
-    "moody_teal_orange": DefinicionPreset(
-        id="moody_teal_orange",
-        nombre="Teal & Orange",
-        subtitulo="Color grading de cine contemporáneo",
-        categoria="CINE",
-        color_acento="#00e5ff",
-        icon="07",
-        swatch_gradient="linear-gradient(135deg, #04181f, #093b45, #cf6d17, #ffa938)",
-        contraste=30.0,
-        ambiente=18.0,
-        iluminaciones=-24.0,
-        sombras=18.0,
-        negros=22.0,
-        grano=24.0,
-        temperatura=-18.0,
-        tinte=8.0,
-        mezcla_color={
-            "cyan": {"tono": 0.0, "sat": 25.0, "lum": -5.0},
-            "azul": {"tono": -10.0, "sat": 25.0, "lum": -10.0},
-            "naranja": {"tono": 0.0, "sat": 20.0, "lum": 10.0},
-            "amarillo": {"tono": -5.0, "sat": 15.0, "lum": 8.0},
-        },
-        herramientas=("HSL Cine", "Fade Negros +22", "Grano 24"),
-    ),
-    # 8. Fallen Angels 90s Cine
-    "fallen_angels_90s": DefinicionPreset(
-        id="fallen_angels_90s",
-        nombre="Fallen Angels",
-        subtitulo="Verde neón Wong Kar-wai & celuloide",
-        categoria="NOIR 90S",
-        color_acento="#00ff9d",
-        icon="08",
-        swatch_gradient="linear-gradient(135deg, #01140e, #053322, #00d280, #e6c800)",
-        contraste=34.0,
-        ambiente=15.0,
-        negros=15.0,
-        grano=48.0,
-        temperatura=-16.0,
-        tinte=-22.0,
-        marco_estilo="pelicula",
-        herramientas=("Tinte Neón -22", "Marco Película", "Grano 48"),
-    ),
-    # 9. Y2K Digicam Direct Flash
-    "y2k_digicam_flash": DefinicionPreset(
-        id="y2k_digicam_flash",
-        nombre="Y2K Digicam Flash",
-        subtitulo="Flash directo frontal & nitidez 2000s",
-        categoria="Y2K",
-        color_acento="#00ff66",
-        icon="09",
-        swatch_gradient="linear-gradient(135deg, #181818, #555555, #f5f5f5, #99aaff)",
-        brillo=16.0,
-        contraste=24.0,
-        iluminaciones=35.0,
-        blancos=28.0,
+        ambiente=14.0,
+        iluminaciones=-12.0,
+        sombras=10.0,
         negros=8.0,
-        grano=50.0,
-        nitidez=45.0,
-        marco_estilo="liso",
-        marco_color="#000000",
-        marco_grosor=14,
-        herramientas=("Flash Directo", "Nitidez +45", "Borde Negro"),
+        fade=10.0,
+        vineta=-26.0,
+        temperatura=-18.0,
+        tinte=5.0,
+        halacion=78.0,
+        aberracion=16.0,
+        nitidez=24.0,
+        grano=32.0,
+        mezcla_color={
+            "cyan": {"tono": -6.0, "saturacion": 26.0, "luminancia": -6.0},
+            "azul": {"tono": -10.0, "saturacion": 22.0, "luminancia": -10.0},
+            "rojo": {"tono": -4.0, "saturacion": 32.0, "luminancia": 8.0},
+            "naranja": {"tono": 0.0, "saturacion": 22.0, "luminancia": 6.0},
+        },
+        marco_estilo="pelicula",
+        herramientas=("Halación +78", "Tira 35mm", "Tungsteno"),
     ),
-    # 10. Orton Glow & Bloom
-    "dreamy_orton_bloom": DefinicionPreset(
-        id="dreamy_orton_bloom",
-        nombre="Orton Bloom",
-        subtitulo="Resplandor etéreo & marco instantáneo",
-        categoria="FANTASÍA",
-        color_acento="#e6a8d7",
-        icon="10",
-        swatch_gradient="linear-gradient(135deg, #241129, #59254f, #be73a6, #fff0fa)",
-        brillo=12.0,
-        contraste=-14.0,
-        ambiente=32.0,
-        iluminaciones=25.0,
-        calidez=16.0,
-        desenfoque=8.0,
+    # 2. Midnight Touge (Automotriz CRT + Aberración RGB + Halación)
+    "midnight_touge": DefinicionPreset(
+        id="midnight_touge",
+        nombre="Midnight Touge",
+        subtitulo="Asfalto nocturno, aberración RGB & transmisión CRT",
+        categoria="MOTOR CRT",
+        color_acento="#00d9ff",
+        icon="02",
+        swatch_gradient="linear-gradient(135deg, #05050a 0%, #170e2e 38%, #6d1d5a 72%, #00d9ff 100%)",
+        contraste=34.0,
+        ambiente=18.0,
+        iluminaciones=-10.0,
+        sombras=10.0,
+        fade=14.0,
+        vineta=-40.0,
+        temperatura=-14.0,
+        tinte=10.0,
+        halacion=42.0,
+        aberracion=36.0,
+        scanlines=22.0,
+        nitidez=42.0,
+        grano=18.0,
+        mezcla_color={
+            "azul": {"tono": -12.0, "saturacion": 34.0, "luminancia": -12.0},
+            "cyan": {"tono": 0.0, "saturacion": 32.0, "luminancia": 4.0},
+            "rojo": {"tono": 0.0, "saturacion": 36.0, "luminancia": 10.0},
+            "violeta": {"tono": 8.0, "saturacion": 24.0, "luminancia": 4.0},
+        },
+        herramientas=("Aberración RGB", "Scanlines CRT", "Halación +42"),
+    ),
+    # 3. Risograph Press (Duotono custom índigo/coral + Bayer 8x8)
+    "riso_crimson_press": DefinicionPreset(
+        id="riso_crimson_press",
+        nombre="Risograph Press",
+        subtitulo="Serigrafía editorial duotono índigo/coral & trama fina",
+        categoria="DUOTONO",
+        color_acento="#ff6352",
+        icon="03",
+        swatch_gradient="linear-gradient(135deg, #141c52 0%, #24338f 42%, #ff6352 78%, #ffe7d6 100%)",
+        contraste=24.0,
+        ambiente=12.0,
+        vineta=-18.0,
         nitidez=20.0,
+        dither_algoritmo="bayer_8",
+        dither_paleta="duotono",
+        dither_pixel=1,
+        dither_intensidad=88,
+        dither_umbral=10,
+        dither_duotono_oscuro="#141c52",
+        dither_duotono_claro="#ff6352",
+        herramientas=("Duotono Ink", "Bayer 8x8", "Umbral +10"),
+    ),
+    # 4. Macintosh 1984 (Atkinson 1-bit auténtico + pixel-perfect)
+    "mac_atkinson_1bit": DefinicionPreset(
+        id="mac_atkinson_1bit",
+        nombre="Macintosh 1984",
+        subtitulo="Difusión Atkinson de 1 bit, tinta carbón & papel fósforo",
+        categoria="1-BIT",
+        color_acento="#eceae1",
+        icon="04",
+        swatch_gradient="linear-gradient(135deg, #0b0c10 0%, #262930 45%, #a8a69d 80%, #eceae1 100%)",
+        contraste=22.0,
+        sombras=14.0,
+        nitidez=30.0,
+        dither_algoritmo="atkinson",
+        dither_paleta="duotono",
+        dither_pixel=2,
+        dither_intensidad=100,
+        dither_umbral=6,
+        dither_duotono_oscuro="#0b0c10",
+        dither_duotono_claro="#eceae1",
+        herramientas=("Atkinson 1-Bit", "Píxel x2", "Pixel-Perfect"),
+    ),
+    # 5. Kodak Aerochrome (Falso color infrarrojo + halación + viñeta)
+    "infrared_aerochrome": DefinicionPreset(
+        id="infrared_aerochrome",
+        nombre="Kodak Aerochrome",
+        subtitulo="Película infrarroja falso color, vegetación carmesí & cielo cobalto",
+        categoria="INFRARROJO",
+        color_acento="#ff4d6d",
+        icon="05",
+        swatch_gradient="linear-gradient(135deg, #07142b 0%, #163a70 38%, #c9184a 75%, #ff758f 100%)",
+        contraste=20.0,
+        ambiente=14.0,
+        iluminaciones=-14.0,
+        sombras=16.0,
+        fade=8.0,
+        vineta=-32.0,
+        aerochrome=True,
+        halacion=34.0,
+        nitidez=22.0,
+        grano=24.0,
+        herramientas=("Falso IR", "Halación +34", "Viñeta -32"),
+    ),
+    # 6. VHS Camcorder 94 (Scanlines + Aberración fuerte + Fade)
+    "vhs_camcorder_94": DefinicionPreset(
+        id="vhs_camcorder_94",
+        nombre="VHS Camcorder 94",
+        subtitulo="Cinta magnética, líneas de rastreo CRT & aberración cromática",
+        categoria="ANALOG CRT",
+        color_acento="#e8d29c",
+        icon="06",
+        swatch_gradient="linear-gradient(135deg, #12101a 0%, #3d2240 40%, #b56b45 75%, #e8d29c 100%)",
+        contraste=-4.0,
+        calidez=14.0,
+        fade=28.0,
+        vineta=-44.0,
+        temperatura=10.0,
+        tinte=10.0,
+        desenfoque=8.0,
+        grano=42.0,
+        aberracion=58.0,
+        scanlines=52.0,
+        herramientas=("Scanlines +52", "Aberración +58", "Fade +28"),
+    ),
+    # 7. Kodachrome 64 (Diapositiva clásica + Montura blanca)
+    "kodachrome_archive": DefinicionPreset(
+        id="kodachrome_archive",
+        nombre="Kodachrome 64",
+        subtitulo="Diapositiva de archivo, rojos profundos & montura hueso",
+        categoria="ARCHIVO",
+        color_acento="#d96b38",
+        icon="07",
+        swatch_gradient="linear-gradient(135deg, #1c100b 0%, #5c2018 40%, #c96a2b 75%, #f5f3ec 100%)",
+        contraste=24.0,
+        ambiente=16.0,
+        iluminaciones=-18.0,
+        sombras=14.0,
+        calidez=12.0,
+        fade=10.0,
+        vineta=-22.0,
+        nitidez=28.0,
+        grano=18.0,
+        mezcla_color={
+            "rojo": {"tono": 0.0, "saturacion": 28.0, "luminancia": -4.0},
+            "naranja": {"tono": -6.0, "saturacion": 18.0, "luminancia": 6.0},
+            "amarillo": {"tono": -12.0, "saturacion": 18.0, "luminancia": 4.0},
+            "cyan": {"tono": 6.0, "saturacion": -18.0, "luminancia": -6.0},
+            "verde": {"tono": 12.0, "saturacion": -14.0, "luminancia": -4.0},
+        },
+        marco_estilo="liso",
+        marco_color="#f5f3ec",
+        marco_grosor=28,
+        herramientas=("Montura Slide", "Rojos 64", "Viñeta -22"),
+    ),
+    # 8. Platino Paladio (B&N Virado Platino + Fade mate galería)
+    "monochrome_platinum": DefinicionPreset(
+        id="monochrome_platinum",
+        nombre="Platino Paladio",
+        subtitulo="Copia por contacto B&N, negros aterciopelados & virado platino",
+        categoria="GALERÍA B&N",
+        color_acento="#d6dce2",
+        icon="08",
+        swatch_gradient="linear-gradient(135deg, #0c0e10 0%, #2a2f36 42%, #7d858e 78%, #f2f4f7 100%)",
+        contraste=26.0,
+        ambiente=20.0,
+        iluminaciones=-22.0,
+        sombras=26.0,
+        fade=22.0,
+        vineta=-30.0,
+        nitidez=28.0,
+        grano=22.0,
+        byn_activo=True,
+        byn_filtro="naranja",
+        byn_virado="platino",
+        byn_virado_intensidad=80.0,
+        herramientas=("Virado Platino", "Fade +22", "Filtro Naranja"),
+    ),
+    # 9. Thermal Predator (Paleta térmica + Bayer 4x4 + Scanlines + Aberración)
+    "cyber_thermal_hud": DefinicionPreset(
+        id="cyber_thermal_hud",
+        nombre="Thermal Predator",
+        subtitulo="Visor FLIR térmico, matriz Bayer, aberración & scanlines",
+        categoria="TÉRMICO",
+        color_acento="#ffdc00",
+        icon="09",
+        swatch_gradient="linear-gradient(135deg, #000028 0%, #78008c 38%, #e63c14 72%, #ffdc00 100%)",
+        contraste=26.0,
+        aberracion=24.0,
+        scanlines=30.0,
+        dither_algoritmo="bayer_4",
+        dither_paleta="termica",
+        dither_pixel=2,
+        dither_intensidad=92,
+        dither_umbral=-6,
+        herramientas=("Paleta Térmica", "Scanlines +30", "Bayer 4x4"),
+    ),
+    # 10. Silver Bleach (Bleach Bypass cinematográfico crudo + Halación metálica)
+    "bleach_bypass_noir": DefinicionPreset(
+        id="bleach_bypass_noir",
+        nombre="Silver Bleach",
+        subtitulo="Retención de plata cruda, desaturado acerado & viñeta densa",
+        categoria="CINE NOIR",
+        color_acento="#b9c3cc",
+        icon="10",
+        swatch_gradient="linear-gradient(135deg, #08090a 0%, #24282c 45%, #697077 78%, #d8dee4 100%)",
+        contraste=42.0,
+        saturacion=-56.0,
+        iluminaciones=-18.0,
+        sombras=-18.0,
+        negros=-10.0,
+        vineta=-52.0,
+        halacion=18.0,
+        nitidez=50.0,
+        grano=36.0,
+        herramientas=("Retención Plata", "Viñeta -52", "Nitidez +50"),
+    ),
+    # 11. Ámbar Mainframe (Terminal CRT 1982 + Floyd + Scanlines + Halación)
+    "amber_terminal_crt": DefinicionPreset(
+        id="amber_terminal_crt",
+        nombre="Ámbar Mainframe",
+        subtitulo="Monitor fósforo ámbar 1982, difusión Floyd & barrido CRT",
+        categoria="TERMINAL",
+        color_acento="#ffb900",
+        icon="11",
+        swatch_gradient="linear-gradient(135deg, #140a00 0%, #5e2c00 42%, #be6e00 76%, #ffb900 100%)",
+        contraste=28.0,
+        vineta=-48.0,
+        halacion=30.0,
+        scanlines=46.0,
+        dither_algoritmo="floyd_steinberg",
+        dither_paleta="ambar",
+        dither_pixel=2,
+        dither_intensidad=100,
+        dither_umbral=4,
+        herramientas=("Fósforo Ámbar", "CRT +46", "Viñeta -48"),
+    ),
+    # 12. Instant SX-70 Dream (Polaroid clásico + Halación solar + Fade pastel)
+    "instant_sx70_dream": DefinicionPreset(
+        id="instant_sx70_dream",
+        nombre="Instant SX-70",
+        subtitulo="Emulsión Time-Zero pastel, halación solar & marco Polaroid",
+        categoria="POLAROID",
+        color_acento="#f7f6f2",
+        icon="12",
+        swatch_gradient="linear-gradient(135deg, #1e2421 0%, #4d6b5e 40%, #cfa178 75%, #f7f6f2 100%)",
+        brillo=6.0,
+        contraste=-6.0,
+        ambiente=18.0,
+        calidez=16.0,
+        fade=32.0,
+        temperatura=6.0,
+        tinte=-6.0,
+        halacion=54.0,
+        desenfoque=4.0,
+        nitidez=18.0,
+        grano=24.0,
+        mezcla_color={
+            "verde": {"tono": 18.0, "saturacion": -12.0, "luminancia": 6.0},
+            "amarillo": {"tono": -10.0, "saturacion": 16.0, "luminancia": 8.0},
+            "azul": {"tono": -14.0, "saturacion": -10.0, "luminancia": 8.0},
+        },
         marco_estilo="polaroid",
-        herramientas=("Bloom Orton", "Marco Polaroid", "Calidez +16"),
+        herramientas=("Halación +54", "Fade +32", "Marco Polaroid"),
     ),
 }
 
-# Diccionario público con los 10 presets principales + alias de retrocompatibilidad
 PRESETS_DISPONIBLES: dict[str, DefinicionPreset] = dict(_PRESETS_BASE)
 
 # Alias de compatibilidad hacia atrás
-PRESETS_DISPONIBLES["moody_cinematic"] = _PRESETS_BASE["moody_teal_orange"]
-PRESETS_DISPONIBLES["golden_hour"] = _PRESETS_BASE["kodak_portra_35mm"]
-PRESETS_DISPONIBLES["cyber_neotokyo"] = _PRESETS_BASE["cyber_cga_80s"]
-PRESETS_DISPONIBLES["editorial_bw"] = _PRESETS_BASE["fine_art_selenio"]
-PRESETS_DISPONIBLES["y2k_flash"] = _PRESETS_BASE["y2k_digicam_flash"]
-PRESETS_DISPONIBLES["clean_muted"] = _PRESETS_BASE["moody_teal_orange"]
-PRESETS_DISPONIBLES["fallen_angels"] = _PRESETS_BASE["fallen_angels_90s"]
-PRESETS_DISPONIBLES["polaroid_600"] = _PRESETS_BASE["polaroid_vintage"]
-PRESETS_DISPONIBLES["dreamy_glow"] = _PRESETS_BASE["dreamy_orton_bloom"]
-PRESETS_DISPONIBLES["neo_noir"] = _PRESETS_BASE["fallen_angels_90s"]
+PRESETS_DISPONIBLES["gt_supercar_chrome"] = _PRESETS_BASE["midnight_touge"]
+PRESETS_DISPONIBLES["night_runner_drift"] = _PRESETS_BASE["cinestill_neon_800"]
+PRESETS_DISPONIBLES["kodak_portra_35mm"] = _PRESETS_BASE["kodachrome_archive"]
+PRESETS_DISPONIBLES["polaroid_vintage"] = _PRESETS_BASE["instant_sx70_dream"]
+PRESETS_DISPONIBLES["moody_teal_orange"] = _PRESETS_BASE["cinestill_neon_800"]
+PRESETS_DISPONIBLES["fallen_angels_90s"] = _PRESETS_BASE["midnight_touge"]
+PRESETS_DISPONIBLES["fine_art_selenio"] = _PRESETS_BASE["monochrome_platinum"]
+PRESETS_DISPONIBLES["cianotipia_1842"] = _PRESETS_BASE["riso_crimson_press"]
+PRESETS_DISPONIBLES["y2k_digicam_flash"] = _PRESETS_BASE["vhs_camcorder_94"]
+PRESETS_DISPONIBLES["dreamy_orton_bloom"] = _PRESETS_BASE["instant_sx70_dream"]
+PRESETS_DISPONIBLES["gameboy_1989"] = _PRESETS_BASE["mac_atkinson_1bit"]
+PRESETS_DISPONIBLES["cyber_cga_80s"] = _PRESETS_BASE["cyber_thermal_hud"]
 
 
 def aplicar_tonos_vectorizados(
@@ -424,8 +526,10 @@ def procesar_preset(
     modo_original = imagen.mode
     imagen_rgb = imagen if modo_original == "RGB" else imagen.convert("RGB")
 
-    # 1. Curvas tonales fotográficas vectorizadas
+    # 1. Transformación espectral Aerochrome & curvas tonales vectorizadas
     arr = np.array(imagen_rgb, dtype=np.float32) / 255.0
+    if preset.aerochrome:
+        arr = _aplicar_aerochrome_rgb(arr)
     arr_procesado = aplicar_tonos_vectorizados(
         arr,
         brillo=preset.brillo,
@@ -440,6 +544,16 @@ def procesar_preset(
     )
     res_uint8 = np.clip(arr_procesado * 255.0 + 0.5, 0, 255).astype(np.uint8)
     actual = Image.fromarray(res_uint8)
+
+    if preset.fade != 0.0 or preset.vineta != 0.0:
+        siguiente = aplicar_luz_avanzada(
+            actual,
+            fade=preset.fade,
+            vineta=preset.vineta,
+        )
+        if actual is not siguiente:
+            actual.close()
+        actual = siguiente
 
     # 2. Balance de Color & Mezcla HSL si el preset lo define
     if preset.temperatura != 0.0 or preset.tinte != 0.0 or preset.mezcla_color is not None:
@@ -488,7 +602,18 @@ def procesar_preset(
             actual.close()
         actual = siguiente
 
-    # 5. Dithering retro si el preset lo especifica
+    # 5. Laboratorio Óptico (Halación 35mm y Aberración Cromática radial)
+    if preset.halacion > 0.0 or preset.aberracion > 0.0:
+        siguiente = procesar_optica_lente(
+            actual,
+            halacion=preset.halacion,
+            aberracion=preset.aberracion,
+        )
+        if actual is not siguiente:
+            actual.close()
+        actual = siguiente
+
+    # 6. Dithering retro / duotono personalizado si el preset lo especifica
     if preset.dither_algoritmo != "ninguno":
         siguiente = aplicar_dithering(
             actual,
@@ -496,12 +621,22 @@ def procesar_preset(
             preset.dither_paleta,
             preset.dither_pixel,
             preset.dither_intensidad,
+            umbral=preset.dither_umbral,
+            duotono_oscuro=preset.dither_duotono_oscuro,
+            duotono_claro=preset.dither_duotono_claro,
         )
         if actual is not siguiente:
             actual.close()
         actual = siguiente
 
-    # 6. Mezcla de intensidad (Alpha blend con la imagen original sin preset)
+    # 7. Scanlines CRT tras dithering y óptica
+    if preset.scanlines > 0.0:
+        siguiente = aplicar_scanlines(actual, preset.scanlines)
+        if actual is not siguiente:
+            actual.close()
+        actual = siguiente
+
+    # 8. Mezcla de intensidad (Alpha blend con la imagen original sin preset)
     if alpha < 0.999:
         blended = Image.blend(imagen_rgb, actual, alpha)
         if actual is not imagen_rgb:

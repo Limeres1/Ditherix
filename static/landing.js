@@ -1,17 +1,15 @@
 /**
  * DITHERIX - Landing Page Interactive Core
- * Edoardo Smerilli style: 000% -> 100% Preloader + Buttery Smooth 60 FPS Horizontal Scroll
- * + Reticle Cursor (Opción 2)
- * + Parallax & 3D Tilt (Opción 4)
- * + Paletas Retro en tiempo real (Opción 5)
- * + Sound Design táctil procedural Web Audio (Opción 7)
+ * Fondo líquido blanco animado (WebGL Shader) + Preloader 000% -> 100% + Scroll Horizontal 60 FPS
+ * + Sound Design táctil procedural Web Audio (siempre activo)
  */
 
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
+    document.documentElement.removeAttribute("data-theme");
+    initLiquidBackground();
     initTactileAudio();
-    initThemeSelector();
     initCinemaLoader();
     initSplitComparator();
     initHorizontalScroll();
@@ -345,63 +343,12 @@ function initHorizontalScroll() {
 }
 
 /* ========================================================================= */
-/* 3. SELECTOR DE PALETA RETRO EN TIEMPO REAL (Opción 5)                    */
-/* ========================================================================= */
-function initThemeSelector() {
-    const paletteBtn = document.getElementById("hudPaletteBtn");
-    const swatchEl = document.getElementById("hudSwatch");
-    const nameEl = document.getElementById("hudPaletteName");
-    if (!paletteBtn) return;
-
-    const themes = [
-        { id: "obsidian", name: "OBSIDIAN B&N", swatch: "oklch(93% 0.005 260)" },
-        { id: "gameboy", name: "GAMEBOY 1989", swatch: "#9bbc0f" },
-        { id: "amber", name: "AMBER CRT", swatch: "#ffb000" },
-        { id: "silver", name: "PLATA 925", swatch: "#ffffff" }
-    ];
-
-    let currentIdx = 0;
-    const savedTheme = localStorage.getItem("ditherix_theme");
-    if (savedTheme === "cyanotype") {
-        localStorage.removeItem("ditherix_theme");
-    } else if (savedTheme) {
-        const found = themes.findIndex(t => t.id === savedTheme);
-        if (found !== -1) currentIdx = found;
-    }
-
-    function applyTheme(idx, playSound = false) {
-        const theme = themes[idx];
-        if (theme.id === "obsidian") {
-            document.documentElement.removeAttribute("data-theme");
-        } else {
-            document.documentElement.setAttribute("data-theme", theme.id);
-        }
-
-        if (nameEl) nameEl.textContent = theme.name;
-        if (swatchEl) swatchEl.style.backgroundColor = theme.swatch;
-        localStorage.setItem("ditherix_theme", theme.id);
-
-        if (playSound && window.DitherixAudio) {
-            window.DitherixAudio.playSwitch();
-        }
-    }
-
-    applyTheme(currentIdx, false);
-
-    paletteBtn.addEventListener("click", () => {
-        currentIdx = (currentIdx + 1) % themes.length;
-        applyTheme(currentIdx, true);
-    });
-}
-
-/* ========================================================================= */
-/* 5. SOUND DESIGN TÁCTIL PROCEDURAL WEB AUDIO (Opción 7)                    */
+/* 5. SOUND DESIGN TÁCTIL PROCEDURAL WEB AUDIO (SIEMPRE ACTIVO)              */
 /* ========================================================================= */
 function initTactileAudio() {
-    const soundBtn = document.getElementById("hudSoundBtn");
-    const soundLabel = document.getElementById("hudSoundLabel");
-    let isAudioEnabled = localStorage.getItem("ditherix_audio") === "true";
+    const isAudioEnabled = true;
     let audioCtx = null;
+    const unlockEvents = ["pointerdown", "keydown", "touchstart", "click"];
 
     function getAudioContext() {
         if (!audioCtx) {
@@ -410,17 +357,38 @@ function initTactileAudio() {
                 audioCtx = new AudioContextClass();
             }
         }
-        if (audioCtx && audioCtx.state === "suspended") {
-            audioCtx.resume();
-        }
         return audioCtx;
     }
+
+    function unlockAudio() {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        if (ctx.state === "suspended") {
+            ctx.resume().then(() => {
+                if (ctx.state === "running") {
+                    unlockEvents.forEach((evt) => {
+                        window.removeEventListener(evt, unlockAudio, { capture: true });
+                    });
+                }
+            }).catch(() => {});
+        } else if (ctx.state === "running") {
+            unlockEvents.forEach((evt) => {
+                window.removeEventListener(evt, unlockAudio, { capture: true });
+            });
+        }
+    }
+
+    // Auto-desbloquear Web Audio en el primer gesto válido del usuario
+    unlockEvents.forEach((evt) => {
+        window.addEventListener(evt, unlockAudio, { capture: true, passive: true });
+    });
 
     // Sonido seco y mecánico de obturador de cámara analógica (35mm SLR)
     function playShutter() {
         if (!isAudioEnabled) return;
         const ctx = getAudioContext();
-        if (!ctx) return;
+        if (!ctx || ctx.state !== "running") return;
 
         const now = ctx.currentTime;
 
@@ -473,7 +441,7 @@ function initTactileAudio() {
     function playTick() {
         if (!isAudioEnabled) return;
         const ctx = getAudioContext();
-        if (!ctx) return;
+        if (!ctx || ctx.state !== "running") return;
 
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
@@ -493,11 +461,11 @@ function initTactileAudio() {
         osc.stop(now + 0.015);
     }
 
-    // Tono sutil al alternar paleta o botones secundarios
+    // Tono sutil al alternar botones
     function playSwitch() {
         if (!isAudioEnabled) return;
         const ctx = getAudioContext();
-        if (!ctx) return;
+        if (!ctx || ctx.state !== "running") return;
 
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
@@ -522,29 +490,6 @@ function initTactileAudio() {
         playTick,
         playSwitch
     };
-
-    function updateAudioUI() {
-        if (soundBtn) {
-            soundBtn.setAttribute("aria-pressed", String(isAudioEnabled));
-        }
-        if (soundLabel) {
-            soundLabel.textContent = isAudioEnabled ? "AUDIO: ON" : "AUDIO: OFF";
-        }
-        localStorage.setItem("ditherix_audio", String(isAudioEnabled));
-    }
-
-    updateAudioUI();
-
-    if (soundBtn) {
-        soundBtn.addEventListener("click", () => {
-            isAudioEnabled = !isAudioEnabled;
-            getAudioContext();
-            updateAudioUI();
-            if (isAudioEnabled) {
-                playShutter();
-            }
-        });
-    }
 
     document.querySelectorAll(".btn--primary").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -660,17 +605,17 @@ function initGlitchWaveform() {
             const topY = centerY - barHeight / 2;
 
             if (i % 7 === 0) {
-                ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+                ctx.fillStyle = "rgba(0, 0, 0, 0.92)";
             } else if (amplitude > 0.6) {
-                ctx.fillStyle = "rgba(235, 235, 245, 0.85)";
+                ctx.fillStyle = "rgba(25, 25, 30, 0.72)";
             } else {
-                ctx.fillStyle = "rgba(140, 140, 155, 0.35)";
+                ctx.fillStyle = "rgba(130, 130, 145, 0.30)";
             }
 
             ctx.fillRect(x, topY, barWidth, barHeight);
 
             if (barHeight > height * 0.65) {
-                ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+                ctx.fillStyle = "rgba(0, 0, 0, 0.90)";
                 ctx.fillRect(x - 1, topY - 3, barWidth + 2, 2);
                 ctx.fillRect(x - 1, topY + barHeight + 1, barWidth + 2, 2);
             }
@@ -944,4 +889,297 @@ function initSplitComparator() {
     } else {
         beforeImg.addEventListener("load", renderDither);
     }
+}
+
+/* ========================================================================= */
+/* 9. LIQUID BACKGROUND WEBGL (ESTILO MAXIMILIAN KASPAR - WHITE SILK FLUID)  */
+/* ========================================================================= */
+function initLiquidBackground() {
+    const canvas = document.getElementById("liquidCanvas");
+    if (!canvas) return;
+
+    const gl = canvas.getContext("webgl", {
+        alpha: false,
+        depth: false,
+        stencil: false,
+        antialias: false,
+        powerPreference: "high-performance"
+    }) || canvas.getContext("experimental-webgl");
+
+    if (!gl) {
+        initCanvas2DFallback(canvas);
+        return;
+    }
+
+    const vsSource = `
+        attribute vec2 a_pos;
+        void main() {
+            gl_Position = vec4(a_pos, 0.0, 1.0);
+        }
+    `;
+
+    const fsSource = `
+        #ifdef GL_FRAGMENT_PRECISION_HIGH
+        precision highp float;
+        #else
+        precision mediump float;
+        #endif
+
+        uniform vec2 u_resolution;
+        uniform vec2 u_mouse;
+        uniform vec2 u_mouse_vel;
+        uniform float u_mouse_energy;
+        uniform float u_time;
+        uniform float u_scroll;
+
+        vec2 hash2(vec2 p) {
+            p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+            return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+        }
+
+        float gradNoise(vec2 p) {
+            vec2 i = floor(p);
+            vec2 f = fract(p);
+            vec2 u = f * f * (3.0 - 2.0 * f);
+            return mix(
+                mix(dot(hash2(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)),
+                    dot(hash2(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
+                mix(dot(hash2(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),
+                    dot(hash2(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x),
+                u.y
+            );
+        }
+
+        float fbm(vec2 p) {
+            float v = 0.0;
+            float a = 0.55;
+            mat2 rot = mat2(0.87758, 0.47942, -0.47942, 0.87758);
+            for (int i = 0; i < 3; i++) {
+                v += a * gradNoise(p);
+                p = rot * p * 1.95 + vec2(11.3, 4.7);
+                a *= 0.5;
+            }
+            return v;
+        }
+
+        float liquidHeight(vec2 p) {
+            float t = u_time * 0.24;
+            vec2 scaledP = p * 0.78;
+
+            vec2 mDiff = p - u_mouse;
+            float mDist = length(mDiff);
+            float mLens = exp(-mDist * 2.2) * 0.09;
+            float mRipple = exp(-mDist * 2.8) * sin(mDist * 14.0 - u_time * 4.5) * 0.22 * u_mouse_energy;
+            vec2 mPush = normalize(mDiff + vec2(0.0001)) * exp(-mDist * 2.4) * length(u_mouse_vel) * 0.55;
+
+            vec2 pMod = scaledP + mPush;
+
+            vec2 q = vec2(
+                fbm(pMod + vec2(t * 0.32, t * 0.20)),
+                fbm(pMod + vec2(5.2, 1.3) + vec2(-t * 0.24, t * 0.28))
+            );
+
+            vec2 r = vec2(
+                fbm(pMod + 2.4 * q + vec2(1.7, 9.2) + vec2(t * 0.14, -t * 0.16)),
+                fbm(pMod + 2.4 * q + vec2(8.3, 2.8) + vec2(-t * 0.11, t * 0.18))
+            );
+
+            float h = fbm(pMod + 2.2 * r + vec2(u_scroll * 1.6, 0.0));
+            h += mRipple - mLens;
+            return h;
+        }
+
+        void main() {
+            vec2 p = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+
+            float eps = 0.012;
+            float hCenter = liquidHeight(p);
+            float hRight  = liquidHeight(p + vec2(eps, 0.0));
+            float hUp     = liquidHeight(p + vec2(0.0, eps));
+
+            vec3 normal = normalize(vec3(-(hRight - hCenter) / eps, -(hUp - hCenter) / eps, 1.45));
+
+            vec3 lightDir = normalize(vec3(-0.42, 0.68, 0.85));
+            float diff = dot(normal, lightDir);
+
+            vec3 paperWhite = vec3(1.0, 1.0, 1.0);
+            vec3 foldShadow = vec3(0.90, 0.91, 0.94);
+            vec3 deepCrease = vec3(0.83, 0.84, 0.88);
+
+            float shadowFactor = smoothstep(-0.35, 0.78, diff);
+            vec3 surfaceCol = mix(deepCrease, paperWhite, shadowFactor);
+            surfaceCol = mix(foldShadow, surfaceCol, smoothstep(-0.15, 0.65, hCenter + 0.45));
+
+            vec3 viewDir = vec3(0.0, 0.0, 1.0);
+            vec3 halfVec = normalize(lightDir + viewDir);
+            float spec = pow(max(dot(normal, halfVec), 0.0), 22.0) * 0.12;
+            surfaceCol += vec3(spec);
+
+            float grain = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * 0.014;
+            surfaceCol += grain;
+
+            surfaceCol = clamp(surfaceCol, 0.0, 1.0);
+            gl_FragColor = vec4(surfaceCol, 1.0);
+        }
+    `;
+
+    function createShader(type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.warn("Shader error:", gl.getShaderInfoLog(shader));
+            gl.deleteShader(shader);
+            return null;
+        }
+        return shader;
+    }
+
+    const vs = createShader(gl.VERTEX_SHADER, vsSource);
+    const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+    if (!vs || !fs) {
+        initCanvas2DFallback(canvas);
+        return;
+    }
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.warn("Program link error:", gl.getProgramInfoLog(program));
+        initCanvas2DFallback(canvas);
+        return;
+    }
+
+    gl.useProgram(program);
+
+    const quadBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([
+            -1.0, -1.0,
+             1.0, -1.0,
+            -1.0,  1.0,
+            -1.0,  1.0,
+             1.0, -1.0,
+             1.0,  1.0
+        ]),
+        gl.STATIC_DRAW
+    );
+
+    const posLoc = gl.getAttribLocation(program, "a_pos");
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const uResLoc   = gl.getUniformLocation(program, "u_resolution");
+    const uMouseLoc = gl.getUniformLocation(program, "u_mouse");
+    const uMVelLoc  = gl.getUniformLocation(program, "u_mouse_vel");
+    const uMEnrLoc  = gl.getUniformLocation(program, "u_mouse_energy");
+    const uTimeLoc  = gl.getUniformLocation(program, "u_time");
+    const uScrlLoc  = gl.getUniformLocation(program, "u_scroll");
+
+    let mouseTargetX = 0;
+    let mouseTargetY = 0;
+    let mouseCurrentX = 0;
+    let mouseCurrentY = 0;
+    let mouseVelX = 0;
+    let mouseVelY = 0;
+    let mouseEnergy = 0;
+    let scrollProgress = 0;
+
+    function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        const w = Math.floor(window.innerWidth * dpr);
+        const h = Math.floor(window.innerHeight * dpr);
+        if (canvas.width !== w || canvas.height !== h) {
+            canvas.width = w;
+            canvas.height = h;
+            gl.viewport(0, 0, w, h);
+            gl.uniform2f(uResLoc, w, h);
+        }
+    }
+
+    window.addEventListener("resize", resize, { passive: true });
+    resize();
+
+    function updatePointer(clientX, clientY) {
+        const minDim = Math.min(window.innerWidth, window.innerHeight);
+        mouseTargetX = (clientX * 2.0 - window.innerWidth) / minDim;
+        mouseTargetY = -((clientY * 2.0 - window.innerHeight) / minDim);
+        mouseEnergy = Math.min(1.0, mouseEnergy + 0.35);
+    }
+
+    window.addEventListener("mousemove", (e) => {
+        updatePointer(e.clientX, e.clientY);
+    }, { passive: true });
+
+    window.addEventListener("touchmove", (e) => {
+        if (e.touches && e.touches.length > 0) {
+            updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
+
+    window.addEventListener("scroll", () => {
+        const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        scrollProgress = window.scrollY / maxScroll;
+    }, { passive: true });
+
+    const startTime = performance.now();
+    const isReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function renderFrame(elapsed) {
+        const prevX = mouseCurrentX;
+        const prevY = mouseCurrentY;
+        mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.055;
+        mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.055;
+
+        mouseVelX = mouseCurrentX - prevX;
+        mouseVelY = mouseCurrentY - prevY;
+        mouseEnergy *= 0.94;
+
+        gl.uniform1f(uTimeLoc, elapsed);
+        gl.uniform2f(uMouseLoc, mouseCurrentX, mouseCurrentY);
+        gl.uniform2f(uMVelLoc, mouseVelX * 12.0, mouseVelY * 12.0);
+        gl.uniform1f(uMEnrLoc, mouseEnergy);
+        gl.uniform1f(uScrlLoc, scrollProgress);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    if (isReducedMotion) {
+        renderFrame(1.5);
+        return;
+    }
+
+    function renderLoop(now) {
+        const elapsed = (now - startTime) * 0.001;
+        renderFrame(elapsed);
+        requestAnimationFrame(renderLoop);
+    }
+
+    requestAnimationFrame(renderLoop);
+}
+
+function initCanvas2DFallback(canvas) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    function draw() {
+        const w = canvas.width = window.innerWidth;
+        const h = canvas.height = window.innerHeight;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+
+        const grad = ctx.createRadialGradient(w * 0.5, h * 0.5, 50, w * 0.5, h * 0.5, w * 0.8);
+        grad.addColorStop(0, "rgba(255, 255, 255, 1)");
+        grad.addColorStop(1, "rgba(240, 240, 245, 0.9)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+    }
+
+    window.addEventListener("resize", draw, { passive: true });
+    draw();
 }

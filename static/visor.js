@@ -3,6 +3,10 @@
 const visor = document.getElementById("visor");
 const escenario = document.getElementById("escenario");
 const menuImagen = document.getElementById("menuImagen");
+const zoomHud = document.getElementById("zoomHud");
+const btnZoomOut = document.getElementById("btnZoomOut");
+const btnZoomReset = document.getElementById("btnZoomReset");
+const btnZoomIn = document.getElementById("btnZoomIn");
 
 const ESCALA_MIN = 0.2;
 const ESCALA_MAX = 8;
@@ -11,8 +15,15 @@ let escala = 1;
 let x = 0;
 let y = 0;
 
-function aplicar(){
+function actualizarIndicadorZoom() {
+    if (btnZoomReset) {
+        btnZoomReset.textContent = `${Math.round(escala * 100)}%`;
+    }
+}
+
+function aplicar() {
     escenario.style.transform = `translate(${x}px, ${y}px) scale(${escala})`;
+    actualizarIndicadorZoom();
 }
 
 function reiniciarVista() {
@@ -22,6 +33,46 @@ function reiniciarVista() {
     aplicar();
 }
 window.reiniciarVista = reiniciarVista;
+
+function zoomDesdeCentro(factor) {
+    if (visor.classList.contains("modo-recorte")) return;
+    const caja = visor.getBoundingClientRect();
+    const cx = caja.width / 2;
+    const cy = caja.height / 2;
+    const nueva = Math.min(ESCALA_MAX, Math.max(ESCALA_MIN, escala * factor));
+    const px = (cx - x) / escala;
+    const py = (cy - y) / escala;
+    x = cx - px * nueva;
+    y = cy - py * nueva;
+    escala = nueva;
+    aplicar();
+}
+
+window.setZoomHudVisible = (visible) => {
+    if (zoomHud) {
+        zoomHud.classList.toggle("oculto", !visible);
+    }
+    actualizarIndicadorZoom();
+};
+
+if (btnZoomIn) {
+    btnZoomIn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        zoomDesdeCentro(1.25);
+    });
+}
+if (btnZoomOut) {
+    btnZoomOut.addEventListener("click", (e) => {
+        e.stopPropagation();
+        zoomDesdeCentro(1 / 1.25);
+    });
+}
+if (btnZoomReset) {
+    btnZoomReset.addEventListener("click", (e) => {
+        e.stopPropagation();
+        reiniciarVista();
+    });
+}
 
 ["pointerdown", "wheel", "dblclick"].forEach((evento) => {
     menuImagen.addEventListener(evento, (e) => e.stopPropagation());
@@ -111,293 +162,111 @@ const btnToggleMarcos = document.getElementById("btn-toggle-marcos");
 const btnCloseMarcos = document.getElementById("btn-close-marcos");
 const marcosMenu = document.getElementById("marcos-menu");
 
-function setPresetsMenuOpen(open) {
-    if (open) {
-        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
-        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
-        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
-        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
-        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
-        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
-    }
-    if (presetsMenu && btnTogglePresets) {
-        presetsMenu.classList.toggle("hidden", !open);
-        presetsMenu.setAttribute("aria-hidden", String(!open));
-        btnTogglePresets.setAttribute("aria-expanded", String(open));
-        btnTogglePresets.classList.toggle("active", open);
+const btnToggleOptica = document.getElementById("btn-toggle-optica");
+const btnCloseOptica = document.getElementById("btn-close-optica");
+const opticaMenu = document.getElementById("optica-menu");
+
+const PANELES_MENUS = [
+    { key: "presets", menu: presetsMenu, toggle: btnTogglePresets, close: btnClosePresets },
+    { key: "edit", menu: editMenu, toggle: btnToggleEdit, close: btnCloseEdit },
+    { key: "detalle", menu: detalleMenu, toggle: btnToggleDetalle, close: btnCloseDetalle },
+    { key: "dither", menu: ditherMenu, toggle: btnToggleDither, close: btnCloseDither },
+    { key: "color", menu: colorMenu, toggle: btnToggleColor, close: btnCloseColor },
+    { key: "byn", menu: bynMenu, toggle: btnToggleByn, close: btnCloseByn },
+    { key: "marcos", menu: marcosMenu, toggle: btnToggleMarcos, close: btnCloseMarcos },
+    { key: "optica", menu: opticaMenu, toggle: btnToggleOptica, close: btnCloseOptica },
+];
+
+function alternarPanel(targetKey, open) {
+    for (const panel of PANELES_MENUS) {
+        if (!panel.menu || !panel.toggle) continue;
+        if (panel.key === targetKey) {
+            panel.menu.classList.toggle("hidden", !open);
+            panel.menu.setAttribute("aria-hidden", String(!open));
+            panel.toggle.setAttribute("aria-expanded", String(open));
+            panel.toggle.classList.toggle("active", open);
+        } else if (open) {
+            panel.menu.classList.add("hidden");
+            panel.menu.setAttribute("aria-hidden", "true");
+            panel.toggle.setAttribute("aria-expanded", "false");
+            panel.toggle.classList.remove("active");
+        }
     }
 }
+
+const setPresetsMenuOpen = (open) => alternarPanel("presets", open);
+const setEditMenuOpen = (open) => alternarPanel("edit", open);
+const setDetalleMenuOpen = (open) => alternarPanel("detalle", open);
+const setDitherMenuOpen = (open) => alternarPanel("dither", open);
+const setColorMenuOpen = (open) => alternarPanel("color", open);
+const setBynMenuOpen = (open) => alternarPanel("byn", open);
+const setMarcosMenuOpen = (open) => alternarPanel("marcos", open);
+const setOpticaMenuOpen = (open) => alternarPanel("optica", open);
+
 window.setPresetsMenuOpen = setPresetsMenuOpen;
-
-function setEditMenuOpen(open) {
-    if (open) {
-        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
-        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
-        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
-        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
-        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
-        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
-    }
-    if (editMenu && btnToggleEdit) {
-        editMenu.classList.toggle("hidden", !open);
-        editMenu.setAttribute("aria-hidden", String(!open));
-        btnToggleEdit.setAttribute("aria-expanded", String(open));
-        btnToggleEdit.classList.toggle("active", open);
-    }
-}
-
-function setDetalleMenuOpen(open) {
-    if (open) {
-        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
-        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
-        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
-        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
-        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
-        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
-    }
-    if (detalleMenu && btnToggleDetalle) {
-        detalleMenu.classList.toggle("hidden", !open);
-        detalleMenu.setAttribute("aria-hidden", String(!open));
-        btnToggleDetalle.setAttribute("aria-expanded", String(open));
-        btnToggleDetalle.classList.toggle("active", open);
-    }
-}
-
-function setDitherMenuOpen(open) {
-    if (open) {
-        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
-        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
-        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
-        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
-        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
-        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
-    }
-    if (ditherMenu && btnToggleDither) {
-        ditherMenu.classList.toggle("hidden", !open);
-        ditherMenu.setAttribute("aria-hidden", String(!open));
-        btnToggleDither.setAttribute("aria-expanded", String(open));
-        btnToggleDither.classList.toggle("active", open);
-    }
-}
-
-function setColorMenuOpen(open) {
-    if (open) {
-        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
-        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
-        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
-        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
-        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
-        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
-    }
-    if (colorMenu && btnToggleColor) {
-        colorMenu.classList.toggle("hidden", !open);
-        colorMenu.setAttribute("aria-hidden", String(!open));
-        btnToggleColor.setAttribute("aria-expanded", String(open));
-        btnToggleColor.classList.toggle("active", open);
-    }
-}
+window.setEditMenuOpen = setEditMenuOpen;
+window.setDetalleMenuOpen = setDetalleMenuOpen;
+window.setDitherMenuOpen = setDitherMenuOpen;
 window.setColorMenuOpen = setColorMenuOpen;
-
-function setBynMenuOpen(open) {
-    if (open) {
-        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
-        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
-        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
-        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
-        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
-        if (typeof setMarcosMenuOpen === "function") setMarcosMenuOpen(false);
-    }
-    if (bynMenu && btnToggleByn) {
-        bynMenu.classList.toggle("hidden", !open);
-        bynMenu.setAttribute("aria-hidden", String(!open));
-        btnToggleByn.setAttribute("aria-expanded", String(open));
-        btnToggleByn.classList.toggle("active", open);
-    }
-}
 window.setBynMenuOpen = setBynMenuOpen;
-
-function setMarcosMenuOpen(open) {
-    if (open) {
-        if (typeof setPresetsMenuOpen === "function") setPresetsMenuOpen(false);
-        if (typeof setEditMenuOpen === "function") setEditMenuOpen(false);
-        if (typeof setDetalleMenuOpen === "function") setDetalleMenuOpen(false);
-        if (typeof setDitherMenuOpen === "function") setDitherMenuOpen(false);
-        if (typeof setColorMenuOpen === "function") setColorMenuOpen(false);
-        if (typeof setBynMenuOpen === "function") setBynMenuOpen(false);
-    }
-    if (marcosMenu && btnToggleMarcos) {
-        marcosMenu.classList.toggle("hidden", !open);
-        marcosMenu.setAttribute("aria-hidden", String(!open));
-        btnToggleMarcos.setAttribute("aria-expanded", String(open));
-        btnToggleMarcos.classList.toggle("active", open);
-    }
-}
 window.setMarcosMenuOpen = setMarcosMenuOpen;
+window.setOpticaMenuOpen = setOpticaMenuOpen;
 
-if (btnTogglePresets) {
-    btnTogglePresets.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setPresetsMenuOpen(presetsMenu.classList.contains("hidden"));
-    });
-}
-
-if (btnClosePresets) {
-    btnClosePresets.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setPresetsMenuOpen(false);
-        btnTogglePresets.focus();
-    });
-}
-
-if (btnToggleEdit) {
-    btnToggleEdit.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setEditMenuOpen(editMenu.classList.contains("hidden"));
-    });
-}
-
-if (btnCloseEdit) {
-    btnCloseEdit.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setEditMenuOpen(false);
-        btnToggleEdit.focus();
-    });
-}
-
-if (btnToggleDetalle) {
-    btnToggleDetalle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setDetalleMenuOpen(detalleMenu.classList.contains("hidden"));
-    });
-}
-
-if (btnCloseDetalle) {
-    btnCloseDetalle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setDetalleMenuOpen(false);
-        btnToggleDetalle.focus();
-    });
-}
-
-if (btnToggleDither) {
-    btnToggleDither.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setDitherMenuOpen(ditherMenu.classList.contains("hidden"));
-    });
-}
-
-if (btnCloseDither) {
-    btnCloseDither.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setDitherMenuOpen(false);
-        btnToggleDither.focus();
-    });
-}
-
-if (btnToggleColor) {
-    btnToggleColor.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setColorMenuOpen(colorMenu.classList.contains("hidden"));
-    });
-}
-
-if (btnCloseColor) {
-    btnCloseColor.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setColorMenuOpen(false);
-        btnToggleColor.focus();
-    });
-}
-
-if (btnToggleByn) {
-    btnToggleByn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setBynMenuOpen(bynMenu.classList.contains("hidden"));
-    });
-}
-
-if (btnCloseByn) {
-    btnCloseByn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setBynMenuOpen(false);
-        btnToggleByn.focus();
-    });
-}
-
-if (btnToggleMarcos) {
-    btnToggleMarcos.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setMarcosMenuOpen(marcosMenu.classList.contains("hidden"));
-    });
-}
-
-if (btnCloseMarcos) {
-    btnCloseMarcos.addEventListener("click", (e) => {
-        e.stopPropagation();
-        setMarcosMenuOpen(false);
-        btnToggleMarcos.focus();
-    });
-}
-
-[presetsMenu, editMenu, detalleMenu, ditherMenu, colorMenu, bynMenu, marcosMenu].forEach((menu) => {
-    if (menu) {
-        menu.addEventListener("click", (e) => e.stopPropagation());
+for (const panel of PANELES_MENUS) {
+    if (panel.toggle && panel.menu) {
+        panel.toggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            alternarPanel(panel.key, panel.menu.classList.contains("hidden"));
+        });
     }
-});
+    if (panel.close) {
+        panel.close.addEventListener("click", (e) => {
+            e.stopPropagation();
+            alternarPanel(panel.key, false);
+            if (panel.toggle) panel.toggle.focus();
+        });
+    }
+    if (panel.menu) {
+        panel.menu.addEventListener("click", (e) => e.stopPropagation());
+    }
+}
 
 document.addEventListener("click", (event) => {
-    if (presetsMenu && !presetsMenu.classList.contains("hidden") && !presetsMenu.contains(event.target) && !btnTogglePresets.contains(event.target)) {
-        setPresetsMenuOpen(false);
-    }
-    if (editMenu && !editMenu.classList.contains("hidden") && !editMenu.contains(event.target) && !btnToggleEdit.contains(event.target)) {
-        setEditMenuOpen(false);
-    }
-    if (detalleMenu && !detalleMenu.classList.contains("hidden") && !detalleMenu.contains(event.target) && !btnToggleDetalle.contains(event.target)) {
-        setDetalleMenuOpen(false);
-    }
-    if (ditherMenu && !ditherMenu.classList.contains("hidden") && !ditherMenu.contains(event.target) && !btnToggleDither.contains(event.target)) {
-        setDitherMenuOpen(false);
-    }
-    if (colorMenu && !colorMenu.classList.contains("hidden") && !colorMenu.contains(event.target) && !btnToggleColor.contains(event.target)) {
-        setColorMenuOpen(false);
-    }
-    if (bynMenu && !bynMenu.classList.contains("hidden") && !bynMenu.contains(event.target) && !btnToggleByn.contains(event.target)) {
-        setBynMenuOpen(false);
-    }
-    if (marcosMenu && !marcosMenu.classList.contains("hidden") && !marcosMenu.contains(event.target) && !btnToggleMarcos.contains(event.target)) {
-        setMarcosMenuOpen(false);
+    for (const panel of PANELES_MENUS) {
+        if (
+            panel.menu &&
+            !panel.menu.classList.contains("hidden") &&
+            !panel.menu.contains(event.target) &&
+            (!panel.toggle || !panel.toggle.contains(event.target))
+        ) {
+            alternarPanel(panel.key, false);
+        }
     }
 });
 
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-        if (presetsMenu && !presetsMenu.classList.contains("hidden")) {
-            setPresetsMenuOpen(false);
-            btnTogglePresets.focus();
+        for (const panel of PANELES_MENUS) {
+            if (panel.menu && !panel.menu.classList.contains("hidden")) {
+                alternarPanel(panel.key, false);
+                if (panel.toggle) panel.toggle.focus();
+            }
         }
-        if (editMenu && !editMenu.classList.contains("hidden")) {
-            setEditMenuOpen(false);
-            btnToggleEdit.focus();
-        }
-        if (detalleMenu && !detalleMenu.classList.contains("hidden")) {
-            setDetalleMenuOpen(false);
-            btnToggleDetalle.focus();
-        }
-        if (ditherMenu && !ditherMenu.classList.contains("hidden")) {
-            setDitherMenuOpen(false);
-            btnToggleDither.focus();
-        }
-        if (colorMenu && !colorMenu.classList.contains("hidden")) {
-            setColorMenuOpen(false);
-            btnToggleColor.focus();
-        }
-        if (bynMenu && !bynMenu.classList.contains("hidden")) {
-            setBynMenuOpen(false);
-            btnToggleByn.focus();
-        }
-        if (marcosMenu && !marcosMenu.classList.contains("hidden")) {
-            setMarcosMenuOpen(false);
-            btnToggleMarcos.focus();
-        }
+        return;
+    }
+
+    const tag = document.activeElement?.tagName;
+    if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+    if (!zoomHud || zoomHud.classList.contains("oculto")) return;
+
+    if (event.key === "+" || event.key === "=") {
+        event.preventDefault();
+        zoomDesdeCentro(1.2);
+    } else if (event.key === "-" || event.key === "_") {
+        event.preventDefault();
+        zoomDesdeCentro(1 / 1.2);
+    } else if (event.key === "0") {
+        event.preventDefault();
+        reiniciarVista();
     }
 });

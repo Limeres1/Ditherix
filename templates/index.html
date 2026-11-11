@@ -15,13 +15,13 @@
         <div class="menu-flotante" id="menuImagen">
             <nav class="glass-bar top-bar" aria-label="Menú principal">
                 <div class="bar-items bar-items-left">
-                    <a href="/" class="glass-control" title="Volver al Portal"
-                        style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                    <a href="/" class="glass-control" title="Volver a la portada de Ditherix" aria-label="Volver a la portada">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
                             fill="#e3e3e3">
                             <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" />
                         </svg>
                     </a>
+                    <div class="bar-divider" aria-hidden="true"></div>
                     <button class="glass-control" id="botonExportar" type="button" disabled title="Exportar imagen">
                         <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"
                             fill="#e3e3e3">
@@ -37,6 +37,7 @@
                                 d="M440-200h80v-167l64 64 56-57-160-160-160 160 57 56 63-63v167ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z" />
                         </svg>
                     </button>
+                    <div class="bar-divider" aria-hidden="true"></div>
                     <button class="glass-control" id="botonComparar" type="button" disabled
                         title="Comparar Antes / Después [C]" aria-pressed="false">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
@@ -58,34 +59,64 @@
                             </svg>
                         </button>
                         <div id="crop-menu" class="crop-menu hidden" aria-label="Opciones de recorte">
-                            <button id="btn-confirmar-recorte" class="glass-control crop-action-btn" type="button"
-                                disabled title="Aplicar recorte">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
-                                    width="16px" fill="currentColor">
-                                    <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
-                                </svg>
-                                <span>Aplicar</span>
-                            </button>
-                            <button id="btn-cancelar-recorte" class="glass-control crop-action-btn" type="button"
-                                disabled title="Cancelar recorte">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
-                                    width="16px" fill="currentColor">
-                                    <path
-                                        d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
-                                </svg>
-                                <span>Cancelar</span>
-                            </button>
-                            <button id="btn-restablecer-recorte" class="glass-control crop-action-btn" type="button"
-                                disabled title="Restablecer tamaño original">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
-                                    width="16px" fill="currentColor">
-                                    <path
-                                        d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
-                                </svg>
-                                <span>Restablecer</span>
-                            </button>
+                            <div class="crop-actions-row">
+                                <button id="btn-confirmar-recorte" class="glass-control crop-action-btn" type="button"
+                                    disabled title="Aplicar recorte">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
+                                        width="16px" fill="currentColor">
+                                        <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                                    </svg>
+                                    <span>Aplicar</span>
+                                </button>
+                                <button id="btn-cancelar-recorte" class="glass-control crop-action-btn" type="button"
+                                    disabled title="Cancelar recorte">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
+                                        width="16px" fill="currentColor">
+                                        <path
+                                            d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                                    </svg>
+                                    <span>Cancelar</span>
+                                </button>
+                                <button id="btn-restablecer-recorte" class="glass-control crop-action-btn" type="button"
+                                    disabled title="Restablecer tamaño original">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960"
+                                        width="16px" fill="currentColor">
+                                        <path
+                                            d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z" />
+                                    </svg>
+                                    <span>Restablecer</span>
+                                </button>
+                            </div>
+                            <div class="crop-ratios-row" role="group" aria-label="Proporción de recorte">
+                                <button type="button" class="crop-ratio-btn active" data-ratio="free">Libre</button>
+                                <button type="button" class="crop-ratio-btn" data-ratio="1:1">1:1</button>
+                                <button type="button" class="crop-ratio-btn" data-ratio="4:5">4:5</button>
+                                <button type="button" class="crop-ratio-btn" data-ratio="16:9">16:9</button>
+                                <button type="button" class="crop-ratio-btn" data-ratio="3:2">3:2</button>
+                            </div>
+                            <div class="crop-straighten-row">
+                                <div class="crop-straighten-head">
+                                    <label for="anguloEnderezarInput">Enderezar</label>
+                                    <div class="crop-straighten-meta">
+                                        <output id="anguloEnderezarValor" for="anguloEnderezarInput">0.0°</output>
+                                        <button type="button" id="btn-reset-angulo" class="crop-angle-reset" disabled
+                                            title="Enderezar a 0°">0°</button>
+                                    </div>
+                                </div>
+                                <input id="anguloEnderezarInput" type="range" min="-45" max="45" step="0.5" value="0"
+                                    aria-label="Enderezar horizonte" disabled>
+                            </div>
                         </div>
                     </div>
+                    <div class="bar-divider" aria-hidden="true"></div>
+                    <button class="glass-control" id="botonRotar90" type="button" disabled
+                        title="Rotar 90° a la derecha">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                            fill="#e3e3e3">
+                            <path
+                                d="M440-120v-80h240v-240h80v320H440Zm120-200H160v-440h400v440Zm-80-80v-280H240v280h240ZM698-622q-45-45-106.5-69T460-715v-80q77 0 147.5 28T734-688l66-66v234H566l132-102Z" />
+                        </svg>
+                    </button>
                     <button class="glass-control" id="botonVoltearHorizontal" type="button" disabled
                         title="Voltear horizontal">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
@@ -164,6 +195,14 @@
                                 d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm80-80h400v-400H280v400Zm-80 80v-560 560Z" />
                         </svg>
                     </button>
+                    <button class="glass-control" id="btn-toggle-optica" type="button" aria-controls="optica-menu"
+                        aria-expanded="false" title="Laboratorio Óptico / CRT">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                            fill="currentColor">
+                            <path
+                                d="M480-320q66 0 113-47t47-113q0-66-47-113t-113-47q-66 0-113 47t-47 113q0 66 47 113t113 47Zm0-80q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0 320q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Z" />
+                        </svg>
+                    </button>
                 </div>
             </nav>
 
@@ -185,7 +224,7 @@
                 <div class="edit-header">
                     <div>
                         <h2>Presets de Autor</h2>
-                        <span class="panel-subtitle">Estilos calibrados con marcos, dither, química y color</span>
+                        <span class="panel-subtitle">Óptica 35mm, CRT, duotono 1-bit, falso IR & marcos</span>
                     </div>
                     <button class="close-btn" id="btn-close-presets" type="button" aria-label="Cerrar presets">
                         &times;
@@ -209,201 +248,241 @@
 
                 <div class="presets-cards-container" id="presetsCardsContainer" role="radiogroup"
                     aria-label="Seleccionar estilo preestablecido">
-                    <button type="button" class="preset-card" data-preset="polaroid_vintage" role="radio"
+                    <button type="button" class="preset-card" data-preset="cinestill_neon_800" role="radio"
                         aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #fce4b8, #e07a42, #422013);">
-                            <span class="swatch-cat">INSTANT</span>
+                            style="background: linear-gradient(135deg, #07131c 0%, #103247 40%, #d9381e 78%, #ffb478 100%);">
+                            <span class="swatch-cat">CINE 35MM</span>
                             <span class="swatch-num">01</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">Polaroid 600</span>
+                                <span class="preset-name">Cinestill 800T</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">Marco gastado & film ámbar</span>
+                            <span class="preset-sub">Tungsteno nocturno, halación 35mm & tira negativa</span>
                             <div class="preset-tools">
-                                <span class="ptool">Polaroid</span>
-                                <span class="ptool">Grano 35</span>
+                                <span class="ptool">Halación +78</span>
+                                <span class="ptool">Tira 35mm</span>
                             </div>
                         </div>
                     </button>
 
-                    <button type="button" class="preset-card" data-preset="kodak_portra_35mm" role="radio"
+                    <button type="button" class="preset-card" data-preset="midnight_touge" role="radio"
                         aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #111111, #3a200a, #d48228, #f5d061);">
-                            <span class="swatch-cat">35MM</span>
+                            style="background: linear-gradient(135deg, #05050a 0%, #170e2e 38%, #6d1d5a 72%, #00d9ff 100%);">
+                            <span class="swatch-cat">MOTOR CRT</span>
                             <span class="swatch-num">02</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">Portra 35mm</span>
+                                <span class="preset-name">Midnight Touge</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">Celuloide & color cálido</span>
+                            <span class="preset-sub">Asfalto nocturno, aberración RGB & transmisión CRT</span>
                             <div class="preset-tools">
-                                <span class="ptool">Película</span>
-                                <span class="ptool">Grano 45</span>
+                                <span class="ptool">Aberración RGB</span>
+                                <span class="ptool">Scanlines CRT</span>
                             </div>
                         </div>
                     </button>
 
-                    <button type="button" class="preset-card" data-preset="cianotipia_1842" role="radio"
-                        aria-checked="false" disabled>
+                    <button type="button" class="preset-card" data-preset="riso_crimson_press" data-dither="true"
+                        role="radio" aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #041021, #0a2f54, #1b6ca8, #72efdd);">
-                            <span class="swatch-cat">QUÍMICA</span>
+                            style="background: linear-gradient(135deg, #141c52 0%, #24338f 42%, #ff6352 78%, #ffe7d6 100%);">
+                            <span class="swatch-cat">DUOTONO</span>
                             <span class="swatch-num">03</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">Cianotipia 1842</span>
+                                <span class="preset-name">Risograph Press</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">Azul de Prusia & sales férricas</span>
+                            <span class="preset-sub">Serigrafía duotono índigo/coral & trama fina</span>
                             <div class="preset-tools">
-                                <span class="ptool">Cianotipia</span>
-                                <span class="ptool">Marco Azul</span>
+                                <span class="ptool">Duotono Ink</span>
+                                <span class="ptool">Bayer 8x8</span>
                             </div>
                         </div>
                     </button>
 
-                    <button type="button" class="preset-card" data-preset="fine_art_selenio" role="radio"
-                        aria-checked="false" disabled>
+                    <button type="button" class="preset-card" data-preset="mac_atkinson_1bit" data-dither="true"
+                        role="radio" aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #100f14, #272130, #736980, #f2f0f7);">
-                            <span class="swatch-cat">FINE ART</span>
+                            style="background: linear-gradient(135deg, #0b0c10 0%, #262930 45%, #a8a69d 80%, #eceae1 100%);">
+                            <span class="swatch-cat">1-BIT</span>
                             <span class="swatch-num">04</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">Plata & Selenio</span>
+                                <span class="preset-name">Macintosh 1984</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">B&N de galería en baritado</span>
+                            <span class="preset-sub">Difusión Atkinson 1-bit, carbón & papel fósforo</span>
                             <div class="preset-tools">
-                                <span class="ptool">Selenio</span>
-                                <span class="ptool">Marco Blanco</span>
+                                <span class="ptool">Atkinson 1-Bit</span>
+                                <span class="ptool">Pixel-Perfect</span>
                             </div>
                         </div>
                     </button>
 
-                    <button type="button" class="preset-card" data-preset="gameboy_1989" role="radio"
+                    <button type="button" class="preset-card" data-preset="infrared_aerochrome" role="radio"
                         aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #0f380f, #306230, #8bac0f, #9bbc0f);">
-                            <span class="swatch-cat">8-BIT</span>
+                            style="background: linear-gradient(135deg, #07142b 0%, #163a70 38%, #c9184a 75%, #ff758f 100%);">
+                            <span class="swatch-cat">INFRARROJO</span>
                             <span class="swatch-num">05</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">Game Boy 1989</span>
+                                <span class="preset-name">Kodak Aerochrome</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">LCD 4 tonos & matriz Bayer</span>
+                            <span class="preset-sub">Falso color IR, follaje carmesí & cielo cobalto</span>
                             <div class="preset-tools">
-                                <span class="ptool">Bayer 4x4</span>
-                                <span class="ptool">Marco LCD</span>
+                                <span class="ptool">Falso IR</span>
+                                <span class="ptool">Halación +34</span>
                             </div>
                         </div>
                     </button>
 
-                    <button type="button" class="preset-card" data-preset="cyber_cga_80s" role="radio"
+                    <button type="button" class="preset-card" data-preset="vhs_camcorder_94" role="radio"
                         aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #000000 20%, #00ffff 50%, #ff55ff 80%, #ffffff 100%);">
-                            <span class="swatch-cat">CYBER</span>
+                            style="background: linear-gradient(135deg, #12101a 0%, #3d2240 40%, #b56b45 75%, #e8d29c 100%);">
+                            <span class="swatch-cat">ANALOG CRT</span>
                             <span class="swatch-num">06</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">CGA Cyberpunk</span>
+                                <span class="preset-name">VHS Camcorder 94</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">Difusión Floyd & neón 1981</span>
+                            <span class="preset-sub">Cinta magnética, líneas de rastreo & desfasaje RGB</span>
                             <div class="preset-tools">
-                                <span class="ptool">Floyd Dither</span>
-                                <span class="ptool">Borde Cyber</span>
+                                <span class="ptool">Scanlines +52</span>
+                                <span class="ptool">Aberración +58</span>
                             </div>
                         </div>
                     </button>
 
-                    <button type="button" class="preset-card" data-preset="moody_teal_orange" role="radio"
+                    <button type="button" class="preset-card" data-preset="kodachrome_archive" role="radio"
                         aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #04181f, #093b45, #cf6d17, #ffa938);">
-                            <span class="swatch-cat">CINE</span>
+                            style="background: linear-gradient(135deg, #1c100b 0%, #5c2018 40%, #c96a2b 75%, #f5f3ec 100%);">
+                            <span class="swatch-cat">ARCHIVO</span>
                             <span class="swatch-num">07</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">Teal & Orange</span>
+                                <span class="preset-name">Kodachrome 64</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">Color grading blockbuster</span>
+                            <span class="preset-sub">Diapositiva de archivo, rojos ricos & montura</span>
                             <div class="preset-tools">
-                                <span class="ptool">HSL Cine</span>
-                                <span class="ptool">Fade Negros</span>
+                                <span class="ptool">Montura Slide</span>
+                                <span class="ptool">Viñeta -22</span>
                             </div>
                         </div>
                     </button>
 
-                    <button type="button" class="preset-card" data-preset="fallen_angels_90s" role="radio"
+                    <button type="button" class="preset-card" data-preset="monochrome_platinum" role="radio"
                         aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #01140e, #053322, #00d280, #e6c800);">
-                            <span class="swatch-cat">NOIR 90S</span>
+                            style="background: linear-gradient(135deg, #0c0e10 0%, #2a2f36 42%, #7d858e 78%, #f2f4f7 100%);">
+                            <span class="swatch-cat">GALERÍA B&N</span>
                             <span class="swatch-num">08</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">Fallen Angels</span>
+                                <span class="preset-name">Platino Paladio</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">Verde neón & celuloide forzado</span>
+                            <span class="preset-sub">Negros aterciopelados, filtro naranja & platino</span>
                             <div class="preset-tools">
-                                <span class="ptool">Tinte Neón</span>
-                                <span class="ptool">Marco Película</span>
+                                <span class="ptool">Virado Platino</span>
+                                <span class="ptool">Fade +22</span>
                             </div>
                         </div>
                     </button>
 
-                    <button type="button" class="preset-card" data-preset="y2k_digicam_flash" role="radio"
-                        aria-checked="false" disabled>
+                    <button type="button" class="preset-card" data-preset="cyber_thermal_hud" data-dither="true"
+                        role="radio" aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #181818, #555555, #f5f5f5, #99aaff);">
-                            <span class="swatch-cat">Y2K</span>
+                            style="background: linear-gradient(135deg, #000028 0%, #78008c 38%, #e63c14 72%, #ffdc00 100%);">
+                            <span class="swatch-cat">TÉRMICO</span>
                             <span class="swatch-num">09</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">Y2K Flash</span>
+                                <span class="preset-name">Thermal Predator</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">Luz frontal & nitidez 2000s</span>
+                            <span class="preset-sub">Visor FLIR térmico, trama Bayer & barrido CRT</span>
                             <div class="preset-tools">
-                                <span class="ptool">Flash Directo</span>
-                                <span class="ptool">Nitidez +45</span>
+                                <span class="ptool">Paleta Térmica</span>
+                                <span class="ptool">Scanlines +30</span>
                             </div>
                         </div>
                     </button>
 
-                    <button type="button" class="preset-card" data-preset="dreamy_orton_bloom" role="radio"
+                    <button type="button" class="preset-card" data-preset="bleach_bypass_noir" role="radio"
                         aria-checked="false" disabled>
                         <div class="preset-swatch"
-                            style="background: linear-gradient(135deg, #241129, #59254f, #be73a6, #fff0fa);">
-                            <span class="swatch-cat">FANTASÍA</span>
+                            style="background: linear-gradient(135deg, #08090a 0%, #24282c 45%, #697077 78%, #d8dee4 100%);">
+                            <span class="swatch-cat">CINE NOIR</span>
                             <span class="swatch-num">10</span>
                         </div>
                         <div class="preset-info">
                             <div class="preset-title-row">
-                                <span class="preset-name">Orton Bloom</span>
+                                <span class="preset-name">Silver Bleach</span>
                                 <span class="preset-active-dot" aria-hidden="true">●</span>
                             </div>
-                            <span class="preset-sub">Resplandor etéreo & instantáneo</span>
+                            <span class="preset-sub">Retención de plata cruda & viñeta cinematográfica</span>
                             <div class="preset-tools">
-                                <span class="ptool">Bloom Orton</span>
+                                <span class="ptool">Retención Plata</span>
+                                <span class="ptool">Viñeta -52</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="preset-card" data-preset="amber_terminal_crt" data-dither="true"
+                        role="radio" aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #140a00 0%, #5e2c00 42%, #be6e00 76%, #ffb900 100%);">
+                            <span class="swatch-cat">TERMINAL</span>
+                            <span class="swatch-num">11</span>
+                        </div>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Ámbar Mainframe</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Monitor fósforo ámbar 1982, Floyd & halación CRT</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Fósforo Ámbar</span>
+                                <span class="ptool">CRT +46</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="preset-card" data-preset="instant_sx70_dream" role="radio"
+                        aria-checked="false" disabled>
+                        <div class="preset-swatch"
+                            style="background: linear-gradient(135deg, #1e2421 0%, #4d6b5e 40%, #cfa178 75%, #f7f6f2 100%);">
+                            <span class="swatch-cat">POLAROID</span>
+                            <span class="swatch-num">12</span>
+                        </div>
+                        <div class="preset-info">
+                            <div class="preset-title-row">
+                                <span class="preset-name">Instant SX-70</span>
+                                <span class="preset-active-dot" aria-hidden="true">●</span>
+                            </div>
+                            <span class="preset-sub">Emulsión pastel, halación solar & marco Polaroid</span>
+                            <div class="preset-tools">
+                                <span class="ptool">Halación +54</span>
                                 <span class="ptool">Marco Polaroid</span>
                             </div>
                         </div>
@@ -417,6 +496,15 @@
                     <button class="close-btn" id="btn-close-edit" type="button" aria-label="Cerrar ajustes">
                         &times;
                     </button>
+                </div>
+
+                <div class="histogram-wrap" id="histogramWrap" role="button" tabindex="0"
+                    title="Clic para alternar Luma monocroma / Canales RGB">
+                    <div class="histogram-header">
+                        <span>Histograma</span>
+                        <span class="histogram-mode" id="histogramModeBadge">LUMA</span>
+                    </div>
+                    <canvas id="histogramCanvas" width="248" height="64"></canvas>
                 </div>
 
                 <div class="slider-group">
@@ -438,9 +526,39 @@
                     <input id="saturacionInput" type="range" min="-100" max="100" step="1" value="0"
                         aria-label="Nivel de saturación" disabled>
                 </div>
+
+                <div class="edit-section-divider">Luz y Tono Avanzado</div>
+
+                <div class="slider-group">
+                    <label for="altasLucesInput">Altas Luces <output id="altasLucesValor"
+                            for="altasLucesInput">0%</output></label>
+                    <input id="altasLucesInput" type="range" min="-100" max="100" step="1" value="0"
+                        aria-label="Recuperar altas luces" disabled>
+                </div>
+
+                <div class="slider-group">
+                    <label for="sombrasInput">Sombras <output id="sombrasValor"
+                            for="sombrasInput">0%</output></label>
+                    <input id="sombrasInput" type="range" min="-100" max="100" step="1" value="0"
+                        aria-label="Levantar o profundizar sombras" disabled>
+                </div>
+
+                <div class="slider-group">
+                    <label for="fadeInput">Fade Mate <output id="fadeValor"
+                            for="fadeInput">0%</output></label>
+                    <input id="fadeInput" type="range" min="0" max="100" step="1" value="0"
+                        aria-label="Lavado mate de negros" disabled>
+                </div>
+
+                <div class="slider-group">
+                    <label for="vinetaInput">Viñeta <output id="vinetaValor"
+                            for="vinetaInput">0%</output></label>
+                    <input id="vinetaInput" type="range" min="-100" max="100" step="1" value="0"
+                        aria-label="Viñeta en esquinas" disabled>
+                </div>
+
                 <div class="edit-actions">
                     <button class="glass-control" id="botonResetAjustes" type="button" disabled>Restablecer</button>
-                    <button class="glass-control" id="botonAplicarAjustes" type="button" disabled>Aplicar</button>
                 </div>
             </section>
             <section id="detalle-menu" class="edit-panel hidden" aria-label="Ajustes de detalle" aria-hidden="true">
@@ -471,7 +589,6 @@
                 </div>
                 <div class="edit-actions">
                     <button class="glass-control" id="botonResetDetalle" type="button" disabled>Restablecer</button>
-                    <button class="glass-control" id="botonAplicarDetalle" type="button" disabled>Aplicar</button>
                 </div>
             </section>
             <section id="dither-menu" class="edit-panel hidden" aria-label="Efecto Dithering" aria-hidden="true">
@@ -498,6 +615,7 @@
                     <label for="ditherPaleta">Paleta de color</label>
                     <select id="ditherPaleta" class="glass-select" disabled>
                         <option value="bn">Monocromo B&N</option>
+                        <option value="duotono">Duotono Personalizado</option>
                         <option value="gameboy">Game Boy</option>
                         <option value="cga">CGA Retro</option>
                         <option value="ambar">Ámbar CRT</option>
@@ -506,6 +624,44 @@
                         <option value="vaporwave">Vaporwave</option>
                         <option value="termica">Visión Térmica</option>
                     </select>
+                </div>
+
+                <div id="opcionesDuotono" class="duotono-picker-group oculto">
+                    <div class="duotono-colors-row">
+                        <label class="duotono-color-field" for="duotonoOscuroInput">
+                            <span>Oscuro</span>
+                            <input type="color" id="duotonoOscuroInput" value="#0a0a10" disabled>
+                        </label>
+                        <label class="duotono-color-field" for="duotonoClaroInput">
+                            <span>Claro</span>
+                            <input type="color" id="duotonoClaroInput" value="#f2f2ea" disabled>
+                        </label>
+                    </div>
+                    <div class="duotono-presets-row" aria-label="Combinaciones duotono rápidas">
+                        <button type="button" class="duotono-swatch-btn" data-oscuro="#0a0a10" data-claro="#f2f2ea"
+                            title="Tinta y Papel">
+                            <span style="background:#0a0a10"></span><span style="background:#f2f2ea"></span>
+                        </button>
+                        <button type="button" class="duotono-swatch-btn" data-oscuro="#120905" data-claro="#ff9f1c"
+                            title="Ámbar Noir">
+                            <span style="background:#120905"></span><span style="background:#ff9f1c"></span>
+                        </button>
+                        <button type="button" class="duotono-swatch-btn" data-oscuro="#071330" data-claro="#8ef9f3"
+                            title="Blueprint Cian">
+                            <span style="background:#071330"></span><span style="background:#8ef9f3"></span>
+                        </button>
+                        <button type="button" class="duotono-swatch-btn" data-oscuro="#1a061b" data-claro="#ff2e7e"
+                            title="Neón Magenta">
+                            <span style="background:#1a061b"></span><span style="background:#ff2e7e"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="slider-group">
+                    <label for="ditherUmbralInput">Umbral tonal <output id="ditherUmbralValor"
+                            for="ditherUmbralInput">0</output></label>
+                    <input id="ditherUmbralInput" type="range" min="-100" max="100" step="1" value="0"
+                        aria-label="Pre-umbral tonal" disabled>
                 </div>
 
                 <div class="slider-group">
@@ -522,9 +678,14 @@
                         aria-label="Tamaño de píxel retro" disabled>
                 </div>
 
+                <label class="toggle-check-row" for="ditherPixelPerfectInput"
+                    title="Desactiva el suavizado al hacer zoom para ver píxeles nítidos">
+                    <span>Render Pixel-Perfect</span>
+                    <input id="ditherPixelPerfectInput" type="checkbox" disabled>
+                </label>
+
                 <div class="edit-actions">
                     <button class="glass-control" id="botonResetDither" type="button" disabled>Restablecer</button>
-                    <button class="glass-control" id="botonAplicarDither" type="button" disabled>Aplicar</button>
                 </div>
             </section>
             <section id="color-menu" class="edit-panel hidden" aria-label="Ajustes de color y Mezcla HSL"
@@ -616,7 +777,6 @@
 
                 <div class="edit-actions">
                     <button class="glass-control" id="botonResetColor" type="button" disabled>Restablecer</button>
-                    <button class="glass-control" id="botonAplicarColor" type="button" disabled>Aplicar</button>
                 </div>
             </section>
             <section id="byn-menu" class="edit-panel hidden" aria-label="Ajustes de Blanco y Negro" aria-hidden="true">
@@ -738,7 +898,6 @@
 
                 <div class="edit-actions">
                     <button class="glass-control" id="botonResetByn" type="button" disabled>Restablecer</button>
-                    <button class="glass-control" id="botonAplicarByn" type="button" disabled>Aplicar</button>
                 </div>
             </section>
             <section id="marcos-menu" class="edit-panel hidden" aria-label="Marcos decorativos" aria-hidden="true">
@@ -790,9 +949,47 @@
 
                 <div class="edit-actions">
                     <button class="glass-control" id="botonResetMarco" type="button" disabled>Quitar marco</button>
-                    <button class="glass-control" id="botonAplicarMarco" type="button" disabled>Aplicar</button>
                 </div>
             </section>
+            <section id="optica-menu" class="edit-panel hidden" aria-label="Laboratorio Óptico y CRT"
+                aria-hidden="true">
+                <div class="edit-header">
+                    <h2>Óptica / CRT</h2>
+                    <button class="close-btn" id="btn-close-optica" type="button" aria-label="Cerrar óptica">
+                        &times;
+                    </button>
+                </div>
+
+                <div class="slider-group">
+                    <label for="halacionInput">Halación 35mm <output id="halacionValor"
+                            for="halacionInput">0%</output></label>
+                    <input id="halacionInput" type="range" min="0" max="100" step="1" value="0"
+                        aria-label="Halación de película" disabled>
+                </div>
+
+                <div class="slider-group">
+                    <label for="aberracionInput">Aberración RGB <output id="aberracionValor"
+                            for="aberracionInput">0%</output></label>
+                    <input id="aberracionInput" type="range" min="0" max="100" step="1" value="0"
+                        aria-label="Aberración cromática" disabled>
+                </div>
+
+                <div class="slider-group">
+                    <label for="scanlinesInput">Scanlines CRT <output id="scanlinesValor"
+                            for="scanlinesInput">0%</output></label>
+                    <input id="scanlinesInput" type="range" min="0" max="100" step="1" value="0"
+                        aria-label="Líneas CRT" disabled>
+                </div>
+
+                <div class="edit-actions">
+                    <button class="glass-control" id="botonResetOptica" type="button" disabled>Restablecer</button>
+                </div>
+            </section>
+            <div id="zoomHud" class="zoom-hud oculto" aria-label="Indicador y control de zoom">
+                <button type="button" id="btnZoomOut" class="zoom-hud-btn" title="Alejar (-)">−</button>
+                <button type="button" id="btnZoomReset" class="zoom-hud-val" title="Restablecer zoom a 100% (0)">100%</button>
+                <button type="button" id="btnZoomIn" class="zoom-hud-btn" title="Acercar (+)">+</button>
+            </div>
         </div>
         <p id="mensaje" class="oculto" role="alert" aria-live="assertive"></p>
         <p id="cargando" class="oculto" role="status" aria-live="polite">
@@ -800,28 +997,17 @@
         </p>
         <div class="drop-zone" id="dropZone" role="button" tabindex="0"
             aria-label="Cargar imagen mediante arrastrar y soltar o clic">
-            <span class="drop-zone-bracket dz-tl" aria-hidden="true">┌</span>
-            <span class="drop-zone-bracket dz-tr" aria-hidden="true">┐</span>
-            <span class="drop-zone-bracket dz-bl" aria-hidden="true">└</span>
-            <span class="drop-zone-bracket dz-br" aria-hidden="true">┘</span>
-
             <div class="drop-zone-icon" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" height="42px" viewBox="0 -960 960 960" width="42px"
-                    fill="currentColor">
-                    <path
-                        d="M480-260 280-460l56-56 104 104v-308h80v308l104-104 56 56-200 200ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Z" />
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="4" />
+                    <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none" />
+                    <path d="M21 15l-5-5L5 21" />
                 </svg>
             </div>
-
             <div class="drop-zone-text">
-                <p class="drop-zone-title">Arrastra y suelta tu imagen aquí</p>
-                <p class="drop-zone-sub">o haz clic para explorar archivos</p>
-            </div>
-
-            <div class="drop-zone-meta">
-                <span class="meta-bracket">[</span>
-                <span class="meta-info">JPG • PNG • WEBP</span>
-                <span class="meta-bracket">]</span>
+                <p class="drop-zone-title">Arrastra tu fotografía aquí</p>
+                <p class="drop-zone-sub">o haz clic para abrir</p>
             </div>
         </div>
         <div class="escenario" id="escenario">
@@ -842,7 +1028,12 @@
             </div>
 
             <div id="cropOverlay" class="crop-overlay oculto" aria-label="Área de selección del recorte">
-                <div id="cropSelection" class="crop-selection oculto"></div>
+                <div id="cropSelection" class="crop-selection oculto">
+                    <span class="crop-grid-line crop-grid-v1" aria-hidden="true"></span>
+                    <span class="crop-grid-line crop-grid-v2" aria-hidden="true"></span>
+                    <span class="crop-grid-line crop-grid-h1" aria-hidden="true"></span>
+                    <span class="crop-grid-line crop-grid-h2" aria-hidden="true"></span>
+                </div>
             </div>
         </div>
     </main>

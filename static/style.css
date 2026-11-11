@@ -1,16 +1,16 @@
 :root {
-    --bg-ground: rgba(6, 6, 8, 0.76);
-    --bg-panel: rgba(7, 7, 9, 0.78);
-    --bg-panel-solid: #070709;
-    --bg-surface: rgba(0, 0, 0, 0.52);
-    --bg-surface-hover: rgba(255, 255, 255, 0.08);
-    --bg-surface-active: rgba(255, 255, 255, 0.14);
+    --bg-ground: rgba(16, 16, 22, 0.52);
+    --bg-panel: rgba(16, 16, 22, 0.58);
+    --bg-panel-solid: #0d0d12;
+    --bg-surface: rgba(255, 255, 255, 0.05);
+    --bg-surface-hover: rgba(255, 255, 255, 0.10);
+    --bg-surface-active: rgba(255, 255, 255, 0.16);
     --color-ink: rgba(255, 255, 255, 0.95);
     --color-ink-muted: rgba(255, 255, 255, 0.55);
     --color-ink-dim: rgba(255, 255, 255, 0.35);
-    --border-hairline: 1px solid rgba(255, 255, 255, 0.10);
-    --border-subtle: 1px solid rgba(255, 255, 255, 0.06);
-    --border-strong: 1px solid rgba(255, 255, 255, 0.22);
+    --border-hairline: 1px solid rgba(255, 255, 255, 0.12);
+    --border-subtle: 1px solid rgba(255, 255, 255, 0.08);
+    --border-strong: 1px solid rgba(255, 255, 255, 0.24);
     --accent-cyan: #ffffff;
     --accent-focus: #ffffff;
     --font-mono: "SF Mono", Consolas, Menlo, Monaco, "Courier New", monospace;
@@ -51,6 +51,11 @@ main {
     pointer-events: none;
 }
 
+.preview.pixelated {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
 .crop-overlay {
     position: absolute;
     inset: 0;
@@ -66,10 +71,45 @@ main {
 .crop-selection {
     position: absolute;
     box-sizing: border-box;
-    border: 2px solid #fff;
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+    border: 1.5px solid #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.58);
     pointer-events: none;
+    overflow: hidden;
+}
+
+.crop-grid-line {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.28);
+    pointer-events: none;
+}
+
+.crop-grid-v1 {
+    top: 0;
+    bottom: 0;
+    left: 33.3333%;
+    width: 1px;
+}
+
+.crop-grid-v2 {
+    top: 0;
+    bottom: 0;
+    left: 66.6666%;
+    width: 1px;
+}
+
+.crop-grid-h1 {
+    left: 0;
+    right: 0;
+    top: 33.3333%;
+    height: 1px;
+}
+
+.crop-grid-h2 {
+    left: 0;
+    right: 0;
+    top: 66.6666%;
+    height: 1px;
 }
 
 .visor {
@@ -93,21 +133,19 @@ main {
 
 .glass-bar {
     position: fixed;
-    right: 0;
-    left: 0;
     box-sizing: border-box;
     display: flex;
-    height: 72px;
-    min-height: 72px;
+    height: 52px;
+    min-height: 52px;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 8px clamp(12px, 3vw, 38px);
-    background: var(--bg-ground);
-    -webkit-backdrop-filter: blur(16px) saturate(130%);
-    backdrop-filter: blur(16px) saturate(130%);
+    background: rgba(16, 16, 22, 0.52);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16);
     pointer-events: auto;
-    border-radius: 0;
+    z-index: 10;
 }
 
 .glass-bar>* {
@@ -115,35 +153,54 @@ main {
     z-index: 1;
 }
 
+/* Barra superior: cápsula flotante despegada de los bordes (estilo Pixea) */
 .top-bar {
-    top: 0;
+    top: 18px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(980px, calc(100vw - 36px));
     border-radius: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    padding: 0 clamp(14px, 2.5vw, 28px);
 }
 
+/* Barra inferior: cápsula flotante centrada tipo dock macOS (Pixea) */
 .bottom-bar {
-    bottom: 0;
+    bottom: 22px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: fit-content;
+    max-width: calc(100vw - 36px);
     border-radius: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+    padding: 0 18px;
 }
 
 .bottom-bar .bar-items {
     width: 100%;
     justify-content: center;
+    gap: clamp(16px, 2.8vw, 36px);
 }
 
 .bottom-bar .glass-control {
-    min-width: 108px;
+    min-width: 42px;
+    height: 42px;
+    padding: 0 10px;
 }
 
 .bar-items {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(4px, 0.9vw, 12px);
+    gap: clamp(12px, 1.8vw, 24px);
     pointer-events: auto;
+}
+
+.bar-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.14);
+    margin: 0 4px;
 }
 
 .bar-spacer {
@@ -151,53 +208,95 @@ main {
 }
 
 .glass-control {
+    position: relative;
     display: inline-flex;
-    height: 38px;
+    height: 40px;
+    min-width: 40px;
     align-items: center;
     justify-content: center;
-    padding: 0 clamp(10px, 1.4vw, 18px);
-    border: 1px solid transparent;
+    padding: 0 clamp(8px, 1.2vw, 14px);
+    border: none;
     border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    color: rgba(255, 255, 255, 0.88);
+    background: transparent !important;
+    box-shadow: none !important;
+    color: rgba(255, 255, 255, 0.72);
     font: inherit;
     font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
     white-space: nowrap;
     cursor: pointer;
-    transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    transition: color 180ms ease, opacity 180ms ease;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
+.glass-control svg {
+    display: block;
+    fill: currentColor !important;
+    color: inherit;
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms ease, filter 180ms ease;
+    transform-origin: center center;
+}
+
+/* Hover: sin recuadro ni fondo cuadrado, SOLO el icono se agranda e ilumina */
 .glass-control:not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.16);
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
     color: #ffffff;
 }
 
+.glass-control:not(:disabled):hover svg {
+    transform: scale(1.24);
+    color: #ffffff;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.65));
+}
+
+/* Micro-feedback de pulsación */
+.glass-control:not(:disabled):active svg {
+    transform: scale(1.08);
+}
+
+/* Estado activo (menú desplegado): micro-indicador minimalista inferior */
 .glass-control:not(:disabled).active {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.35);
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
     color: #ffffff;
 }
 
-.glass-control:not(:disabled):active {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.45);
+.glass-control:not(:disabled).active svg {
+    color: #ffffff;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    transform: scale(1.1);
+}
+
+.glass-control:not(:disabled).active::after {
+    content: "";
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 2px;
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+    pointer-events: none;
 }
 
 .glass-control:focus-visible {
-    outline: 1px solid var(--accent-focus);
-    outline-offset: 1px;
+    outline: 1px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
 }
 
 .glass-control:disabled {
     cursor: not-allowed;
-    opacity: 0.35;
-    background: transparent;
-    border: 1px solid transparent;
+    opacity: 0.28;
+    background: transparent !important;
+    border: none;
     box-shadow: none;
+    pointer-events: none;
 }
 
 .escenario {
@@ -226,9 +325,28 @@ sacar el arrastre nativo
 
 @media (max-width: 680px) {
     .glass-bar {
-        gap: 4px;
-        padding-right: 7px;
-        padding-left: 7px;
+        height: 48px;
+        min-height: 48px;
+    }
+
+    .top-bar {
+        top: 10px;
+        width: calc(100vw - 20px);
+        padding: 0 10px;
+    }
+
+    .bottom-bar {
+        bottom: 12px;
+        max-width: calc(100vw - 20px);
+        padding: 0 12px;
+    }
+
+    .bottom-bar .bar-items {
+        gap: clamp(8px, 2.5vw, 16px);
+    }
+
+    .bar-items {
+        gap: 8px;
     }
 
     .brand,
@@ -237,18 +355,10 @@ sacar el arrastre nativo
     }
 
     .glass-control {
-        min-height: 40px;
-        padding: 0 5px;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 4px;
         font-size: 10px;
-    }
-}
-
-@media (max-width: 600px) {
-    .glass-bar {
-        height: 62px;
-        min-height: 62px;
-        padding-top: 6px;
-        padding-bottom: 6px;
     }
 }
 
@@ -260,22 +370,22 @@ sacar el arrastre nativo
 
 .edit-panel {
     position: fixed;
-    bottom: 84px;
-    right: clamp(12px, 3vw, 38px);
+    bottom: 88px;
+    right: clamp(18px, 3vw, 40px);
     box-sizing: border-box;
-    width: min(340px, calc(100vw - 24px));
-    max-height: calc(100vh - 104px);
+    width: min(340px, calc(100vw - 36px));
+    max-height: calc(100vh - 120px);
     overflow-y: auto;
-    padding: 20px 22px;
-    border: var(--border-hairline);
+    padding: 22px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 0;
-    background: var(--bg-panel);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    background: rgba(16, 16, 22, 0.58);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     color: #ffffff;
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
-    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    backdrop-filter: blur(32px) saturate(180%);
     pointer-events: auto;
-    transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
+    transition: opacity 200ms ease, transform 200ms cubic-bezier(0.16, 1, 0.3, 1), visibility 200ms ease;
 }
 
 .edit-panel::-webkit-scrollbar {
@@ -295,7 +405,7 @@ sacar el arrastre nativo
 .edit-panel.hidden {
     visibility: hidden;
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(8px);
     pointer-events: none;
 }
 
@@ -323,25 +433,26 @@ sacar el arrastre nativo
     height: 28px;
     align-items: center;
     justify-content: center;
-    border: 1px solid transparent;
+    border: none;
     border-radius: 0;
     background: transparent;
-    color: rgba(255, 255, 255, 0.65);
+    color: rgba(255, 255, 255, 0.55);
     font: inherit;
     font-size: 18px;
     line-height: 1;
     cursor: pointer;
-    transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    transition: color 160ms ease, transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .close-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: transparent !important;
+    border: none !important;
     color: #ffffff;
+    transform: scale(1.22);
 }
 
 .close-btn:active {
-    background: rgba(255, 255, 255, 0.16);
+    transform: scale(1.05);
 }
 
 .slider-group {
@@ -451,17 +562,17 @@ sacar el arrastre nativo
 
 .glass-select {
     width: 100%;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(255, 255, 255, 0.05);
     color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 0;
     padding: 8px 10px;
     font: inherit;
     font-size: 12px;
     outline: none;
     cursor: pointer;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     transition: border-color 140ms ease, background 140ms ease;
 }
 
@@ -495,31 +606,44 @@ sacar el arrastre nativo
     height: 34px;
     padding: 0 14px;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: rgba(255, 255, 255, 0.78) !important;
 }
 
 .edit-actions .glass-control:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.32);
+    background: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    color: #ffffff !important;
 }
 
-.edit-actions .glass-control:last-child:not(:disabled),
-.btn-aplicar-ajustes:not(:disabled) {
-    background: #ffffff;
-    color: #000000;
-    border-color: #ffffff;
-    font-weight: 700;
+.edit-actions .glass-control:disabled {
+    opacity: 0.35;
+    color: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-.edit-actions .glass-control:last-child:hover:not(:disabled),
+.btn-aplicar-ajustes {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.42) !important;
+    font-weight: 600;
+}
+
 .btn-aplicar-ajustes:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.88);
-    border-color: rgba(255, 255, 255, 0.88);
-    color: #000000;
+    background: rgba(255, 255, 255, 0.32) !important;
+    border-color: rgba(255, 255, 255, 0.65) !important;
+    color: #ffffff !important;
+}
+
+.btn-aplicar-ajustes:disabled {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.35) !important;
 }
 
 .close-btn:focus-visible,
@@ -563,12 +687,12 @@ sacar el arrastre nativo
 
 .top-bar .bar-items.bar-items-left {
     justify-content: flex-start;
-    gap: 8px;
+    gap: clamp(14px, 1.8vw, 24px);
 }
 
 .top-bar .bar-items.bar-items-right {
     justify-content: flex-end;
-    gap: 8px;
+    gap: clamp(14px, 1.8vw, 24px);
 }
 
 .crop-popover-container {
@@ -579,22 +703,114 @@ sacar el arrastre nativo
 
 .crop-menu {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 12px);
     right: 0;
     left: auto;
     display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
-    background: rgba(6, 6, 8, 0.88);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-width: 286px;
+    padding: 10px 12px;
+    background: rgba(16, 16, 22, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 0;
-    backdrop-filter: blur(20px) saturate(130%);
-    -webkit-backdrop-filter: blur(20px) saturate(130%);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.56);
     white-space: nowrap;
     pointer-events: auto;
-    transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
+    transition: opacity 180ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1), visibility 180ms ease;
+}
+
+.crop-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.crop-ratios-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.crop-ratio-btn {
+    height: 26px;
+    padding: 0 6px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.72);
+    font-family: var(--font-mono, monospace);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.crop-ratio-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.crop-ratio-btn.active {
+    background: #ffffff;
+    color: #0b0b0f;
+    border-color: #ffffff;
+}
+
+.crop-straighten-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.crop-straighten-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.crop-straighten-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono, monospace);
+    color: #ffffff;
+}
+
+.crop-angle-reset {
+    height: 18px;
+    padding: 0 6px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.85);
+    font-family: var(--font-mono, monospace);
+    font-size: 9.5px;
+    cursor: pointer;
+}
+
+.crop-angle-reset:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+.crop-straighten-row input[type="range"] {
+    width: 100%;
+    margin: 0;
+    accent-color: #ffffff;
+    cursor: pointer;
 }
 
 .crop-menu.hidden {
@@ -616,7 +832,7 @@ sacar el arrastre nativo
     letter-spacing: 0.04em;
     border-radius: 0;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .crop-menu .glass-control.crop-action-btn:hover:not(:disabled) {
@@ -624,20 +840,33 @@ sacar el arrastre nativo
     border-color: rgba(255, 255, 255, 0.32);
 }
 
-#btn-confirmar-recorte:not(:disabled) {
-    background: #ffffff;
-    color: #000000;
-    border-color: #ffffff;
-    font-weight: 700;
+#btn-confirmar-recorte {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.42) !important;
+    font-weight: 600;
+}
+
+#btn-confirmar-recorte svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
 }
 
 #btn-confirmar-recorte:not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.32) !important;
+    border-color: rgba(255, 255, 255, 0.65) !important;
+    color: #ffffff !important;
+}
+
+#btn-confirmar-recorte:disabled {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.35) !important;
 }
 
 
 /* ==========================================================================
-   Zona de Drop & Drag-and-Drop
+   Zona de Drop & Drag-and-Drop (Minimalista & Frosted Glass)
    ========================================================================== */
 .drop-zone {
     position: absolute;
@@ -650,22 +879,22 @@ sacar el arrastre nativo
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 14px;
-    padding: 36px 44px;
-    min-width: 300px;
-    max-width: min(440px, 90vw);
+    gap: 12px;
+    padding: 28px 42px;
+    min-width: 240px;
+    max-width: min(360px, 86vw);
     box-sizing: border-box;
-    background: rgba(14, 14, 20, 0.72);
-    -webkit-backdrop-filter: blur(20px) saturate(130%);
-    backdrop-filter: blur(20px) saturate(130%);
-    border: 1px dashed rgba(255, 255, 255, 0.3);
+    background: rgba(16, 16, 22, 0.45);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 0;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     color: #e3e3e3;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
-    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease, transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .drop-zone.oculto {
@@ -674,10 +903,10 @@ sacar el arrastre nativo
 
 .drop-zone:hover,
 .drop-zone:focus-visible {
-    border-color: rgba(255, 255, 255, 0.7);
-    border-style: solid;
-    background: rgba(24, 24, 34, 0.85);
-    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.8), 0 0 24px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    border-color: rgba(255, 255, 255, 0.28);
+    background: rgba(22, 22, 30, 0.6);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transform: translate(-50%, -50%) translateY(-2px);
     outline: none;
 }
 
@@ -685,80 +914,61 @@ sacar el arrastre nativo
     transform: translate(-50%, -50%) scale(0.985);
 }
 
-.drop-zone-bracket {
-    position: absolute;
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 15px;
-    line-height: 1;
-    pointer-events: none;
-}
-
-.dz-tl { top: -6px; left: -6px; }
-.dz-tr { top: -6px; right: -6px; }
-.dz-bl { bottom: -6px; left: -6px; }
-.dz-br { bottom: -6px; right: -6px; }
-
 .drop-zone-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 64px;
-    height: 64px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    color: #ffffff;
-    transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    width: 44px;
+    height: 44px;
+    color: rgba(255, 255, 255, 0.85);
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), color 200ms ease;
 }
 
-.drop-zone:hover .drop-zone-icon,
-.visor.drag-over .drop-zone-icon {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.55);
+.drop-zone-icon svg {
+    display: block;
+    width: 28px;
+    height: 28px;
+    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), filter 200ms ease;
+}
+
+.drop-zone:hover .drop-zone-icon svg,
+.visor.drag-over .drop-zone-icon svg {
+    transform: scale(1.15);
+    color: #ffffff;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6));
 }
 
 .drop-zone-text {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 
 .drop-zone-title {
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     color: #ffffff;
 }
 
 .drop-zone-sub {
     margin: 0;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.65);
-}
-
-.drop-zone-meta {
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    color: rgba(255, 255, 255, 0.45);
-}
-
-.drop-zone-meta .meta-bracket {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 /* Estado Drag-Over sobre el visor completo */
 .visor.drag-over {
-    outline: 2px dashed rgba(255, 255, 255, 0.6);
+    outline: 2px solid rgba(255, 255, 255, 0.6);
     outline-offset: -12px;
 }
 
 .visor.drag-over .drop-zone {
-    border-color: rgba(255, 255, 255, 0.9);
-    border-style: solid;
-    background: rgba(30, 30, 46, 0.9);
-    box-shadow: 0 0 36px rgba(255, 255, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-    transform: translate(-50%, -50%) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.7);
+    background: rgba(26, 26, 36, 0.75);
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%) scale(1.03);
 }
 
 
@@ -1110,22 +1320,23 @@ sacar el arrastre nativo
    Panel de Estilos Preestablecidos (Presets de Autor)
    ========================================================================== */
 .presets-panel {
-    width: clamp(340px, 94vw, 470px);
+    width: clamp(340px, 94vw, 490px);
 }
 
 .panel-subtitle {
     display: block;
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.55);
     margin-top: 2px;
+    letter-spacing: 0.02em;
 }
 
 .preset-top-bar {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 14px;
-    padding-bottom: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -1138,75 +1349,97 @@ sacar el arrastre nativo
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
 }
 
 .preset-reset-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 10px;
+    padding: 6px 14px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    letter-spacing: 0.05em;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 0;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.82);
     cursor: pointer;
     flex-shrink: 0;
-    transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+    transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .preset-reset-pill:hover:not(:disabled) {
-    background: rgba(255, 68, 68, 0.16);
-    border-color: rgba(255, 68, 68, 0.45);
-    color: #ff6666;
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    transform: translateY(-1px);
 }
 
 .preset-reset-pill:disabled {
-    opacity: 0.35;
+    opacity: 0.32;
     cursor: not-allowed;
 }
 
 .presets-cards-container {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    max-height: 480px;
+    gap: 12px;
+    max-height: 510px;
     overflow-y: auto;
-    padding-right: 4px;
-    margin-bottom: 14px;
+    padding: 2px 4px 6px 2px;
+    margin-bottom: 10px;
+}
+
+.presets-cards-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.presets-cards-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.presets-cards-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 0;
+}
+
+.presets-cards-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
 }
 
 .preset-card {
     display: flex;
     flex-direction: column;
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 0;
     overflow: hidden;
     cursor: pointer;
     text-align: left;
     padding: 0;
     outline: none;
-    transition: background 140ms ease, border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+    position: relative;
+    backdrop-filter: blur(12px);
+    transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .preset-card:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.32);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
 }
 
 .preset-card.active {
-    background: rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.09);
     border-color: #ffffff;
-    box-shadow: 0 0 16px rgba(255, 255, 255, 0.35), inset 0 0 0 1px #ffffff;
+    box-shadow: 0 0 0 1px #ffffff, 0 10px 28px rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
 }
 
 .preset-card:disabled {
@@ -1216,7 +1449,7 @@ sacar el arrastre nativo
 }
 
 .preset-swatch {
-    height: 36px;
+    height: 42px;
     width: 100%;
     display: flex;
     align-items: center;
@@ -1227,34 +1460,46 @@ sacar el arrastre nativo
     border-radius: 0;
 }
 
+.preset-swatch::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+    pointer-events: none;
+}
+
 .swatch-cat {
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 2px 5px;
-    background: rgba(0, 0, 0, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 2.5px 7px;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 0;
     color: #ffffff;
     line-height: 1;
+    z-index: 1;
 }
 
 .swatch-num {
     font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.75);
-    letter-spacing: 0.8px;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.06em;
     line-height: 1;
-    background: rgba(0, 0, 0, 0.55);
-    padding: 2px 5px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    padding: 2.5px 6px;
     border-radius: 0;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    z-index: 1;
 }
 
 .preset-info {
-    padding: 8px 10px 10px;
+    padding: 10px 12px 12px;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -1269,10 +1514,10 @@ sacar el arrastre nativo
 }
 
 .preset-name {
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 12.5px;
+    font-weight: 600;
     color: #ffffff;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.01em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1292,8 +1537,8 @@ sacar el arrastre nativo
 
 .preset-sub {
     font-size: 10.5px;
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -1304,16 +1549,16 @@ sacar el arrastre nativo
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    margin-top: 3px;
+    margin-top: 4px;
 }
 
 .ptool {
-    font-size: 9.5px;
-    padding: 1px 5px;
+    font-size: 9px;
+    padding: 2px 7px;
     border-radius: 0;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.75);
     line-height: 1.3;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -1461,7 +1706,7 @@ sacar el arrastre nativo
 /* Badges flotantes en el HUD del editor */
 .split-badges-hud {
     position: fixed;
-    bottom: 82px;
+    bottom: 86px;
     left: 0;
     right: 0;
     display: flex;
@@ -1480,10 +1725,10 @@ sacar el arrastre nativo
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    height: 30px;
-    padding: 0 12px;
-    background: rgba(10, 10, 14, 0.88);
-    border: 1px solid rgba(255, 255, 255, 0.24);
+    height: 32px;
+    padding: 0 14px;
+    background: rgba(16, 16, 22, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 0;
     color: #e5e5e5;
     font-family: var(--font-family-mono, monospace);
@@ -1491,18 +1736,19 @@ sacar el arrastre nativo
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
     pointer-events: auto;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
 .split-badge-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.4);
     color: #ffffff;
+    transform: translateY(-1px);
 }
 
 .split-badge-btn:focus-visible {
@@ -1518,16 +1764,17 @@ sacar el arrastre nativo
 .split-hud-hint {
     display: inline-flex;
     align-items: center;
-    padding: 4px 10px;
-    background: rgba(10, 10, 14, 0.72);
-    border: 1px dashed rgba(255, 255, 255, 0.16);
-    color: rgba(255, 255, 255, 0.6);
+    padding: 5px 12px;
+    background: rgba(16, 16, 22, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0;
+    color: rgba(255, 255, 255, 0.65);
     font-family: var(--font-family-mono, monospace);
     font-size: 9.5px;
     letter-spacing: 0.1em;
     pointer-events: none;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 @media (max-width: 680px) {
@@ -1536,13 +1783,13 @@ sacar el arrastre nativo
     }
 
     .split-badges-hud {
-        bottom: 74px;
+        bottom: 84px;
         padding: 0 12px;
     }
 
     .split-badge-btn {
         height: 28px;
-        padding: 0 9px;
+        padding: 0 10px;
         font-size: 9px;
     }
 }
@@ -1551,13 +1798,13 @@ sacar el arrastre nativo
 #mensaje,
 #cargando {
     position: fixed;
-    top: 72px;
+    top: 82px;
     left: 50%;
     transform: translateX(-50%);
     margin: 0;
-    padding: 8px 18px;
-    background: rgba(10, 10, 14, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    padding: 8px 20px;
+    background: rgba(16, 16, 22, 0.68);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 0;
     color: #ffffff;
     font-family: var(--font-mono, monospace);
@@ -1565,9 +1812,9 @@ sacar el arrastre nativo
     font-weight: 500;
     letter-spacing: 0.05em;
     z-index: 100;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
     pointer-events: none;
     text-transform: uppercase;
 }
@@ -1579,6 +1826,215 @@ sacar el arrastre nativo
 #mensaje.oculto,
 #cargando.oculto {
     display: none !important;
+}
+
+/* Indicador y HUD flotante de Zoom (90°) */
+.zoom-hud {
+    position: fixed;
+    bottom: 20px;
+    right: clamp(18px, 3vw, 40px);
+    z-index: 8;
+    display: inline-flex;
+    align-items: center;
+    background: rgba(16, 16, 22, 0.54);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(28px) saturate(170%);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    pointer-events: auto;
+}
+
+.zoom-hud.oculto {
+    display: none !important;
+}
+
+.zoom-hud-btn,
+.zoom-hud-val {
+    height: 34px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.84);
+    font-family: var(--font-mono, monospace);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.zoom-hud-btn {
+    width: 30px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zoom-hud-val {
+    min-width: 50px;
+    padding: 0 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.zoom-hud-btn:hover,
+.zoom-hud-val:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+@media (max-width: 860px) {
+    .zoom-hud {
+        bottom: 84px;
+        left: 14px;
+        right: auto;
+    }
+}
+
+/* Histograma en Tiempo Real (Monocromo / RGB) */
+.histogram-wrap {
+    margin-bottom: 14px;
+    padding: 8px 10px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.34);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.histogram-wrap:hover {
+    border-color: rgba(255, 255, 255, 0.28);
+    background: rgba(0, 0, 0, 0.48);
+}
+
+.histogram-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-family: var(--font-mono, monospace);
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.56);
+}
+
+.histogram-mode {
+    padding: 1px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 9px;
+}
+
+#histogramCanvas {
+    display: block;
+    width: 100%;
+    height: 60px;
+}
+
+.edit-section-divider {
+    margin: 14px 0 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.52);
+}
+
+/* Selector Duotono Personalizado + Pixel-Perfect Toggle */
+.duotono-picker-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: -4px 0 14px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.duotono-picker-group.oculto {
+    display: none;
+}
+
+.duotono-colors-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.duotono-color-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.28);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.78);
+    cursor: pointer;
+}
+
+.duotono-color-field input[type="color"] {
+    width: 24px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.duotono-presets-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+.duotono-swatch-btn {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 18px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 0;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 130ms ease, border-color 130ms ease;
+}
+
+.duotono-swatch-btn:hover {
+    border-color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.toggle-check-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+}
+
+.toggle-check-row input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: #ffffff;
+    cursor: pointer;
 }
 
 

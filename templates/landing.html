@@ -24,7 +24,7 @@
 
         <div class="loader-content">
             <div class="loader-header-meta">
-                <span class="loader-sigil"><span class="sigil-box">■</span> DITHERIX // LAB SYSTEM</span>
+                <span class="loader-sigil"><span class="sigil-box">■</span> DITHERIX</span>
                 <span class="loader-coord num">[ 34.6037° S · 58.3816° W ]</span>
             </div>
 
@@ -51,14 +51,12 @@
         </div>
     </aside>
 
-    <div class="screen-scanlines" aria-hidden="true"></div>
-    <div class="screen-vignette" aria-hidden="true"></div>
+    <canvas id="liquidCanvas" class="landing-liquid-canvas" aria-hidden="true"></canvas>
 
     <header class="hud-header">
         <div class="hud-header-inner">
             <div class="hud-left">
                 <a href="#inicio" class="hud-logo-link">
-                    <span class="hud-bullet" aria-hidden="true">■</span>
                     <span class="hud-brand-name">Ditherix</span>
                 </a>
             </div>
@@ -76,18 +74,6 @@
             </div>
 
             <div class="hud-right">
-                <button type="button" class="hud-control-pill" id="hudPaletteBtn" aria-label="Cambiar paleta cromática"
-                    title="Alternar paleta retro">
-                    <span class="hud-swatch" id="hudSwatch"></span>
-                    <span class="hud-pill-label" id="hudPaletteName">OBSIDIAN</span>
-                </button>
-
-                <button type="button" class="hud-control-pill" id="hudSoundBtn" aria-pressed="false"
-                    aria-label="Activar efectos sonoros" title="Efectos de sonido mecánicos">
-                    <span class="hud-sound-dot" id="hudSoundDot" aria-hidden="true">■</span>
-                    <span class="hud-pill-label" id="hudSoundLabel">AUDIO: OFF</span>
-                </button>
-
                 <a href="/editor" class="btn btn--primary">
                     <span>Abrir editor</span>
                 </a>
@@ -100,7 +86,6 @@
 
             <div class="h-hud-bar">
                 <div class="h-hud-left">
-                    <span class="h-hud-tag">PORTFOLIO // CAPÍTULOS</span>
                     <span class="h-hud-index">
                         PANEL <strong id="hActiveNum" class="num">01</strong> / <span class="num">08</span>
                     </span>
@@ -135,7 +120,6 @@
             <main class="h-track" id="hTrack">
 
                 <article class="h-slide h-slide--hero" data-index="0" id="inicio">
-                    <div class="hero-bg-layer" aria-hidden="true"></div>
                     <div class="hero-mesh-overlay" aria-hidden="true"></div>
 
                     <div class="hero-hud-reticle-wrap" aria-hidden="true">
@@ -615,11 +599,6 @@
     </div>
 
     <section class="soundwave-divider" aria-label="Visualizador de frecuencia matricial">
-        <div class="soundwave-header">
-            <span class="sw-label">Matriz de frecuencia 44.1 kHz (buffer activo)</span>
-            <span class="sw-sigil" aria-hidden="true">▲ ◈ ▼</span>
-            <span class="sw-status">Señal calibrada</span>
-        </div>
         <div class="soundwave-canvas-wrap">
             <canvas id="waveformCanvas" width="1200" height="64" aria-hidden="true"></canvas>
         </div>
@@ -629,19 +608,12 @@
         <div class="container footer-inner">
             <div class="footer-left">
                 <span class="footer-logo">Ditherix</span>
-                <span class="footer-sub">Laboratorio de composición y dithering fotográfico</span>
             </div>
             <div class="footer-center">
                 <span class="footer-coords num">Coordenadas: 34.6037° S, 58.3816° W</span>
             </div>
             <div class="footer-right">
                 <a href="mailto:limeresjoaquin@gmail.com" class="footer-email">limeresjoaquin@gmail.com</a>
-            </div>
-        </div>
-        <div class="footer-bottom-bar">
-            <div class="container footer-bottom-inner">
-                <span class="num">© 2026 Ditherix. Código abierto.</span>
-                <span class="num">Estética Edoardo Smerilli & Darkroom Core.</span>
             </div>
         </div>
     </footer>

@@ -5,6 +5,8 @@ Algoritmos soportados: Floyd-Steinberg, Bayer 4x4, Bayer 8x8, Atkinson y Cuantiz
 Paletas: Monocromo B&N, Game Boy Clásico, CGA Retro, Ámbar CRT y Cyberpunk.
 """
 
+import re
+import numpy as np
 from PIL import Image, ImageChops
 
 PALETAS = {
@@ -141,12 +143,75 @@ def _aplicar_dithering_atkinson(imagen: Image.Image, colores: list[tuple[int, in
     return resultado
 
 
+_BAYER_4X4_NORM = (
+    np.array(MATRIZ_BAYER_4X4, dtype=np.float32).reshape(4, 4) / 256.0
+)
+_BAYER_8X8_NORM = (
+    np.array(MATRIZ_BAYER_8X8, dtype=np.float32).reshape(8, 8) / 256.0
+)
+_HEX_RE = re.compile(r"^#?([0-9a-fA-F]{6})$")
+
+
+def _parsear_hex_rgb(
+    hex_color: str, fallback: tuple[int, int, int]
+) -> tuple[int, int, int]:
+    """Convierte un color hexadecimal #RRGGBB a tupla RGB segura."""
+    if not isinstance(hex_color, str):
+        return fallback
+    match = _HEX_RE.match(hex_color.strip())
+    if not match:
+        return fallback
+    val = match.group(1)
+    return (int(val[0:2], 16), int(val[2:4], 16), int(val[4:6], 16))
+
+
+def _aplicar_pre_umbral(img_rgb: Image.Image, umbral: int) -> Image.Image:
+    """Desplaza el punto de corte tonal antes del dithering (-100..100)."""
+    umbral_clamped = max(-100, min(100, int(umbral)))
+    if umbral_clamped == 0:
+        return img_rgb
+    arr = np.asarray(img_rgb, dtype=np.float32)
+    sesgo = (umbral_clamped / 100.0) * 115.0
+    ajustado = np.clip(arr + sesgo, 0.0, 255.0).astype(np.uint8)
+    return Image.fromarray(ajustado, mode="RGB")
+
+
+def _aplicar_bayer_numpy(
+    img_rgb: Image.Image,
+    tamano: int,
+    colores: list[tuple[int, int, int]],
+    img_paleta: Image.Image,
+) -> Image.Image:
+    """Dithering ordenado Bayer 4x4/8x8 acelerado con NumPy preservando color o duotono."""
+    arr = np.asarray(img_rgb, dtype=np.float32)
+    h, w, _ = arr.shape
+    matriz = _BAYER_4X4_NORM if tamano == 4 else _BAYER_8X8_NORM
+    trama = np.tile(matriz, ((h + tamano - 1) // tamano, (w + tamano - 1) // tamano))[:h, :w]
+
+    if len(colores) == 2:
+        luma = (0.299 * arr[:, :, 0] + 0.587 * arr[:, :, 1] + 0.114 * arr[:, :, 2]) / 255.0
+        oscuro = np.array(colores[0], dtype=np.uint8)
+        claro = np.array(colores[1], dtype=np.uint8)
+        mascara = luma > trama
+        out = np.where(mascara[:, :, None], claro, oscuro)
+        return Image.fromarray(out, mode="RGB")
+
+    desplazamiento = (trama - 0.5)[:, :, None] * 68.0
+    modulada = np.clip(arr + desplazamiento, 0.0, 255.0).astype(np.uint8)
+    return Image.fromarray(modulada, mode="RGB").quantize(
+        palette=img_paleta, dither=Image.Dither.NONE
+    ).convert("RGB")
+
+
 def aplicar_dithering(
     imagen: Image.Image,
     algoritmo: str,
     paleta_nombre: str = "bn",
     tamano_pixel: int = 1,
     intensidad: int = 100,
+    umbral: int = 0,
+    duotono_oscuro: str = "#0a0a10",
+    duotono_claro: str = "#f2f2ea",
 ) -> Image.Image:
     """
     Aplica dithering o cuantización de color sobre una imagen PIL.
@@ -154,13 +219,22 @@ def aplicar_dithering(
     Parámetros:
         imagen: Objeto PIL.Image.
         algoritmo: 'ninguno', 'floyd_steinberg', 'bayer_4', 'bayer_8', 'atkinson' o 'cuantizacion'.
-        paleta_nombre: 'bn', 'gameboy', 'cga', 'ambar' o 'cyberpunk'.
+        paleta_nombre: Clave de PALETAS o 'duotono' para colores personalizados.
         tamano_pixel: Entero de 1 a 8 indicando el tamaño de cada píxel retro.
+        intensidad: Mezcla 0..100 con la imagen de entrada.
+        umbral: Pre-umbral tonal (-100..100) aplicado antes de cuantizar.
+        duotono_oscuro / duotono_claro: Colores hex cuando paleta_nombre == 'duotono'.
     """
     if algoritmo == "ninguno" or not algoritmo:
         return imagen
 
-    colores = PALETAS.get(paleta_nombre, PALETAS["bn"])
+    if paleta_nombre == "duotono":
+        c_oscuro = _parsear_hex_rgb(duotono_oscuro, (10, 10, 16))
+        c_claro = _parsear_hex_rgb(duotono_claro, (242, 242, 234))
+        colores = [c_oscuro, c_claro]
+    else:
+        colores = PALETAS.get(paleta_nombre, PALETAS["bn"])
+
     img_paleta = _crear_imagen_paleta(colores)
 
     ancho_orig, alto_orig = imagen.size
@@ -174,18 +248,14 @@ def aplicar_dithering(
     else:
         imagen_trabajo = imagen
 
-    w, h = imagen_trabajo.size
-    img_rgb = imagen_trabajo.convert("RGB")
+    img_rgb = _aplicar_pre_umbral(imagen_trabajo.convert("RGB"), umbral)
 
     if algoritmo == "floyd_steinberg":
         dithered = img_rgb.quantize(palette=img_paleta, dither=Image.Dither.FLOYDSTEINBERG).convert("RGB")
 
     elif algoritmo in ("bayer_4", "bayer_8"):
         tam = 4 if algoritmo == "bayer_4" else 8
-        trama = _generar_trama_bayer(w, h, tamano=tam)
-        modulada = ImageChops.add(img_rgb.convert("L"), trama, scale=1.0, offset=-64)
-        modulada_rgb = modulada.convert("RGB")
-        dithered = modulada_rgb.quantize(palette=img_paleta, dither=Image.Dither.NONE).convert("RGB")
+        dithered = _aplicar_bayer_numpy(img_rgb, tam, colores, img_paleta)
 
     elif algoritmo == "atkinson":
         dithered = _aplicar_dithering_atkinson(img_rgb, colores)
