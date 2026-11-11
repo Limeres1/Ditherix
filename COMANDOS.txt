@@ -3,7 +3,7 @@
 # ============================================================
 
 1. CREAR EL ENTORNO VIRTUAL (.venv)  
-   python -m venv .venv
+   py -m venv .venv
 
 2. ACTIVAR EL ENTORNO VIRTUAL
 
@@ -20,10 +20,10 @@
    pip install -r requirements.txt
 
 4. INICIAR LA APLICACIÓN
-   
    python app.py
 
 5. DESACTIVAR EL ENTORNO (Cuando termines de trabajar)
    
    deactivate
 
+ 

@@ -1,141 +1,144 @@
 # Ditherix
 
-> **Estación de trabajo fotográfica, cuarto oscuro digital y laboratorio de tramado retro.**  
-> Procesamiento de imagen en memoria 100% no destructivo con aceleración vectorial en NumPy, Pillow y Flask, bajo una interfaz táctil Cyber Y2K / Hallmark Darkroom.
+> **Laboratorio fotográfico web, cuarto oscuro digital y motor de tramado retro en tiempo real.**  
+> Procesamiento de imagen no destructivo en memoria con **Python**, **Flask**, **Pillow** y **NumPy**, compuesto por una portada editorial animada con WebGL y un estudio de edición de geometría ortogonal (`border-radius: 0`).
 
 ---
 
-## Tabla de Contenidos
+## Contenidos
 
 1. [Visión General](#visión-general)
-2. [Características Principales](#características-principales)
-   - [Pipeline No Destructivo en Memoria](#1-pipeline-no-destructivo-en-memoria)
-   - [Motor de Dithering Retro](#2-motor-de-dithering-retro)
-   - [Laboratorio de Blanco y Negro & Virados Químicos](#3-laboratorio-de-blanco-y-negro--virados-químicos)
-   - [Mezclador HSL & Balance de Color](#4-mezclador-hsl--balance-de-color)
-   - [Marcos Decorativos & Analógicos](#5-marcos-decorativos--analógicos)
-   - [Presets de Autor](#6-presets-de-autor)
-   - [Detalle & Grano Estocástico](#7-detalle--grano-estocástico)
-   - [Herramientas Espaciales & Visor](#8-herramientas-espaciales--visor)
-3. [Arquitectura y Workflow](#arquitectura-y-workflow)
-4. [Estructura del Proyecto](#estructura-del-proyecto)
-5. [Instalación y Puesta en Marcha](#instalación-y-puesta-en-marcha)
-6. [Referencia de la API REST](#referencia-de-la-api-rest)
-7. [Catálogo de Presets de Autor](#catálogo-de-presets-de-autor)
-8. [Estética & Filosofía de Diseño (Hallmark)](#estética--filosofía-de-diseño-hallmark)
-9. [Atajos y Navegación](#atajos-y-navegación)
-10. [Licencia](#licencia)
+2. [Funcionalidades del Sistema](#funcionalidades-del-sistema)
+   - [Portal de Inicio (Landing)](#portal-de-inicio-landing)
+   - [Editor y Pipeline No Destructivo](#editor-y-pipeline-no-destructivo)
+   - [Luz, Curvas Avanzadas e Histograma](#luz-curvas-avanzadas-e-histograma)
+   - [Óptica 35mm y Simulación CRT](#óptica-35mm-y-simulación-crt)
+   - [Motor de Dithering Retro & Duotono](#motor-de-dithering-retro--duotono)
+   - [Mezclador HSL y Balance de Blancos](#mezclador-hsl-y-balance-de-blancos)
+   - [Laboratorio B&N y Virados Químicos](#laboratorio-bn-y-virados-químicos)
+   - [Detalle y Grano Analógico](#detalle-y-grano-analógico)
+   - [Marcos Procedimentales](#marcos-procedimentales)
+   - [Geometría, Comparador Split y Visor](#geometría-comparador-split-y-visor)
+3. [Catálogo de Presets (12 Estilos)](#catálogo-de-presets-12-estilos)
+4. [Arquitectura del Pipeline](#arquitectura-del-pipeline)
+5. [Estructura del Proyecto](#estructura-del-proyecto)
+6. [Instalación y Puesta en Marcha](#instalación-y-puesta-en-marcha)
+7. [Despliegue](#despliegue)
+8. [Referencia de Rutas y API](#referencia-de-rutas-y-api)
+9. [Atajos de Teclado y Controles](#atajos-de-teclado-y-controles)
+10. [Autor](#autor)
 
 ---
 
 ## Visión General
 
-**Ditherix** transforma fotografías digitales en obras de arte analógicas, cinematográficas y retro-digitales de 8 bits. A diferencia de editores convencionales basados en canvas destructivo, Ditherix procesa cada transformación directamente en el backend mediante operaciones vectorizadas en **NumPy** y algoritmos optimizados en **Pillow**, manteniendo los datos originales intactos en memoria.
+**Ditherix** combina fotografía analógica, emulsiones experimentales, óptica 35mm y tramado pixel-art/retro en una aplicación web sin base de datos ni procesamiento destructivo permanente en cliente. Cada foto subida permanece almacenada en memoria del servidor dentro de una estructura inmutable (`ImagenGuardada`), y cada cambio recalcula únicamente las etapas necesarias dentro de un pipeline ordenado de 9 pasos.
 
-La interfaz de usuario implementa un diseño inspirado en el estándar **Hallmark Darkroom**:
-- Vidrio ahumado negro profundo y semitraslúcido (`rgba(7, 7, 9, 0.78)` con `backdrop-filter: blur(20px)`).
-- Ángulos rectos de 90° (`border-radius: 0`) para una sensación técnica, sobria y de alta precisión.
-- Cero emojis y cero texto genérico (*AI slop*).
-- Cumplimiento estricto de transiciones explícitas (prohibido `transition: all`).
+La aplicación se divide en dos experiencias conectadas:
+- **Portada (`/`)**: diseño editorial blanco y negro con fondo líquido WebGL interactivo, preloader `000% -> 100%`, galería horizontal de 8 paneles, comparador interactivo, reloj HUD, visualizador de onda sonora y audio táctil procedural en Web Audio.
+- **Editor (`/editor` o `/app`)**: apertura vertical con cortina negra, barras flotantes translúcidas en cristal ahumado con esquinas de 90°, sliders reactivos en tiempo real con cola de cancelación y visor con zoom centrado en cursor.
 
 ---
 
-## Características Principales
+## Funcionalidades del Sistema
 
-### 1. Pipeline No Destructivo en Memoria
-- El archivo subido original permanece inmutable como un arreglo de bytes en memoria (`ImagenGuardada`).
-- Todas las capas de ajuste (curvas, HSL, virado, dither, marcos) se apilan y ejecutan dinámicamente en orden matemático óptimo.
-- Vista previa responsiva generada en tiempo real (máx. 1600px) para mantener 60 FPS, mientras que la exportación final procesa la imagen en su resolución completa sin pérdida.
-- Capacidad de revertir recortes o reiniciar cualquier filtro individual sin alterar el resto de los ajustes.
+### Portal de Inicio (Landing)
+- **Fondo líquido WebGL** (`static/landing.js`): shader animado en tiempo real sobre lienzo fijo blanco.
+- **Preloader teatral** (`cinemaLoader`): contador progresivo `000%`–`100%` (con opción de omitir por clic o `Esc`) seguido de apertura vertical de cortinas.
+- **Scroll horizontal suavizado** en 8 paneles (`PORTADA`, `DITHERING`, `COMPARADOR`, `QUÍMICA`, `MARCOS`, `PRESETS`, `ESTUDIO`, `AUTOR`), comparador interactivo Antes/Después, reloj HUD y audio táctil siempre activo sin dependencias externas.
 
-### 2. Motor de Dithering Retro
-- **Algoritmos de difusión de error**:
-  - `floyd_steinberg` (Difusión clásica equilibrada de 4 coeficientes).
-  - `atkinson` (Difusión con 75% de dispersión, estética Apple Macintosh de 1984).
-  - `burkes` y `sierra` (Difusión de rango amplio).
-- **Tramados ordenados por matriz**:
-  - `bayer_2` (Matriz 2×2), `bayer_4` (Matriz 4×4), `bayer_8` (Matriz 8×8).
-- **Paletas cromáticas históricas indexadas**:
-  - `bn` (1-bit monocromo puro).
-  - `gameboy` (4 niveles verde fósforo LCD Nintendo 1989).
-  - `cga` (IBM CGA Modo 1: negro, cian, magenta, blanco).
-  - `cyberpunk` (Neón de alto contraste).
-  - `sepia` y `solar` (Estilos fotográficos monocromáticos).
-- **Control de tamaño de celda de píxel** (1× a 16×) y **mezcla de intensidad** (0% a 100%).
+### Editor y Pipeline No Destructivo
+- **Cortina de entrada**: al acceder a `/editor`, una pantalla negra partida verticalmente (`#editorCurtain`) se abre suavemente igual que en la landing sin pantalla de carga numérica.
+- **Formatos y límites**: soporta `JPEG`, `PNG` y `WEBP` hasta **25 MB** y **6000×6000 px** por lado (`manejo_imagen.py`), aplicando corrección automática de orientación EXIF y conversión limpia sobre fondo blanco si la imagen tiene canal alfa.
+- **Gestión LRU en memoria**: mantiene hasta **5 sesiones simultáneas** (`MAX_IMAGENES_EN_MEMORIA = 5`) protegidas con bloqueo de concurrencia (`imagenes_lock`) y control de carrera por versión de solicitud.
 
-### 3. Laboratorio de Blanco y Negro & Virados Químicos
-- Conversión monocroma con ponderación espectral calibrada (Rec. 709).
-- **Filtros ópticos físicos (Wratten)**:
-  - Rojo (oscurece cielos y resalta arquitectura).
-  - Naranja y Amarillo (contraste suave y retratos).
-  - Verde (resalta follaje y separa tonos de piel).
-  - Azul (simula emulsiones ortocromáticas tempranas).
-- **Mezclador de canales luminosos**: Control granular sobre los 8 espectros cromáticos de la imagen.
-- **Virados químicos tradicionales de laboratorio**:
-  - *Sepia* (Sulfuro de plata cálido).
-  - *Cianotipia 1842* (Azul de Prusia a base de sales férricas).
-  - *Selenio* (Tonos berenjena y negros profundos de galería).
-  - *Platino* (Rango tonal extendido y luces neutras).
-  - Control de intensidad de virado porcentual (0% a 100%).
+### Luz, Curvas Avanzadas e Histograma
+- **Ajustes básicos** (`ajustes_imagen.py`): Brillo, Contraste y Saturación (`-100` a `+100`).
+- **Tono avanzado vectorizado en `float32`**:
+  - **Altas luces** y **Sombras** basadas en luminancia perceptual Rec. 709.
+  - **Desvanecer (Fade)** (`0` a `100`): elevación exponencial suave del punto negro estilo película mate.
+  - **Viñeta óptica** (`-100` a `+100`): máscara radial elíptica para oscurecer o aclarar esquinas.
+- **Histograma en vivo** (`script.js`): analizador en cliente dibujado en `<canvas>` con modo conmutable entre **LUMA** y canales superpuestos **RGB** haciendo clic sobre el gráfico.
 
-### 4. Mezclador HSL & Balance de Color
-- **Balance de temperatura y tinte**:
-  - Temperatura de color Kelvin (frío - azul / cálido - ámbar).
-  - Tinte verde / magenta para corrección de fuentes de iluminación complejas.
-- **Mezclador espectral de 8 canales (estilo Adobe Lightroom)**:
-  - Canales: Rojo, Naranja, Amarillo, Verde, Cian, Azul, Púrpura, Magenta.
-  - Ajuste independiente de **Tono** (-100 a +100), **Saturación** (-100 a +100) y **Luminancia** (-100 a +100).
-  - Selector táctil con chips cuadrados de filtro fotográfico.
+### Óptica 35mm y Simulación CRT
+- **Halación 35mm** (`optica.py`): aísla brillos especulares altos (`lum > 0.70`), genera halo rojo-ámbar desenfocado tipo película sin capa anti-halación (Cinestill) y mezcla en modo *Screen*.
+- **Aberración cromática radial**: reescala progresivamente los canales R y G mediante transformación afín desde el centro óptico hacia los bordes.
+- **Scanlines CRT**: líneas de barrido horizontales adaptadas automáticamente a la resolución de la imagen y aplicadas después del dithering para preservar nitidez.
 
-### 5. Marcos Decorativos & Analógicos
-- **Marco Liso**: Color personalizable mediante paleta rápida o selector hex y grosor regulable en píxeles.
-- **Polaroid Clásico**: Borde instantáneo asimétrico blanco con área inferior amplia para notas.
-- **Polaroid Gastado (`polaroid_gastado`)**: Emulsión degradada con viñeteo analógico y bordes añejos.
-- **Tira de Película de 35mm (`pelicula`)**: Encuadre de celuloide negro con perforaciones de arrastre en ambos laterales.
-- Los marcos se aplican al final del pipeline para garantizar que los bordes y perforaciones se mantengan nítidos e inalterados por filtros posteriores.
+### Motor de Dithering Retro & Duotono
+- **Algoritmos** (`dithering.py`):
+  - `floyd_steinberg` (difusión de error clásica).
+  - `atkinson` (difusión Macintosh 1984 con 75% de dispersión hacia 6 vecinos).
+  - `bayer_4` y `bayer_8` (tramado ordenado por matriz acelerado con NumPy).
+  - `cuantizacion` (reducción directa de paleta sin trama).
+- **Paletas integradas**: `bn` (1-bit), `gameboy`, `cga`, `ambar`, `cyberpunk`, `matrix`, `vaporwave`, `termica` y **`duotono` personalizado** (colores hex oscuro/claro seleccionables + 4 swatches rápidos).
+- **Pre-umbral** (`-100` a `+100`), **Tamaño de píxel** (`1` a `8` con reescalado `NEAREST`), **Intensidad** (`0%` a `100%`) y **Render Pixel-Perfect** (`image-rendering: pixelated`), activado automáticamente al usar dithering o presets tramados.
 
-### 6. Presets de Autor
-Diez recetas artesanales completas que aprovechan simultáneamente marcos, química, dither y curvas tonales, con ajuste de intensidad porcentual en tiempo real y reinicio rápido.
+### Mezclador HSL y Balance de Blancos
+- **Temperatura Kelvin** (`-100` frío/azul a `+100` cálido/ámbar) y **Tinte** (`-100` verde a `+100` magenta) mediante ganancias equilibradas (`color_mixer.py`).
+- **Mezclador de 8 canales** (`rojo`, `naranja`, `amarillo`, `verde`, `cyan`, `azul`, `violeta`, `rosa`) con control independiente de **Tono**, **Saturación** y **Luminancia** usando interpolación cúbica continua de Hermite y compuerta de saturación (`sat_gate`) para no contaminar grises ni blancos.
 
-### 7. Detalle & Grano Estocástico
-- **Desenfoque gaussiano**: Control suave para efectos atmosféricos o resplandor Orton.
-- **Máscara de enfoque (Unsharp Mask)**: Realce de microcontrastes y nitidez de bordes sin artefactos de halo.
-- **Grano analógico**: Ruido gaussiano estocástico que simula la estructura de cristales de haluro de plata de películas ISO 400 a 3200.
+### Laboratorio B&N y Virados Químicos
+- Conversión monocroma Rec. 709 con **8 canales continuos** y **7 filtros ópticos preestablecidos** (`neutro`, `rojo`, `naranja`, `amarillo`, `verde`, `azul`, `infrarrojo` en `byn.py`).
+- **Virados químicos Split-Tone** con control de intensidad (`0%`–`100%`): `ninguno`, `sepia`, `cianotipia`, `selenio` y `platino`.
 
-### 8. Herramientas Espaciales & Visor
-- Visor con arrastre táctil fluido (*pan & drag*) y zoom infinito centrado en el cursor mediante rueda del ratón.
-- Recorte interactivo no destructivo con superposición visual y preservación de píxeles originales.
-- Volteo simétrico horizontal y vertical sin pérdida de calidad.
+### Detalle y Grano Analógico
+- **Desenfoque / Enfoque** (`GaussianBlur` y `UnsharpMask`), **Nitidez** (`ImageEnhance.Sharpness`) y **Grano analógico** determinista en caché por resolución (semilla fija para evitar parpadeo mientras se mueven otros controles en `detalle.py`).
+
+### Marcos Procedimentales
+- Aplicados siempre al final del pipeline (`marcos.py`) para que no se deformen por otros filtros:
+  - `liso` (color hexadecimal configurable y grosor proporcional en px).
+  - `polaroid` (cartón blanco roto con proporciones clásicas `6.5%` / `23%` y bisel fino).
+  - `polaroid_gastado` (cartón envejecido con ruido orgánico y bordes quemados).
+  - `pelicula` (tira negativa 35mm `#0c0c0e` con perforaciones iluminadas y tipografía retro `KODAK 400` / `SAFETY FILM`).
+
+### Geometría, Comparador Split y Visor
+- **Recorte no destructivo** (`recortar.py`, `app.py`): proporciones `Libre`, `1:1`, `4:5`, `16:9`, `3:2`, `4:3`, rejilla de tercios y botón **Restablecer** que devuelve exactamente el estado previo al recorte sin borrar ajustes anteriores (`pre_recorte_*`).
+- **Enderezado de horizonte** (`geometria.py`): rotación `-45°` a `+45°` en bicúbico con recorte automático al rectángulo útil inscrito (sin esquinas negras).
+- **Rotación 90°** horaria y **Volteo horizontal / vertical** (`voltear_imagen.py`).
+- **Comparador Split Antes / Después** (`script.js`): cortina deslizable vertical entre `/original/<id>` y la imagen procesada, manipulable por puntero, teclado o botones rápidos (`Original` / `Editada`).
+- **Visor HUD** (`visor.js`): paneo fluido, zoom hacia el cursor (`20%` a `800%`) e indicador flotante `- / 100% / +`.
+- **Exportación directa**: botón superior de descarga de la imagen procesada (`ditherix-export.jpg`).
 
 ---
 
-## Arquitectura y Workflow
+## Catálogo de Presets (12 Estilos)
+
+Todos los presets soportan ajuste de intensidad (`0%` a `100%`) en `presets.py`:
+
+| Nº | ID | Nombre | Categoría | Técnicas principales |
+|---|---|---|---|---|
+| `01` | `cinestill_neon_800` | **Cinestill 800T** | CINE 35MM | Halación 35mm (78), aberración (16), balance tungsteno (-18), grano (32), marco `pelicula` |
+| `02` | `midnight_touge` | **Midnight Touge** | MOTOR CRT | Contraste (+34), viñeta (-40), fade (14), halación (42), aberración (36), scanlines CRT (22) |
+| `03` | `riso_crimson_press` | **Risograph Press** | DUOTONO | Dither `bayer_8` duotono `#141c52` / `#ff6352`, pre-umbral (+10), píxel 1× |
+| `04` | `mac_atkinson_1bit` | **Macintosh 1984** | 1-BIT | Difusión `atkinson` 1-bit `#0b0c10` / `#eceae1`, sombras (+14), píxel 2× |
+| `05` | `infrared_aerochrome` | **Kodak Aerochrome** | INFRARROJO | Virado falso infrarrojo (`_aplicar_aerochrome_rgb`), halación (34), viñeta (-32), grano (24) |
+| `06` | `vhs_camcorder_94` | **VHS Camcorder 94** | ANALOG CRT | Aberración RGB (58), scanlines (52), fade (28), viñeta (-44), desenfoque (8), grano (42) |
+| `07` | `kodachrome_archive` | **Kodachrome 64** | ARCHIVO | Contraste (+24), calidez (+12), fade (10), viñeta (-22), marco liso `#f5f3ec` |
+| `08` | `monochrome_platinum` | **Platino Paladio** | GALERÍA B&N | Monocromo con filtro óptico `naranja` y virado químico `platino` (80%) |
+| `09` | `cyber_thermal_hud` | **Thermal Predator** | TÉRMICO | Dither `bayer_4` paleta `termica`, píxel 2×, scanlines (30), aberración (24) |
+| `10` | `bleach_bypass_noir` | **Silver Bleach** | CINE NOIR | Contraste (+42), saturación (-56), viñeta (-52), nitidez (+50), halación (18), grano (36) |
+| `11` | `amber_terminal_crt` | **Ámbar Mainframe** | TERMINAL | `floyd_steinberg` paleta `ambar`, píxel 2×, scanlines CRT (46), halación (30), viñeta (-48) |
+| `12` | `instant_sx70_dream` | **Instant SX-70** | POLAROID | Fade (32), halación (54), brillo (+6), contraste (-6), desenfoque (4), marco `polaroid` |
+
+---
+
+## Arquitectura del Pipeline
 
 ```mermaid
 flowchart TD
-    subgraph Entrada ["Entrada de Imagen"]
-        A["Cliente Web / Navegador"] -->|"POST /upload (FormData)"| B["app.py: subir_imagen()"]
-        B --> C["manejo_imagen.py: abrir_imagen()"]
-        C --> D["Sanitización EXIF + Instancia ImagenGuardada"]
-    end
-
-    subgraph Pipeline ["Pipeline No Destructivo (ejecutar_pipeline)"]
-        D --> E["1. Imagen Base (Original / Recortada)"]
-        E --> F["2. Curvas Tonales (Brillo, Contraste, Saturación)"]
-        F --> G["3. Preset de Autor (Curvas avanzadas + HSL)"]
-        G --> H["4. Balance de Blancos y Mezclador HSL (8 canales)"]
-        H --> I["5. Monocromo ByN & Virados Químicos"]
-        I --> J["6. Filtros de Detalle (Desenfoque, Nitidez, Grano)"]
-        J --> K["7. Algoritmo de Dithering Retro & Paleta"]
-        K --> L["8. Aplicación de Marco Decorativo Final"]
-    end
-
-    subgraph Salida ["Salida y Visualización"]
-        L --> M["guardar_procesada_sin_perdida (PNG Master)"]
-        L --> N["generar_vista (JPEG 1600px Max)"]
-        N --> O["Respuesta JSON con URL y token cache-buster"]
-        O --> A
-    end
+    A["Subida (POST /upload)"] --> B["manejo_imagen.abrir_imagen(): valida formato, <= 6000px, EXIF y RGB"]
+    B --> C["ImagenGuardada inmutable en LRU (máx. 5 imágenes)"]
+    C --> D["1. Enderezado de horizonte (-45°..+45°) sin bordes negros"]
+    D --> E["2. Ajustes básicos + Curvas avanzadas (altas luces, sombras, fade, viñeta)"]
+    E --> F["3. Preset de autor (incl. Aerochrome IR, mezclado por intensidad)"]
+    F --> G["4. Color Mixer (Temperatura, Tinte y 8 canales HSL)"]
+    G --> H["5. Monocromo B&N + Filtros ópticos + Virados químicos"]
+    H --> I["6. Detalle (Desenfoque, Nitidez, Grano determinista)"]
+    I --> J["7. Óptica de lente (Halación 35mm y Aberración RGB)"]
+    J --> K["8. Dithering retro manual (Floyd-Steinberg, Atkinson, Bayer, Cuantización)"]
+    K --> L["9. Scanlines CRT + Marco decorativo final"]
+    L --> M["Vista JPEG calidad 90 + Cache-buster en /imagen/<id>"]
 ```
 
 ---
@@ -143,28 +146,40 @@ flowchart TD
 ## Estructura del Proyecto
 
 ```text
-b:\Ditherix\
-├── app.py                  # Servidor Flask, gestión de estado en memoria y orquestador del pipeline
-├── presets.py              # Definiciones de los 10 presets de autor y motor de curvas vectorizadas
-├── color_mixer.py          # Balance de temperatura/tinte y mezclador espectral HSL de 8 canales
-├── byn.py                  # Monocromo Rec. 709, filtros Wratten y virados químicos (Sepia, Cianotipia, etc.)
-├── dithering.py            # Motor de difusión de error (Floyd-Steinberg, Atkinson) y matrices Bayer
-├── detalle.py              # Filtros de desenfoque, máscara de enfoque y grano analógico estocástico
-├── marcos.py               # Generador procedural de marcos (Liso, Polaroid, Gastado, Tira de 35mm)
-├── recortar.py             # Recorte interactivo con coordenadas relativas y conservación de master
-├── voltear_imagen.py       # Transformaciones de espejo horizontal y vertical
-├── manejo_imagen.py        # Decodificación segura, corrección de rotación EXIF y compresión de vistas
-├── requirements.txt        # Dependencias esenciales del entorno Python
-├── DOCUMENTACION_TECNICA.md# Especificación técnica exhaustiva y matemáticas de algoritmos
+Ditherix/
+├── app.py                  # Servidor Flask, dataclass ImagenGuardada, rutas REST y pipeline
+├── api/
+│   └── index.py            # Entrypoint WSGI para despliegue serverless en Vercel
+├── ajustes_imagen.py       # Brillo, contraste, saturación y curvas float32 (luz, fade, viñeta)
+├── byn.py                  # Conversión Rec. 709, filtros ópticos y virados químicos
+├── color_mixer.py          # Balance de blancos y mezclador HSL continuo de 8 canales
+├── detalle.py              # Desenfoque/enfoque, nitidez y trama de grano en caché
+├── dithering.py            # Floyd-Steinberg, Atkinson, Bayer 4x4/8x8, paletas y duotono
+├── geometria.py            # Rotación 90° y enderezado con recorte rectangular inscrito
+├── manejo_imagen.py        # Validación de archivos, límites de seguridad, EXIF y exportación JPEG/PNG
+├── marcos.py               # Marcos procedurales: liso, Polaroid, Polaroid gastado y 35mm
+├── optica.py               # Halación 35mm, aberración cromática radial y scanlines CRT
+├── presets.py              # DefinicionPreset, Aerochrome IR y catálogo de 12 presets
+├── recortar.py             # Envoltorio Pillow para recorte por coordenadas enteras
+├── voltear_imagen.py       # Espejo horizontal y vertical
+├── frame.py                # Reservado (vacío; los marcos residen en marcos.py)
+├── requirements.txt        # Dependencias Python (+ marcador de entorno para Gunicorn)
+├── Procfile                # Arranque Gunicorn para entornos PaaS Linux
+├── render.yaml             # Manifiesto de despliegue en Render (Python 3.12.8)
+├── vercel.json             # Enrutamiento hacia /api/index
+├── COMANDOS.txt            # Guía rápida local para PowerShell en Windows
 ├── templates/
-│   ├── index.html          # Interfaz principal de la estación de trabajo y menús Hallmark
-│   └── landing.html        # Página de bienvenida minimalista
+│   ├── landing.html        # Portada WebGL interactiva con preloader y 8 paneles
+│   └── index.html          # Interfaz principal del editor fotográfico
 └── static/
-    ├── script.js           # Orquestación de peticiones, debounce, estado de UI y llamadas fetch
-    ├── visor.js            # Motor del visor: transformaciones de matriz CSS, zoom y paneo
-    ├── style.css           # Estilos Hallmark Darkroom: negro traslúcido, border-radius: 0
-    ├── landing.css         # Estilos específicos de la página de aterrizaje
-    └── images/             # Muestrarios y capturas de las herramientas
+    ├── landing.css         # Estilos suizos blanco/negro y cortina teatral de la portada
+    ├── landing.js          # WebGL líquido, scroll horizontal, audio procedural y comparador
+    ├── style.css           # Estilos Hallmark Darkroom del editor (cristal ahumado a 90°)
+    ├── script.js           # Estado del editor, tiempo real, histograma, recorte, comparador y cortina
+    ├── visor.js            # Zoom centrado en puntero, paneo y gestión exclusiva de paneles
+    ├── fonts/              # Tipografías locales
+    ├── icon/               # Favicon del sitio
+    └── images/             # Recursos visuales mostrados en la portada
 ```
 
 ---
@@ -172,110 +187,92 @@ b:\Ditherix\
 ## Instalación y Puesta en Marcha
 
 ### Prerrequisitos
-- **Python 3.10 o superior**
-- **pip** o gestor de paquetes de Python
+- **Python 3.10 o superior** (en producción se recomienda 3.12+; probado localmente en Python 3.14).
+- **pip**.
 
-### 1. Clonar el repositorio
-```bash
-git clone https://github.com/tu-usuario/ditherix.git
-cd ditherix
-```
+### Pasos locales
 
-### 2. Crear y activar un entorno virtual
-```bash
-# Windows
-python -m venv .venv
-.venv\Scripts\activate
+1. Clonar el repositorio:
+   ```bash
+   git clone https://github.com/Limeres1/Ditherix.git
+   cd Ditherix
+   ```
 
-# macOS / Linux
-python3 -m venv .venv
-source .venv/bin/activate
-```
+2. Crear y activar el entorno virtual:
+   ```powershell
+   # Windows PowerShell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   ```
+   ```bash
+   # macOS / Linux
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
 
-### 3. Instalar dependencias
-```bash
-pip install -r requirements.txt
-```
+3. Instalar dependencias:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### 4. Ejecutar el servidor de desarrollo
-```bash
-python app.py
-```
-El servidor se iniciará en `http://127.0.0.1:5000/`.
+4. Iniciar el servidor de desarrollo:
+   ```bash
+   python app.py
+   ```
 
-- **Portal de inicio**: `http://127.0.0.1:5000/`
-- **Editor Ditherix**: `http://127.0.0.1:5000/editor` (o `/app`)
+5. Abrir en el navegador:
+   - **Portada**: `http://127.0.0.1:5000/`
+   - **Editor**: `http://127.0.0.1:5000/editor` (también disponible en `/app`)
 
 ---
 
-## Referencia de la API REST
+## Despliegue
 
-Todos los endpoints que modifican el estado de la imagen consumen y responden en formato JSON (`application/json`).
+- **Render (`render.yaml` / `Procfile`)**: instala `requirements.txt` (incluyendo `gunicorn` en Linux) y ejecuta `gunicorn --workers 1 --threads 4 --timeout 120 app:app`. Mantener `--workers 1` asegura que las sesiones en memoria (`imagenes_guardadas`) compartan el mismo proceso.
+- **Vercel (`vercel.json` + `api/index.py`)**: enruta todo el tráfico hacia la aplicación Flask WSGI expuesta desde `api/index.py`.
 
-| Método | Endpoint | Parámetros Principales | Descripción |
+---
+
+## Referencia de Rutas y API
+
+| Método | Ruta | Cuerpo / Entrada | Descripción |
 |---|---|---|---|
-| `POST` | `/upload` | `FormData(imagen=File)` | Carga una imagen (JPG, PNG, WEBP), sanitiza orientación y crea la sesión. |
-| `GET` | `/imagen/<id>/vista` | Query param `?v=<uuid>` | Devuelve los bytes JPEG optimizados de la vista previa para el canvas. |
-| `GET` | `/imagen/<id>/completa` | Query param `?descargar=1` | Descarga el archivo maestro en resolución completa sin compresión destructiva. |
-| `POST` | `/imagen/<id>/ajustes` | `{ brillo, contraste, saturacion }` | Aplica curvas tonales básicas (-100 a +100). |
-| `POST` | `/imagen/<id>/color` | `{ temperatura, tinte, mezcla_color }` | Aplica balance Kelvin y mezcla de los 8 canales HSL. |
-| `POST` | `/imagen/<id>/byn` | `{ activo, canales, virado, virado_intensidad }` | Controla monocromo, pesos de canal y virados químicos. |
-| `POST` | `/imagen/<id>/detalle` | `{ desenfoque, nitidez, grano }` | Aplica filtros espaciales de textura y enfoque. |
-| `POST` | `/imagen/<id>/dither` | `{ algoritmo, paleta, pixel, intensidad }` | Ejecuta el algoritmo de dithering retro especificado. |
-| `POST` | `/imagen/<id>/marco` | `{ estilo, color, grosor }` | Aplica un marco decorativo al encuadre exterior. |
-| `POST` | `/imagen/<id>/preset` | `{ preset, intensidad }` | Aplica un preset de autor con mezcla porcentual. |
-| `POST` | `/imagen/<id>/recortar` | `{ x, y, ancho, alto }` | Recorta la imagen base preservando coordenadas del master. |
-| `POST` | `/imagen/<id>/voltear` | `{ direccion: "horizontal"|"vertical" }` | Aplica un efecto espejo a la imagen. |
-| `POST` | `/imagen/<id>/reset` | `{ tipo: "todos"|"ajustes"|"dither"|... }` | Restablece los parámetros seleccionados a su valor neutro. |
-| `GET` | `/presets` | *(Ninguno)* | Lista los 10 presets disponibles con metadatos y categorías. |
+| `GET` | `/` | — | Renderiza la portada interactiva (`landing.html`). |
+| `GET` | `/editor`, `/app` | — | Renderiza el editor (`index.html`). |
+| `POST` | `/upload` | `FormData(imagen=File)` | Carga una imagen (máx. 25 MB), valida y crea un `imagen_id`. |
+| `GET` | `/imagen/<imagen_id>` | Query `?v=<token>` opcional | Devuelve la vista procesada actual en JPEG (`no-store`). |
+| `GET` | `/original/<imagen_id>` | Query `?t=<ts>` opcional | Devuelve la vista base sin efectos para el comparador Split. |
+| `GET` | `/presets` | — | Devuelve JSON con metadatos de los 12 presets base. |
+| `POST` | `/imagen/<imagen_id>/ajustes` | `{ brillo, contraste, saturacion, altas_luces, sombras, fade, vineta, ... }` | Aplica ajustes tonales y curvas avanzadas (`-100..100`, `fade` `0..100`). |
+| `POST` | `/imagen/<imagen_id>/detalle` | `{ desenfoque, nitidez, grano }` | Aplica desenfoque/enfoque (`-100..100`) y grano (`0..100`). |
+| `POST` | `/imagen/<imagen_id>/optica` | `{ halacion, aberracion, scanlines }` | Aplica óptica 35mm y líneas CRT (`0..100`). |
+| `POST` | `/imagen/<imagen_id>/color` | `{ temperatura, tinte, mezcla_color }` | Balance Kelvin y mezcla HSL continua de 8 canales. |
+| `POST` | `/imagen/<imagen_id>/byn` | `{ activo, canales, virado, virado_intensidad }` | Convierte a B&N con mezclador de canales y virado químico. |
+| `POST` | `/imagen/<imagen_id>/dithering` | `{ algoritmo, paleta, tamano_pixel, intensidad, umbral, duotono_oscuro, duotono_claro }` | Ejecuta dithering/cuantización con pre-umbral y duotono hex. |
+| `POST` | `/imagen/<imagen_id>/marco` | `{ estilo, color, grosor }` | Aplica el marco final (`ninguno`, `liso`, `polaroid`, `polaroid_gastado`, `pelicula`). |
+| `POST` | `/imagen/<imagen_id>/preset` | `{ preset, intensidad }` | Aplica un preset (`ninguno` o ID/alias válido) mezclado de `0` a `100`. |
+| `POST` | `/imagen/<imagen_id>/recortar` | `{ x, y, ancho, alto }` | Recorta en píxeles enteros y guarda snapshot `pre_recorte_*`. |
+| `POST` | `/imagen/<imagen_id>/restablecer-recorte` | — | Restaura la imagen y todos sus ajustes previos al recorte. |
+| `POST` | `/imagen/<imagen_id>/voltear/<direccion>` | Ruta: `horizontal` \| `vertical` | Invierte la imagen (y ajusta ángulo si había enderezado). |
+| `POST` | `/imagen/<imagen_id>/rotar` | `{ sentido: "derecha" \| "izquierda" }` | Rota 90° sin pérdida y re-ejecuta el pipeline. |
+| `POST` | `/imagen/<imagen_id>/enderezar` | `{ angulo }` | Endereza entre `-45.0°` y `+45.0°` recortando esquinas negras. |
 
 ---
 
-## Catálogo de Presets de Autor
+## Atajos de Teclado y Controles
 
-| ID | Nombre | Categoría | Herramientas Clave |
-|---|---|---|---|
-| `01` | **Polaroid 600** | INSTANT | Marco Polaroid desgastado, Calidez analógica (+28), Grano de película (35). |
-| `02` | **Portra 35mm** | 35MM | Tira de celuloide con perforaciones, Calidez ámbar (+22), Grano 45, Nitidez +25. |
-| `03` | **Cianotipia 1842** | QUÍMICA | Monocromo con virado Azul de Prusia (92%), Filtro Wratten azul, Marco paspartú. |
-| `04` | **Plata & Selenio** | FINE ART | B&N baritado de galería, Virado al Selenio (82%), Filtro rojo de contraste, Paspartú blanco. |
-| `05` | **Game Boy 1989** | 8-BIT | Matriz ordenada Bayer 4×4, Paleta verde LCD de 4 tonos, Píxel x2 al 95%. |
-| `06` | **CGA Cyberpunk** | CYBER | Difusión Floyd-Steinberg, Paleta IBM CGA Modo 1 (negro/cian/magenta/blanco), Contraste +32. |
-| `07` | **Teal & Orange** | CINE | Color grading de cine contemporáneo, Medios tonos ámbar/naranja, Sombras cian, Fade negros +22. |
-| `08` | **Fallen Angels** | NOIR 90S | Tinte neón Wong Kar-wai (-22), Alto contraste (+34), Marco de película de 35mm, Grano 48. |
-| `09` | **Y2K Flash** | Y2K | Iluminación de flash frontal directo (+35), Enfoque acentuado (+45), Borde fino negro. |
-| `10` | **Orton Bloom** | FANTASÍA | Resplandor etéreo difuso (desenfoque gaussiano + máscara de enfoque), Calidez +16, Marco Polaroid. |
-
----
-
-## Estética & Filosofía de Diseño (Hallmark)
-
-El desarrollo visual de Ditherix sigue estrictas pautas de diseño:
-
-- **Ángulos rectos**: Cero radios de curvatura (`border-radius: 0`). Paneles, botones, fichas e interruptores emplean geometría ortogonal estricta.
-- **Negro traslúcido**: Las superficies flotantes utilizan `rgba(7, 7, 9, 0.78)` combinado con `backdrop-filter: blur(20px)` y bordes de filamento de 1px a baja opacidad para un acabado de alta gama.
-- **Tipografía clara**: Uso de títulos en caja alta con tracking espaciado (`letter-spacing: 0.08em`), salidas numéricas en fuentes monoespaciadas y etiquetas concisas.
-- **Sin elementos distractores**: Ausencia total de emojis en menús técnicos o descripciones artificiales genéricas.
-- **Transiciones explícitas**: Prohibido el uso de `transition: all`. Cada elemento interactivo especifica con exactitud las propiedades animadas (`background`, `border-color`, `transform`, `opacity`) para un rendimiento impecable sin repaints innecesarios.
-
----
-
-## Atajos y Navegación
-
-| Acción | Control / Atajo |
+| Acción | Atajo / Control |
 |---|---|
-| **Cargar Imagen** | Clic en el botón central de carga, arrastrar archivo a la zona de drop o usar el botón en la barra superior. |
-| **Mover Imagen (Pan)** | Clic izquierdo sostenido y arrastre sobre el visor. |
-| **Zoom Dinámico** | Rueda del ratón hacia arriba (acercar) o hacia abajo (alejar) centrado en el puntero. |
-| **Restablecer Visor** | Doble clic sobre el visor para centrar la imagen y restablecer la escala 1:1. |
-| **Alternar Menús** | Botones de la barra inferior (Presets, Edición, Detalle, Dithering, Color, Blanco y Negro, Marcos). |
-| **Recorte Rápido** | Botón de tijeras en la barra superior; dibujar rectángulo y presionar "Aplicar". |
-| **Volteo Espejo** | Botones de volteo horizontal y vertical en la barra superior derecha. |
+| **Comparar Antes / Después** | Tecla `C` o `\` (o botón **Comparar** en barra superior) |
+| **Mover divisor del comparador** | Arrastrar tirador central, teclas `←` / `→` (`Shift` mueve 10%), `Home` / `End` |
+| **Acercar / Alejar zoom** | Rueda del ratón hacia cursor, botones `+` / `-` del HUD o teclas `+` / `-` |
+| **Restablecer zoom a 100%** | Tecla `0`, doble clic en el visor o clic en el porcentaje del HUD |
+| **Mover imagen (Pan)** | Clic izquierdo sostenido y arrastre sobre el visor |
+| **Alternar histograma LUMA / RGB** | Clic (o `Enter` / `Espacio`) sobre el gráfico del histograma |
+| **Cerrar menú / cancelar recorte** | Tecla `Esc` |
 
 ---
 
-## Licencia
+## Autor
 
-Distribuido bajo la Licencia **MIT**. Consulta el archivo `LICENSE` para más información.
-Desarrollado con pasión por la fotografía química, el arte retro-digital y el diseño de interfaces moderno.
-
+Creado y desarrollado por **Joaquín Limeres** — [github.com/Limeres1/Ditherix](https://github.com/Limeres1/Ditherix)
