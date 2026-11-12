@@ -5,13 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon/icon.jpeg') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon/icon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Cinzel:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='music_player.css') }}">
     <title>Ditherix</title>
 </head>
 
@@ -24,7 +25,8 @@
         <div class="menu-flotante" id="menuImagen">
             <nav class="glass-bar top-bar" aria-label="Menú principal">
                 <div class="bar-items bar-items-left">
-                    <a href="/" class="glass-control" title="Volver a la portada de Ditherix" aria-label="Volver a la portada">
+                    <a href="/" class="glass-control" title="Volver a la portada de Ditherix"
+                        aria-label="Volver a la portada">
                         <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
                             fill="#e3e3e3">
                             <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z" />
@@ -52,7 +54,14 @@
                             <path
                                 d="M440-160v-640h80v640h-80ZM200-280v-400l120 200-120 200Zm560 0-120-200 120-200v400Z" />
                         </svg>
-                        <span class="btn-text-desktop">Comparar</span>
+                    </button>
+                    <button class="glass-control" id="botonMusica" type="button" aria-controls="musicPlayer"
+                        aria-expanded="false" aria-pressed="false" title="Caja de música Headspace [M]">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                            fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M400-120q-66 0-113-47t-47-113q0-66 47-113t113-47q23 0 42.5 5.5T480-418v-422h240v160H560v400q0 66-47 113t-113 47Z" />
+                        </svg>
                     </button>
                 </div>
                 <div class="bar-items bar-items-right">
@@ -543,22 +552,19 @@
                 </div>
 
                 <div class="slider-group">
-                    <label for="sombrasInput">Sombras <output id="sombrasValor"
-                            for="sombrasInput">0%</output></label>
+                    <label for="sombrasInput">Sombras <output id="sombrasValor" for="sombrasInput">0%</output></label>
                     <input id="sombrasInput" type="range" min="-100" max="100" step="1" value="0"
                         aria-label="Levantar o profundizar sombras" disabled>
                 </div>
 
                 <div class="slider-group">
-                    <label for="fadeInput">Fade Mate <output id="fadeValor"
-                            for="fadeInput">0%</output></label>
+                    <label for="fadeInput">Fade Mate <output id="fadeValor" for="fadeInput">0%</output></label>
                     <input id="fadeInput" type="range" min="0" max="100" step="1" value="0"
                         aria-label="Lavado mate de negros" disabled>
                 </div>
 
                 <div class="slider-group">
-                    <label for="vinetaInput">Viñeta <output id="vinetaValor"
-                            for="vinetaInput">0%</output></label>
+                    <label for="vinetaInput">Viñeta <output id="vinetaValor" for="vinetaInput">0%</output></label>
                     <input id="vinetaInput" type="range" min="-100" max="100" step="1" value="0"
                         aria-label="Viñeta en esquinas" disabled>
                 </div>
@@ -983,8 +989,8 @@
                 <div class="slider-group">
                     <label for="scanlinesInput">Scanlines CRT <output id="scanlinesValor"
                             for="scanlinesInput">0%</output></label>
-                    <input id="scanlinesInput" type="range" min="0" max="100" step="1" value="0"
-                        aria-label="Líneas CRT" disabled>
+                    <input id="scanlinesInput" type="range" min="0" max="100" step="1" value="0" aria-label="Líneas CRT"
+                        disabled>
                 </div>
 
                 <div class="edit-actions">
@@ -993,9 +999,171 @@
             </section>
             <div id="zoomHud" class="zoom-hud oculto" aria-label="Indicador y control de zoom">
                 <button type="button" id="btnZoomOut" class="zoom-hud-btn" title="Alejar (-)">−</button>
-                <button type="button" id="btnZoomReset" class="zoom-hud-val" title="Restablecer zoom a 100% (0)">100%</button>
+                <button type="button" id="btnZoomReset" class="zoom-hud-val"
+                    title="Restablecer zoom a 100% (0)">100%</button>
                 <button type="button" id="btnZoomIn" class="zoom-hud-btn" title="Acercar (+)">+</button>
             </div>
+
+            <!-- Reproductor CRT Compacto (Monocromo Ditherix) -->
+            <aside id="musicPlayer" class="hs-player oculto" role="region" aria-label="Reproductor de música"
+                aria-hidden="true">
+
+                <header class="crt-top-deck" title="Arrastrar reproductor con el mouse">
+                    <div class="crt-title-row">
+                        <span class="crt-led" aria-hidden="true"></span>
+                        <div class="hs-track-marquee">
+                            <span id="musicTrackTitle">SIN CANCIONES</span>
+                        </div>
+                        <div class="hs-window-btns">
+                            <button type="button" id="btnMusicMinimize" class="hs-win-btn" title="Minimizar a mini menú"
+                                aria-label="Minimizar reproductor">_</button>
+                            <button type="button" id="btnMusicClose" class="hs-win-btn" title="Cerrar reproductor"
+                                aria-label="Cerrar reproductor">×</button>
+                        </div>
+                    </div>
+
+                    <div class="crt-transport-row">
+                        <button type="button" id="btnMusicPrev" class="hs-ctrl-btn" title="Canción anterior"
+                            aria-label="Anterior">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                                <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" />
+                            </svg>
+                        </button>
+                        <button type="button" id="btnMusicPlayPause" class="hs-ctrl-btn hs-ctrl-btn--play"
+                            title="Reproducir / Pausar" aria-label="Reproducir">
+                            <svg class="hs-icon-play" viewBox="0 0 24 24" width="15" height="15" fill="currentColor"
+                                aria-hidden="true">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                            <svg class="hs-icon-pause" viewBox="0 0 24 24" width="15" height="15" fill="currentColor"
+                                aria-hidden="true">
+                                <path d="M6 5h4v14H6zm8 0h4v14h-4z" />
+                            </svg>
+                        </button>
+                        <button type="button" id="btnMusicNext" class="hs-ctrl-btn" title="Siguiente canción"
+                            aria-label="Siguiente">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                                <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6z" />
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+
+                <div class="hs-crt-visor" title="Clic para alternar Void Pulse / Flame Dither">
+                    <canvas id="musicVisCanvas" width="244" height="150"></canvas>
+                    <div class="hs-crt-scanlines" aria-hidden="true"></div>
+                    <div class="hs-crt-meta">
+                        <span id="musicVisLabel">VOID // PULSE</span>
+                        <span id="musicTimeDisplay">00:00</span>
+                    </div>
+                </div>
+
+                <div class="crt-bottom-deck">
+                    <input id="musicSeekInput" type="range" min="0" max="1000" step="1" value="0"
+                        aria-label="Progreso de reproducción">
+
+                    <div class="crt-menus-row">
+                        <div class="crt-popover-anchor">
+                            <button type="button" id="btnMusicVolMenu" class="crt-menu-btn"
+                                aria-controls="musicVolPopover" aria-expanded="false" title="Abrir menú de volumen">
+                                <svg class="hs-vol-on" viewBox="0 0 24 24" width="13" height="13" fill="currentColor"
+                                    aria-hidden="true">
+                                    <path
+                                        d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                                </svg>
+                                <svg class="hs-vol-off" viewBox="0 0 24 24" width="13" height="13" fill="currentColor"
+                                    aria-hidden="true">
+                                    <path
+                                        d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z" />
+                                </svg>
+                                <span id="musicVolBtnLabel">75%</span>
+                            </button>
+
+                            <div id="musicVolPopover" class="crt-popover crt-popover--vol hidden" role="dialog"
+                                aria-label="Control de volumen" aria-hidden="true">
+                                <div class="crt-popover-head">
+                                    <span>VOLUMEN</span>
+                                    <button type="button" id="btnMusicMute" class="hs-mute-pill" aria-pressed="false"
+                                        title="Silenciar / Reactivar">MUTE</button>
+                                </div>
+                                <div class="crt-vol-body">
+                                    <input id="musicVolumeInput" type="range" min="0" max="100" step="1" value="75"
+                                        aria-label="Subir o bajar volumen">
+                                    <output id="musicVolumeVal" for="musicVolumeInput">75%</output>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="crt-popover-anchor">
+                            <button type="button" id="btnMusicListMenu" class="crt-menu-btn"
+                                aria-controls="musicListPopover" aria-expanded="false" title="Abrir lista de canciones">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                                    <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h12v2H3z" />
+                                </svg>
+                                <span>Lista</span>
+                                <span id="musicTrackBadge" class="crt-count-badge">0</span>
+                            </button>
+
+                            <div id="musicListPopover" class="crt-popover crt-popover--list hidden" role="dialog"
+                                aria-label="Lista de canciones" aria-hidden="true">
+                                <div class="crt-popover-head">
+                                    <span>CANCIONES</span>
+                                    <div class="crt-popover-tools">
+                                        <button type="button" id="btnMusicAddFiles" class="hs-mini-tool"
+                                            title="Cargar canciones desde tu PC"
+                                            aria-label="Cargar música desde PC">+</button>
+                                        <button type="button" id="btnMusicRefresh" class="hs-mini-tool"
+                                            title="Recargar carpeta static/music/"
+                                            aria-label="Recargar carpeta static/music/">↻</button>
+                                    </div>
+                                </div>
+                                <div id="musicTrackList" class="hs-track-list" role="listbox"
+                                    aria-label="Lista de canciones"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Mini Menú al Minimizar -->
+            <div id="musicMiniBar" class="music-mini-bar oculto" role="region" aria-label="Mini reproductor de música"
+                aria-hidden="true">
+                <div class="mini-drag-grip" title="Mover mini reproductor con el mouse" aria-hidden="true">⋮⋮</div>
+                <span class="mini-led" id="musicMiniLed" aria-hidden="true"></span>
+                <div class="mini-track-info">
+                    <span class="mini-track-title" id="musicMiniTitle">SIN CANCIONES</span>
+                    <span class="mini-track-time" id="musicMiniTime">00:00</span>
+                </div>
+                <div class="mini-controls">
+                    <button type="button" id="btnMiniPrev" class="mini-btn" title="Anterior"
+                        aria-label="Anterior">◄</button>
+                    <button type="button" id="btnMiniPlayPause" class="mini-btn mini-btn--play"
+                        title="Reproducir / Pausar" aria-label="Reproducir">▶</button>
+                    <button type="button" id="btnMiniNext" class="mini-btn" title="Siguiente"
+                        aria-label="Siguiente">►</button>
+                    <button type="button" id="btnMiniMute" class="mini-btn" title="Mutear / Activar audio"
+                        aria-pressed="false" aria-label="Mutear">
+                        <svg class="hs-vol-on" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"
+                            aria-hidden="true">
+                            <path
+                                d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                        </svg>
+                        <svg class="hs-vol-off" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"
+                            aria-hidden="true">
+                            <path
+                                d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z" />
+                        </svg>
+                    </button>
+                    <button type="button" id="btnMusicRestore" class="mini-btn" title="Expandir reproductor completo"
+                        aria-label="Restaurar reproductor">□</button>
+                    <button type="button" id="btnMiniClose" class="mini-btn" title="Cerrar reproductor"
+                        aria-label="Cerrar reproductor">×</button>
+                </div>
+            </div>
+
+            <input type="file" id="musicFileInput" class="oculto" multiple
+                accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.webm">
+            <audio id="musicAudioEl" preload="metadata" crossorigin="anonymous"></audio>
         </div>
         <p id="mensaje" class="oculto" role="alert" aria-live="assertive"></p>
         <p id="cargando" class="oculto" role="status" aria-live="polite">
@@ -1060,6 +1228,7 @@
     </script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='visor.js') }}"></script>
+    <script src="{{ url_for('static', filename='music_player.js') }}"></script>
 </body>
 
 </html>
