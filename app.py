@@ -1,7 +1,6 @@
 from collections import OrderedDict
 from dataclasses import dataclass, field, replace
 import math
-from pathlib import Path
 import re
 from threading import Lock
 import uuid
@@ -316,41 +315,6 @@ def editor():
 @app.get("/app")
 def app_view():
     return render_template("index.html")
-
-
-EXTENSIONES_AUDIO = {".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac", ".webm"}
-
-
-def _clave_orden_natural(nombre: str) -> list[tuple[int, int | str]]:
-    partes = re.split(r"(\d+)", nombre)
-    return [(0, int(p)) if p.isdigit() else (1, p.lower()) for p in partes]
-
-
-@app.get("/api/music")
-def listar_musica():
-    carpeta = Path(app.static_folder or "static") / "music"
-    tracks: list[dict[str, str]] = []
-    if carpeta.is_dir():
-        entradas = sorted(
-            (e for e in carpeta.iterdir() if e.is_file() and not e.name.startswith(".")),
-            key=lambda p: _clave_orden_natural(p.name),
-        )
-        for entrada in entradas:
-            if entrada.suffix.lower() not in EXTENSIONES_AUDIO:
-                continue
-            titulo = re.sub(r"[_]+", " ", entrada.stem).strip() or entrada.name
-            tracks.append(
-                {
-                    "id": f"folder:{entrada.name}",
-                    "title": titulo,
-                    "filename": entrada.name,
-                    "url": url_for("static", filename=f"music/{entrada.name}"),
-                    "source": "folder",
-                }
-            )
-    resp = jsonify(ok=True, tracks=tracks)
-    resp.headers["Cache-Control"] = "no-store"
-    return resp
 
 
 @app.post("/upload")
